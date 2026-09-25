@@ -1,0 +1,40 @@
+<!-- @if (authService.currentUser(); as user) {
+  <section class="profile-card">
+    <h1>Hola, {{ user.name }} 👋</h1>
+
+    <dl>
+      <dt>Email</dt>
+      <dd>{{ user.email }}</dd>
+
+      <dt>ID de usuario</dt>
+      <dd class="mono">{{ user.id }}</dd>
+
+      <dt>Estado</dt>
+      <dd>
+        <span class="badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+          {{ user.isActive ? 'Activo' : 'Inactivo' }}
+        </span>
+      </dd>
+
+      <dt>Creado</dt>
+      <dd>{{ user.createdAt | date: 'medium' }}</dd>
+    </dl>
+
+    <p class="hint">
+      Copiá tu ID de usuario si necesitás asignarte un rol o permiso desde
+      <a routerLink="/admin/authorization">Autorización</a>.
+    </p>
+  </section>
+} -->
+
+<div class="grid grid-cols-12 gap-8">
+  <app-stats-widget class="contents" />
+  <div class="col-span-12 xl:col-span-6">
+    <app-recent-sales-widget />
+    <app-best-selling-widget />
+  </div>
+  <div class="col-span-12 xl:col-span-6">
+    <app-revenue-stream-widget />
+    <app-notifications-widget />
+  </div>
+</div>

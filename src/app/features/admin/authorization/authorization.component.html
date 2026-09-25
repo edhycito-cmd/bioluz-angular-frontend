@@ -1,0 +1,130 @@
+<h1>Autorización</h1>
+<p class="page-hint">
+  Requiere el rol <code>admin</code> (o cualquier rol con permiso <code>manage</code> sobre
+  <code>/api/authorization</code>). El backend no expone un listado de usuarios todavía, así que
+  el ID de usuario se pega a mano — podés copiarlo desde el Dashboard.
+</p>
+
+<section class="panel">
+  <h2>Roles</h2>
+
+  <form novalidate>
+    <label for="userId">ID de usuario</label>
+    <input id="userId" type="text" [formField]="roleForm.userId" placeholder="uuid del usuario" />
+    @let userIdField = roleForm.userId();
+    @if (userIdField.touched() && userIdField.invalid()) {
+      <ul class="field-errors">
+        @for (error of userIdField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="role">Rol</label>
+    <input id="role" type="text" [formField]="roleForm.role" placeholder="admin, user, ..." />
+    @let roleField = roleForm.role();
+    @if (roleField.touched() && roleField.invalid()) {
+      <ul class="field-errors">
+        @for (error of roleField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    @if (roleMessage()) {
+      <p class="success">{{ roleMessage() }}</p>
+    }
+    @if (roleError()) {
+      <p class="error">{{ roleError() }}</p>
+    }
+
+    <div class="actions">
+      <button
+        type="button"
+        class="primary"
+        [disabled]="roleForm().invalid() || roleForm().submitting()"
+        (click)="assignRole($event)"
+      >
+        Asignar rol
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="roleForm().invalid() || roleForm().submitting()"
+        (click)="revokeRole($event)"
+      >
+        Revocar rol
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Policies</h2>
+
+  <form novalidate>
+    <label for="policyRole">Rol</label>
+    <input id="policyRole" type="text" [formField]="policyForm.role" placeholder="admin, user, ..." />
+    @let policyRoleField = policyForm.role();
+    @if (policyRoleField.touched() && policyRoleField.invalid()) {
+      <ul class="field-errors">
+        @for (error of policyRoleField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="resource">Recurso</label>
+    <input
+      id="resource"
+      type="text"
+      [formField]="policyForm.resource"
+      placeholder="/api/ordenes o /api/ordenes/:id"
+    />
+    @let resourceField = policyForm.resource();
+    @if (resourceField.touched() && resourceField.invalid()) {
+      <ul class="field-errors">
+        @for (error of resourceField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="action">Acción</label>
+    <input id="action" type="text" [formField]="policyForm.action" placeholder="read, update, *..." />
+    @let actionField = policyForm.action();
+    @if (actionField.touched() && actionField.invalid()) {
+      <ul class="field-errors">
+        @for (error of actionField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    @if (policyMessage()) {
+      <p class="success">{{ policyMessage() }}</p>
+    }
+    @if (policyError()) {
+      <p class="error">{{ policyError() }}</p>
+    }
+
+    <div class="actions">
+      <button
+        type="button"
+        class="primary"
+        [disabled]="policyForm().invalid() || policyForm().submitting()"
+        (click)="addPolicy($event)"
+      >
+        Agregar policy
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="policyForm().invalid() || policyForm().submitting()"
+        (click)="removePolicy($event)"
+      >
+        Quitar policy
+      </button>
+    </div>
+  </form>
+</section>

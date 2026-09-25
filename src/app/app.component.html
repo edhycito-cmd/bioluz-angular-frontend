@@ -1,0 +1,17 @@
+<!-- @if (authService.isAuthenticated()) {
+  <header class="topbar">
+    <span class="brand">NestJS Clean Lite</span>
+    <nav>
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/admin/authorization">Autorización</a>
+    </nav>
+    <div class="user-info">
+      <span>{{ authService.currentUser()?.name }}</span>
+      <button type="button" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+} -->
+
+<!-- <main> -->
+  <router-outlet />
+<!-- </main> -->

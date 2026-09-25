@@ -1,0 +1,73 @@
+<div class="auth-card">
+  <h1>Crear cuenta</h1>
+
+  <form (submit)="onSubmit($event)" novalidate>
+    <label for="name">Nombre</label>
+    <input id="name" type="text" [formField]="registerForm.name" autocomplete="name" />
+    @let nameField = registerForm.name();
+    @if (nameField.touched() && nameField.invalid()) {
+      <ul class="field-errors">
+        @for (error of nameField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="email">Email</label>
+    <input id="email" type="email" [formField]="registerForm.email" autocomplete="email" />
+    @let emailField = registerForm.email();
+    @if (emailField.touched() && emailField.invalid()) {
+      <ul class="field-errors">
+        @for (error of emailField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="password">Contraseña</label>
+    <input
+      id="password"
+      type="password"
+      [formField]="registerForm.password"
+      autocomplete="new-password"
+    />
+    @let passwordField = registerForm.password();
+    @if (passwordField.touched() && passwordField.invalid()) {
+      <ul class="field-errors">
+        @for (error of passwordField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="confirmPassword">Confirmar contraseña</label>
+    <input
+      id="confirmPassword"
+      type="password"
+      [formField]="registerForm.confirmPassword"
+      autocomplete="new-password"
+    />
+    @let confirmField = registerForm.confirmPassword();
+    @if (confirmField.touched() && confirmField.invalid()) {
+      <ul class="field-errors">
+        @for (error of confirmField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    @if (serverError()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    <button type="submit" [disabled]="registerForm().invalid() || registerForm().submitting()">
+      @if (registerForm().submitting()) {
+        Creando cuenta…
+      } @else {
+        Crear cuenta
+      }
+    </button>
+  </form>
+
+  <p class="switch-link">¿Ya tenés cuenta? <a routerLink="/login">Iniciá sesión</a></p>
+</div>
