@@ -1,6 +1,6 @@
 import { afterNextRender, Component, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ChartModule } from '@openng/optimus-ui/chart';
-import { LayoutService } from '../../../layout/service/layout.service'
+import { LayoutService } from '../../../../layout/service/layout.service';
 
 @Component({
     standalone: true,

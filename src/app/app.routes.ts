@@ -21,27 +21,22 @@ export const routes: Routes = [
       ),
   },
   {
-    path: "dashboard",
+    path: "",
     canActivate: [authGuard],
     loadComponent: () =>
       import("./layout/component/app.layout").then((m) => m.AppLayout),
     children: [
       {
         path: "",
-        loadComponent: () =>
-          import("./features/dashboard/dashboard.component").then(
-            (m) => m.DashboardComponent,
-          ),
+        loadChildren: () => import("./features/home/home.routes"),
+      },
+      {
+        path: "admin",
+        loadChildren: () => import("./features/admin/admin.routes"),
       },
     ],
   },
 
-  // {
-  //   path: 'dashboard',
-  //   canActivate: [authGuard],
-  //   loadComponent: () =>
-  //     import('./features/dashboard/dashboard').then((m) => m.Dashboard),
-  // },
   {
     path: "admin/authorization",
     canActivate: [authGuard],
