@@ -3,7 +3,9 @@ import { authGuard } from "./core/guards/auth.guard";
 import { guestGuard } from "./core/guards/guest.guard";
 
 export const routes: Routes = [
-  { path: "", pathMatch: "full", redirectTo: "dashboard" },
+  // Un redirect no puede llevar guards (NG04014). El guestGuard de /login se
+  // encarga de rebotar a /dashboard si el usuario ya tiene sesión.
+  { path: "", pathMatch: "full", redirectTo: "login" },
   {
     path: "login",
     canActivate: [guestGuard],
@@ -36,14 +38,7 @@ export const routes: Routes = [
       },
     ],
   },
-
-  {
-    path: "admin/authorization",
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import("./features/admin/authorization/authorization.component").then(
-        (m) => m.AuthorizationComponent,
-      ),
-  },
+  // Última instancia: el authGuard del layout se encarga de rebotar a /login
+  // si no hay sesión. Debe ser la última ruta del array.
   { path: "**", redirectTo: "dashboard" },
 ];

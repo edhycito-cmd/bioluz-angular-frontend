@@ -23,33 +23,44 @@ export class AppMenu {
   model: MenuItem[] = [];
 
   ngOnInit() {
+    // Cada routerLink debe existir en app.routes.ts. Los.path de los grupos
+    // alimentan la expansión/colapso del submenú y el resaltado activo.
     this.model = [
       {
         label: "Inicio",
+        path: "/dashboard",
         items: [
-          { label: "Dashboard", icon: "pi pi-fw pi-home", routerLink: ["/"] },
-          { label: "Dashboard Rol", icon: "pi pi-fw pi-home", routerLink: ["/"] },
-          { label: "Mi Perfil", icon: "pi pi-fw pi-home", routerLink: ["/"] },
+          {
+            label: "Dashboard",
+            icon: "pi pi-fw pi-home",
+            routerLink: ["/dashboard"],
+          },
+          {
+            label: "Perfil",
+            icon: "pi pi-fw pi-user",
+            routerLink: ["/perfil"],
+          },
         ],
       },
       {
         label: "Administración",
+        path: "/admin",
         items: [
           {
             label: "Usuarios",
             icon: "pi pi-fw pi-id-card",
-            routerLink: ["/features/admin/users"],
+            routerLink: ["/admin/usuarios"],
           },
           {
             label: "Roles y Permisos",
             icon: "pi pi-fw pi-check-square",
-            routerLink: ["/uikit/input"],
+            routerLink: ["/admin/authorization"],
           },
           {
             label: "Configuración",
             icon: "pi pi-fw pi-mobile",
             class: "rotated-icon",
-            routerLink: ["/uikit/button"],
+            routerLink: ["/admin/configuracion"],
           },
         ],
       },
@@ -90,17 +101,6 @@ export class AppMenu {
             label: "Opción 2",
             icon: "pi pi-fw pi-circle-off",
             routerLink: ["/pages/empty"],
-          },
-        ],
-      },
-
-      {
-        label: "Ayuda",
-        items: [
-          {
-            label: "Documentation",
-            icon: "pi pi-fw pi-book",
-            routerLink: ["/documentation"],
           },
         ],
       },

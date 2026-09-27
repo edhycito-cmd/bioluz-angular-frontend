@@ -1,10 +1,11 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MenuItem } from '@openng/optimus-ui/api';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { StyleClassModule } from '@openng/optimus-ui/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-topbar',
@@ -74,10 +75,10 @@ import { LayoutService } from '../service/layout.service';
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
+                     <button type="button" class="layout-topbar-action" (click)="logout()">
                          <i class="pi pi-sign-out"></i>
-                        <span>Salir</span>                         
-                    </button>
+                         <span>Salir</span>
+                     </button>
                 </div>
             </div>
         </div>
@@ -88,10 +89,19 @@ export class AppTopbar {
 
     layoutService = inject(LayoutService);
 
+    private readonly authService = inject(AuthService);
+
+    private readonly router = inject(Router);
+
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({
             ...state,
             darkTheme: !state.darkTheme
         }));
+    }
+
+    logout() {
+        this.authService.logout();
+        this.router.navigate(['/login']);
     }
 }
