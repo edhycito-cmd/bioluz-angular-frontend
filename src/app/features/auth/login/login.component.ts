@@ -1,38 +1,6 @@
-// import { Component, inject } from '@angular/core';
-// import { FormsModule } from '@angular/forms';
-// import { MessageService } from '@openng/optimus-ui/api';
-// import { Button, ButtonModule } from '@openng/optimus-ui/button';
-// import { InputTextModule } from '@openng/optimus-ui/inputtext';
-// import { MessageModule } from '@openng/optimus-ui/message';
-// import { ToastModule } from '@openng/optimus-ui/toast';
-
-// @Component({
-//   imports: [MessageModule, ToastModule, ButtonModule, InputTextModule, FormsModule],
-//   selector: 'app-login',
-//   styleUrl: './login.component.scss',
-//   templateUrl: './login.component.html',
-//   providers: [MessageService],
-// })
-// export class LoginComponent {
-//   messageService = inject(MessageService);
-//   user: any = { username: '' };
-
-//   onSubmit(form: any) {
-//     if (form.valid) {
-//       this.messageService.add({
-//         severity: 'success',
-//         summary: 'Success',
-//         detail: 'Form Submitted',
-//         life: 3000,
-//       });
-//       form.resetForm();
-//     }
-//   }
-// }
-
 import { Component, inject, signal } from "@angular/core";
 import { HttpErrorResponse } from "@angular/common/http";
-import { Router, RouterLink } from "@angular/router";
+import { Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 import {
   email,
@@ -44,8 +12,7 @@ import {
 import { AuthService } from "../../../core/services/auth.service";
 import { MessageService } from "@openng/optimus-ui/api";
 import { ToastModule } from "@openng/optimus-ui/toast";
-import { FormsModule } from "@angular/forms";
-import { Button, ButtonModule } from "@openng/optimus-ui/button";
+import { ButtonModule } from "@openng/optimus-ui/button";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { MessageModule } from "@openng/optimus-ui/message";
 import { AppFloatingConfigurator } from "../../../layout/component/app.floatingconfigurator";
@@ -68,13 +35,11 @@ interface LoginModel {
     ButtonModule,
     CheckboxModule,
     InputTextModule,
-    FormsModule,
     RippleModule,
     AppFloatingConfigurator,
   ],
   providers: [MessageService],
   templateUrl: "./login.component.html",
-  //styleUrl: "./login.component.scss",
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);

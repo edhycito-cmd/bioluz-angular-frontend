@@ -19,6 +19,7 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+  rememberMe: boolean;
 }
 
 /** Envoltorio de respuesta que agrega el ResponseInterceptor global del backend */

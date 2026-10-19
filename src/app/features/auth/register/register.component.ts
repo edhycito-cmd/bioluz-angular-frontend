@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { FormField, email, form, minLength, required, submit, validate } from '@angular/forms/signals';
+import { FormField, email, form, minLength, pattern, required, submit, validate } from '@angular/forms/signals';
 import { AuthService } from '../../../core/services/auth.service';
 
 interface RegisterModel {
@@ -39,6 +39,12 @@ export class RegisterComponent {
 
     required(path.password, { message: 'La contraseña es obligatoria' });
     minLength(path.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
+    pattern(path.password, /[A-Z]/, { message: 'Debe incluir al menos una mayúscula' });
+    pattern(path.password, /[a-z]/, { message: 'Debe incluir al menos una minúscula' });
+    pattern(path.password, /[0-9]/, { message: 'Debe incluir al menos un número' });
+    pattern(path.password, /[^A-Za-z0-9]/, {
+      message: 'Debe incluir al menos un carácter especial',
+    });
 
     required(path.confirmPassword, { message: 'Confirmá la contraseña' });
     validate(path.confirmPassword, (ctx) =>

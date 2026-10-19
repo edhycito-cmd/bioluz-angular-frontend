@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
 
 import { RouterModule } from "@angular/router";
 import { MenuItem } from "@openng/optimus-ui/api";
@@ -19,12 +19,12 @@ import { AppMenuitem } from "./app.menuitem";
     }
   </ul> `,
 })
-export class AppMenu {
+export class AppMenu implements OnInit {
   model: MenuItem[] = [];
 
   ngOnInit() {
-    // Cada routerLink debe existir en app.routes.ts. Los.path de los grupos
-    // alimentan la expansión/colapso del submenú y el resaltado activo.
+    // Cada routerLink debe existir en app.routes.ts. El path de los grupos
+    // alimenta la expansión/colapso del submenú y el resaltado activo.
     this.model = [
       {
         label: "Inicio",

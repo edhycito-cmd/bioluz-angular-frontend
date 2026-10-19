@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-perfil-usuario',
   imports: [],
   template: `<p>perfil-usuario works!</p>`,
-  styleUrl: './perfil-usuario.css',
+  styleUrl: './perfil-usuario.component.scss',
 })
-export class PerfilUsuario {}
+export class PerfilUsuarioComponent {}

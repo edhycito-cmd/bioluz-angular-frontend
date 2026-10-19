@@ -12,8 +12,8 @@ export default [
   {
     path: "perfil",
     loadComponent: () =>
-      import("./perfil-usuario/perfil-usuario").then(
-        (m) => m.PerfilUsuario,
+      import("./perfil-usuario/perfil-usuario.component").then(
+        (m) => m.PerfilUsuarioComponent,
       ),
   },
 ] satisfies Routes;

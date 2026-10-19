@@ -11,7 +11,7 @@ import {
   LoginPayload,
   RegisterPayload,
 } from '../models/auth.model';
-import { UserProfile } from '../models/user.model';
+import { UserProfile, UserProfileResult } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -59,21 +59,23 @@ export class AuthService {
   }
 
   loadProfile(): Observable<UserProfile> {
-    return this.http.get<ApiEnvelope<UserProfile>>(`${environment.apiUrl}/users/me`).pipe(
-      map((res) => res.data),
-      tap((profile) => this._currentUser.set(profile)),
-    );
+    return this.http
+      .get<ApiEnvelope<UserProfileResult>>(`${environment.apiUrl}/usuario/perfil`)
+      .pipe(
+        map((res) => res.data.user),
+        tap((profile) => this._currentUser.set(profile)),
+      );
   }
 
   activateUser(userId: string): Observable<UserProfile> {
     return this.http
-      .patch<ApiEnvelope<UserProfile>>(`${environment.apiUrl}/users/${userId}/activate`, {})
+      .patch<ApiEnvelope<UserProfile>>(`${environment.apiUrl}/usuario/${userId}/activate`, {})
       .pipe(map((res) => res.data));
   }
 
   deactivateUser(userId: string): Observable<UserProfile> {
     return this.http
-      .patch<ApiEnvelope<UserProfile>>(`${environment.apiUrl}/users/${userId}/deactivate`, {})
+      .patch<ApiEnvelope<UserProfile>>(`${environment.apiUrl}/usuario/${userId}/deactivate`, {})
       .pipe(map((res) => res.data));
   }
 

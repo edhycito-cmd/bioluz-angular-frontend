@@ -66,14 +66,9 @@ import { AuthService } from '../../core/services/auth.service';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action" (click)="goToProfile()">
                         <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                        <span>Perfil</span>
                     </button>
                      <button type="button" class="layout-topbar-action" (click)="logout()">
                          <i class="pi pi-sign-out"></i>
@@ -103,5 +98,9 @@ export class AppTopbar {
     logout() {
         this.authService.logout();
         this.router.navigate(['/login']);
+    }
+
+    goToProfile() {
+        this.router.navigate(['/perfil']);
     }
 }

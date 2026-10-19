@@ -1,7 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import { DatePipe } from "@angular/common";
-import { RouterLink } from "@angular/router";
-import { AuthService } from "../../../core/services/auth.service";
+import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { StatsWidget } from "./components/statswidget";
 import { RecentSalesWidget } from "./components/recentsaleswidget";
 import { BestSellingWidget } from "./components/bestsellingwidget";
@@ -18,11 +15,7 @@ import { NotificationsWidget } from "./components/notificationswidget";
     RevenueStreamWidget,
     NotificationsWidget,
   ],
-
-  //imports: [DatePipe, RouterLink],
   templateUrl: "./dashboard.component.html",
   styleUrl: "./dashboard.component.scss",
 })
-export class DashboardComponent {
-  //protected readonly authService = inject(AuthService);
-}
+export class DashboardComponent {}

@@ -1,27 +1,16 @@
-import {
-  Component,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { RippleModule } from "@openng/optimus-ui/ripple";
 import { TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
-import { CurrencyPipe } from "@angular/common";
-//import { Product, ProductService } from '@/app/pages/service/product.service';
 
 @Component({
   standalone: true,
   selector: "app-recent-sales-widget",
-  imports: [
-    TableModule,
-    ButtonModule,
-    RippleModule, //CurrencyPipe
-  ],
+  imports: [TableModule, ButtonModule, RippleModule],
   template: `
     <div class="card mb-8!">
       <div class="font-semibold text-xl mb-4">Recent Sales</div>
-      <!-- <p-table [value]="products()" [paginator]="true" [rows]="5" responsiveLayout="scroll">
+       <!-- <p-table [value]="products()" [paginator]="true" [rows]="5" responsiveLayout="scroll">
             <ng-template #header>
                 <tr>
                     <th>Image</th>
@@ -46,12 +35,5 @@ import { CurrencyPipe } from "@angular/common";
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
-  //providers: [ProductService]
 })
-export class RecentSalesWidget {
-  // products = signal<Product[]>([]);
-  // productService = inject(ProductService);
-  // ngOnInit() {
-  //     this.productService.getProductsSmall().then((data) => this.products.set(data));
-  // }
-}
+export class RecentSalesWidget {}

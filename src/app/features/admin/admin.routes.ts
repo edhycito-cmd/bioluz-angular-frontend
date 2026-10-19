@@ -4,7 +4,8 @@ export default [
   { path: "", pathMatch: "full", redirectTo: "usuarios" },
   {
     path: "usuarios",
-    loadComponent: () => import("./users/users").then((m) => m.Users),
+    loadComponent: () =>
+      import("./users/users.component").then((m) => m.UsersComponent),
   },
   {
     path: "authorization",
@@ -16,6 +17,8 @@ export default [
   {
     path: "configuracion",
     loadComponent: () =>
-      import("./configuration/configuration").then((m) => m.Configuration),
+      import("./configuration/configuration.component").then(
+        (m) => m.ConfigurationComponent,
+      ),
   },
 ] satisfies Routes;
