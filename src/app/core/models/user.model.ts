@@ -43,3 +43,34 @@ export interface UserProfileResult {
   user: UserProfile;
   persona: Persona | null;
 }
+
+/** Coincide con `UsuarioConPersona` del backend (GET /usuario). */
+export interface UsuarioListado {
+  user: {
+    id: string;
+    email: string;
+    esActivo: boolean;
+  };
+  persona: {
+    id: string;
+    nombres: string;
+    primerApellido: string;
+    segundoApellido: string | null;
+    numeroDocumento: string | null;
+    telefono: string | null;
+    fechaNacimiento: string | null;
+    email: string | null;
+    distincion: string | null;
+    domicilio: string | null;
+  } | null;
+}
+
+export interface UsuarioListadoQuery {
+  limite?: number;
+  pagina?: number;
+  filtro?: string;
+  esActivo?: boolean;
+  numeroDocumento?: string;
+  telefono?: string;
+}
+

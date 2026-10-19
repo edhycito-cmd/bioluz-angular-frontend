@@ -4,7 +4,6 @@ import { TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 
 @Component({
-  standalone: true,
   selector: "app-recent-sales-widget",
   imports: [TableModule, ButtonModule, RippleModule],
   template: `

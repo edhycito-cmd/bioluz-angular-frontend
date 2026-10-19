@@ -1,5 +1,4 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { MenuItem } from '@openng/optimus-ui/api';
 import { Router, RouterModule } from '@angular/router';
 
 import { StyleClassModule } from '@openng/optimus-ui/styleclass';
@@ -9,7 +8,6 @@ import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-topbar',
-    standalone: true,
     imports: [RouterModule, StyleClassModule, AppConfigurator],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: ` <div class="layout-topbar">
@@ -80,8 +78,6 @@ import { AuthService } from '../../core/services/auth.service';
     </div>`
 })
 export class AppTopbar {
-    items!: MenuItem[];
-
     layoutService = inject(LayoutService);
 
     private readonly authService = inject(AuthService);

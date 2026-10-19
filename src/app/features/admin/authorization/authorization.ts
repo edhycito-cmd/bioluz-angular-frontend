@@ -17,12 +17,11 @@ interface PolicyModel {
 
 @Component({
   selector: 'app-authorization',
-  standalone: true,
   imports: [FormField],
-  templateUrl: './authorization.component.html',
-  styleUrl: './authorization.component.scss',
+  templateUrl: './authorization.html',
+  styleUrl: './authorization.scss',
 })
-export class AuthorizationComponent {
+export class Authorization {
   private readonly authorizationService = inject(AuthorizationService);
 
   // --- Asignación de roles ---

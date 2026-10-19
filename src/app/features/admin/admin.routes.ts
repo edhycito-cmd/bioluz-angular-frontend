@@ -4,21 +4,16 @@ export default [
   { path: "", pathMatch: "full", redirectTo: "usuarios" },
   {
     path: "usuarios",
-    loadComponent: () =>
-      import("./users/users.component").then((m) => m.UsersComponent),
+    loadComponent: () => import("./users/users").then((m) => m.Users),
   },
   {
     path: "authorization",
     loadComponent: () =>
-      import("./authorization/authorization.component").then(
-        (m) => m.AuthorizationComponent,
-      ),
+      import("./authorization/authorization").then((m) => m.Authorization),
   },
   {
     path: "configuracion",
     loadComponent: () =>
-      import("./configuration/configuration.component").then(
-        (m) => m.ConfigurationComponent,
-      ),
+      import("./configuration/configuration").then((m) => m.Configuration),
   },
 ] satisfies Routes;

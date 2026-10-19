@@ -3,7 +3,6 @@ import { ChartModule } from '@openng/optimus-ui/chart';
 import { LayoutService } from '../../../../layout/service/layout.service';
 
 @Component({
-    standalone: true,
     selector: 'app-revenue-stream-widget',
     imports: [ChartModule],
     changeDetection: ChangeDetectionStrategy.Eager,

@@ -1,9 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MenuModule } from '@openng/optimus-ui/menu';
+import { MenuItem } from '@openng/optimus-ui/api';
 
 @Component({
-    standalone: true,
     selector: 'app-notifications-widget',
     imports: [ButtonModule, MenuModule],
     changeDetection: ChangeDetectionStrategy.Eager,
@@ -12,7 +12,7 @@ import { MenuModule } from '@openng/optimus-ui/menu';
             <div class="font-semibold text-xl">Notifications</div>
             <div>
                 <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-plain" (click)="menu.toggle($event)"></button>
-                <p-menu #menu [popup]="true" [model]="items" />
+                <p-menu #menu [popup]="true" [model]="items()" />
             </div>
         </div>
 
@@ -74,8 +74,8 @@ import { MenuModule } from '@openng/optimus-ui/menu';
     </div>`
 })
 export class NotificationsWidget {
-    items = [
+    readonly items = signal<MenuItem[]>([
         { label: 'Add New', icon: 'pi pi-fw pi-plus' },
         { label: 'Remove', icon: 'pi pi-fw pi-trash' }
-    ];
+    ]);
 }

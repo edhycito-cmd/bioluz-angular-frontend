@@ -17,6 +17,8 @@ sin errores.
 - Control flow nativo (`@if`, `@for`, `@let`) — no se usa `CommonModule`/`*ngIf` en ningún lado
 - `HttpClient` con interceptores funcionales (`withInterceptors`)
 - Optimus UI + Tailwind CSS v4 (PostCSS)
+- Convención de nombres sin sufijos (`login.ts` / `Login`, no `login.component.ts`), según la guía
+  de estilo de Angular
 - TypeScript 6.0 (requerido por Angular 22)
 
 ## Integración con el backend
@@ -33,9 +35,9 @@ El backend expone todo bajo el prefijo global `/api` y envuelve las respuestas e
 | Respuesta `{ success, data }` | Los servicios tipan la respuesta como `ApiEnvelope<T>` y hacen `map(res => res.data)` |
 | Errores `{ statusCode, path, timestamp, message }` | `extractErrorMessage()` en cada componente lee `error.error.message` |
 
-**Pendientes de integración:** el backend ya expone `GET /api/usuario` (listado paginado) y
-`POST /api/usuario/registrar-con-persona`, pero las páginas `/admin/usuarios` y `/perfil` siguen
-siendo stubs. Son el próximo paso natural para conectarlas.
+**Estado:** el listado de usuarios (`/admin/usuarios`) ya consume `GET /api/usuario` con paginación y
+filtro, y `/perfil` muestra los datos de `data.user` + `data.persona`. Falta sólo conectar
+`POST /api/usuario/registrar-con-persona` (alta de usuarios con persona).
 
 ## Setup
 
@@ -82,12 +84,12 @@ src/app/
 ├── features/
 │   ├── auth/login, auth/register   → Signal Forms + validación
 │   ├── home/dashboard              → widgets de dashboard
-│   ├── home/perfil-usuario         → perfil del usuario (stub)
+│   ├── home/perfil-usuario         → perfil del usuario (usuario + persona, signals)
 │   └── admin/users, admin/configuration, admin/authorization
 ├── layout/component/     → shell (topbar, sidebar, menú, configurador de tema)
 ├── app.config.ts         → providers standalone (router, HttpClient + interceptores, Optimus)
 ├── app.routes.ts         → rutas con lazy loading (loadComponent)
-└── app.component.*       → shell raíz con <router-outlet />
+└── app.ts / app.html     → shell raíz con <router-outlet />
 ```
 
 ## Sobre el manejo de sesión

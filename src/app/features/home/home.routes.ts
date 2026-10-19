@@ -4,16 +4,11 @@ export default [
   { path: "", pathMatch: "full", redirectTo: "dashboard" },
   {
     path: "dashboard",
-    loadComponent: () =>
-      import("./dashboard/dashboard.component").then(
-        (m) => m.DashboardComponent,
-      ),
+    loadComponent: () => import("./dashboard/dashboard").then((m) => m.Dashboard),
   },
   {
     path: "perfil",
     loadComponent: () =>
-      import("./perfil-usuario/perfil-usuario.component").then(
-        (m) => m.PerfilUsuarioComponent,
-      ),
+      import("./perfil-usuario/perfil-usuario").then((m) => m.PerfilUsuario),
   },
 ] satisfies Routes;

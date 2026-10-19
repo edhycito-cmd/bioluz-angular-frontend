@@ -6,7 +6,6 @@ import { LayoutService } from '../service/layout.service';
 
 @Component({
     selector: 'app-sidebar',
-    standalone: true,
     imports: [AppMenu, RouterModule],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `

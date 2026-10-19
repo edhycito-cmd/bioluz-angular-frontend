@@ -27,7 +27,6 @@ interface LoginModel {
 
 @Component({
   selector: "app-login",
-  standalone: true,
   imports: [
     FormField,
     MessageModule,
@@ -39,9 +38,9 @@ interface LoginModel {
     AppFloatingConfigurator,
   ],
   providers: [MessageService],
-  templateUrl: "./login.component.html",
+  templateUrl: "./login.html",
 })
-export class LoginComponent {
+export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 

@@ -18,12 +18,18 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenStorage = inject(TokenStorageService);
 
-  /** Perfil completo del usuario autenticado. null si no hay sesión (o aún no se cargó). */
-  private readonly _currentUser = signal<UserProfile | null>(null);
-  readonly currentUser = this._currentUser.asReadonly();
+  /** Perfil completo (usuario + persona) del usuario autenticado. null si no hay sesión. */
+  private readonly _profile = signal<UserProfileResult | null>(null);
+  readonly profile = this._profile.asReadonly();
+
+  /** Datos públicos del usuario autenticado. null si no hay sesión (o aún no se cargó). */
+  readonly currentUser = computed<UserProfile | null>(() => this._profile()?.user ?? null);
+
+  /** Persona asociada al usuario (puede no existir). null si no hay sesión o no tiene persona. */
+  readonly persona = computed(() => this._profile()?.persona ?? null);
 
   /** true una vez que hay un usuario cargado en memoria. */
-  readonly isAuthenticated = computed(() => this._currentUser() !== null);
+  readonly isAuthenticated = computed(() => this._profile() !== null);
 
   register(payload: RegisterPayload): Observable<AuthResult> {
     return this.http
@@ -62,8 +68,9 @@ export class AuthService {
     return this.http
       .get<ApiEnvelope<UserProfileResult>>(`${environment.apiUrl}/usuario/perfil`)
       .pipe(
-        map((res) => res.data.user),
-        tap((profile) => this._currentUser.set(profile)),
+        map((res) => res.data),
+        tap((profile) => this._profile.set(profile)),
+        map((profile) => profile.user),
       );
   }
 
@@ -81,6 +88,6 @@ export class AuthService {
 
   logout(): void {
     this.tokenStorage.clear();
-    this._currentUser.set(null);
+    this._profile.set(null);
   }
 }

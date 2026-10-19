@@ -14,12 +14,11 @@ interface RegisterModel {
 
 @Component({
   selector: 'app-register',
-  standalone: true,
   imports: [FormField, RouterLink],
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.scss',
+  templateUrl: './register.html',
+  styleUrl: './register.scss',
 })
-export class RegisterComponent {
+export class Register {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 

@@ -15,7 +15,7 @@ import { NotificationsWidget } from "./components/notificationswidget";
     RevenueStreamWidget,
     NotificationsWidget,
   ],
-  templateUrl: "./dashboard.component.html",
-  styleUrl: "./dashboard.component.scss",
+  templateUrl: "./dashboard.html",
+  styleUrl: "./dashboard.scss",
 })
-export class DashboardComponent {}
+export class Dashboard {}
