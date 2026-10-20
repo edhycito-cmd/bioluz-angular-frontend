@@ -16,4 +16,9 @@ export default [
     loadComponent: () =>
       import("./configuration/configuration").then((m) => m.Configuration),
   },
+  {
+    path: "clasificador",
+    loadComponent: () =>
+      import("./clasificadores/clasificador").then((m) => m.Clasificador),
+  },
 ] satisfies Routes;
