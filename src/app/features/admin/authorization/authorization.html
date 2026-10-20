@@ -5,6 +5,13 @@
   el ID de usuario se pega a mano — podés copiarlo desde el Dashboard.
 </p>
 
+@if (permisosPagina().length) {
+  <p class="page-hint">
+    Acciones Casbin de tu rol sobre esta página:
+    <strong>{{ permisosPagina().join(' | ') }}</strong>
+  </p>
+}
+
 <section class="panel">
   <h2>Roles</h2>
 
@@ -39,7 +46,9 @@
     }
 
     <div class="actions">
+      <!-- Asignar rol = acción `create` en Casbin (POST /api/authorization/roles). -->
       <button
+        *appHasPermission="'create'"
         type="button"
         class="primary"
         [disabled]="roleForm().invalid() || roleForm().submitting()"
@@ -47,7 +56,9 @@
       >
         Asignar rol
       </button>
+      <!-- Revocar rol = acción `delete` en Casbin (DELETE /api/authorization/roles). -->
       <button
+        *appHasPermission="'delete'"
         type="button"
         class="secondary"
         [disabled]="roleForm().invalid() || roleForm().submitting()"
@@ -91,11 +102,30 @@
     }
 
     <label for="action">Acción</label>
-    <input id="action" type="text" [formField]="policyForm.action" placeholder="read, update, *..." />
+    <select id="action" [formField]="policyForm.action">
+      @for (accion of accionesDisponibles; track accion) {
+        <option [value]="accion">{{ accion }}</option>
+      }
+    </select>
     @let actionField = policyForm.action();
     @if (actionField.touched() && actionField.invalid()) {
       <ul class="field-errors">
         @for (error of actionField.errors(); track error.kind) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <label for="app">Ámbito (app)</label>
+    <select id="app" [formField]="policyForm.app">
+      @for (app of appsDisponibles; track app) {
+        <option [value]="app">{{ app }}</option>
+      }
+    </select>
+    @let appField = policyForm.app();
+    @if (appField.touched() && appField.invalid()) {
+      <ul class="field-errors">
+        @for (error of appField.errors(); track error.kind) {
           <li>{{ error.message }}</li>
         }
       </ul>
@@ -109,7 +139,9 @@
     }
 
     <div class="actions">
+      <!-- Agregar policy = acción `create` en Casbin (POST /api/authorization/policies). -->
       <button
+        *appHasPermission="'create'"
         type="button"
         class="primary"
         [disabled]="policyForm().invalid() || policyForm().submitting()"
@@ -117,7 +149,9 @@
       >
         Agregar policy
       </button>
+      <!-- Quitar policy = acción `delete` en Casbin (DELETE /api/authorization/policies). -->
       <button
+        *appHasPermission="'delete'"
         type="button"
         class="secondary"
         [disabled]="policyForm().invalid() || policyForm().submitting()"

@@ -19,5 +19,10 @@ export interface MenuArbolItem {
   routerLink?: string[];
   visible: boolean;
   separator?: boolean;
+  /**
+   * Acciones Casbin (`frontend`) que el usuario autenticado tiene sobre el menú:
+   * `read`, `update`, `create`, `delete` (el backend las combina como `read|update|...`).
+   */
+  acciones?: string[];
   items: MenuArbolItem[];
 }

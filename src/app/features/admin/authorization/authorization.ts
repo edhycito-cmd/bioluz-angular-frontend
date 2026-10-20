@@ -1,8 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FormField, form, required, submit } from '@angular/forms/signals';
 import { AuthorizationService } from '../../../core/services/authorization.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
+import { HasPermission } from '../../../core/directives/has-permission.directive';
+import { PermissionAction, PermissionApp } from '../../../core/models/authorization.model';
 
 interface RoleModel {
   userId: string;
@@ -13,16 +16,34 @@ interface PolicyModel {
   role: string;
   resource: string;
   action: string;
+  app: PermissionApp;
 }
 
 @Component({
   selector: 'app-authorization',
-  imports: [FormField],
+  imports: [FormField, HasPermission],
   templateUrl: './authorization.html',
   styleUrl: './authorization.scss',
 })
 export class Authorization {
   private readonly authorizationService = inject(AuthorizationService);
+
+  /** Acciones Casbin de este módulo, para configurar los formularios de la página. */
+  protected readonly permisos = inject(PermissionsService);
+
+  /** Acciones concedidas por Casbin sobre la página (`/admin/authorization`). */
+  protected readonly permisosPagina = computed(() =>
+    [...this.permisos.acciones('/admin/authorization')].sort(),
+  );
+
+  // Ámbitos y acciones válidas según el backend (authorization.dto.ts).
+  protected readonly appsDisponibles: PermissionApp[] = ['backend', 'frontend'];
+  protected readonly accionesDisponibles: PermissionAction[] = [
+    'read',
+    'update',
+    'create',
+    'delete',
+  ];
 
   // --- Asignación de roles ---
   protected readonly roleModel = signal<RoleModel>({ userId: '', role: '' });
@@ -68,7 +89,12 @@ export class Authorization {
   }
 
   // --- Policies (recurso + acción por rol) ---
-  protected readonly policyModel = signal<PolicyModel>({ role: '', resource: '', action: '' });
+  protected readonly policyModel = signal<PolicyModel>({
+    role: '',
+    resource: '',
+    action: '',
+    app: 'backend',
+  });
   protected readonly policyForm = form(this.policyModel, (path) => {
     required(path.role, { message: 'El rol es obligatorio' });
     required(path.resource, { message: 'El recurso es obligatorio' });

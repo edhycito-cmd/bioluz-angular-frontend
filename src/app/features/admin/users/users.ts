@@ -12,12 +12,13 @@ import { ButtonModule } from "@openng/optimus-ui/button";
 import { MessageModule } from "@openng/optimus-ui/message";
 import { UsersService } from "../../../core/services/users.service";
 import { AuthService } from "../../../core/services/auth.service";
+import { HasPermission } from "../../../core/directives/has-permission.directive";
 import { UsuarioListado } from "../../../core/models/user.model";
 
 @Component({
   selector: "app-users",
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormField, InputTextModule, ButtonModule, MessageModule],
+  imports: [FormField, InputTextModule, ButtonModule, MessageModule, HasPermission],
   templateUrl: "./users.html",
   styleUrl: "./users.scss",
 })

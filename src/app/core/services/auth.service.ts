@@ -4,6 +4,7 @@ import { Observable, switchMap, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TokenStorageService } from './token-storage.service';
+import { PermissionsService } from './permissions.service';
 import {
   ApiEnvelope,
   AuthResult,
@@ -17,6 +18,7 @@ import { UserProfile, UserProfileResult } from '../models/user.model';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenStorage = inject(TokenStorageService);
+  private readonly permissions = inject(PermissionsService);
 
   /** Perfil completo (usuario + persona) del usuario autenticado. null si no hay sesión. */
   private readonly _profile = signal<UserProfileResult | null>(null);
@@ -70,6 +72,9 @@ export class AuthService {
       .pipe(
         map((res) => res.data),
         tap((profile) => this._profile.set(profile)),
+        // Casbin (frontend): encadenado (no fire-and-forget), igual que el
+        // perfil, para que guards/directivas de permisos no lean estado a medio camino.
+        switchMap((profile) => this.permissions.ensureLoaded().pipe(map(() => profile))),
         map((profile) => profile.user),
       );
   }
@@ -89,5 +94,7 @@ export class AuthService {
   logout(): void {
     this.tokenStorage.clear();
     this._profile.set(null);
+    // Descarta las acciones Casbin de la sesión cerrada.
+    this.permissions.clear();
   }
 }

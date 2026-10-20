@@ -46,7 +46,7 @@
           <th class="py-2 font-medium">Documento</th>
           <th class="py-2 font-medium">Teléfono</th>
           <th class="py-2 font-medium">Estado</th>
-          <th class="py-2 font-medium"></th>
+          <th *appHasPermission="'update'" class="py-2 font-medium"></th>
         </tr>
       </thead>
       <tbody>
@@ -68,7 +68,7 @@
                 {{ item.user.esActivo ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
-            <td class="py-3 text-right">
+            <td *appHasPermission="'update'" class="py-3 text-right">
               <button
                 pButton
                 type="button"
