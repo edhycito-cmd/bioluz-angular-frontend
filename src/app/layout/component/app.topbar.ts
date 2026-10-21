@@ -33,7 +33,7 @@ import { AuthService } from '../../core/services/auth.service';
                         />
                     </g>
                 </svg>
-                <span>SPARKED</span>
+                <span>MUSPA</span>
             </a>
         </div>
 
