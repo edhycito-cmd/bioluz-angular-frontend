@@ -1,0 +1,192 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      severity="secondary"
+      class="mr-2"
+      *appHasPermission="'create'"
+      (onClick)="openNew()"
+    />
+    <p-button
+      severity="secondary"
+      label="Eliminar"
+      icon="pi pi-trash"
+      outlined
+      [loading]="deleteSeleccionando"
+      [disabled]="!seleccionados || !seleccionados.length"
+      *appHasPermission="'delete'"
+      (onClick)="deleteSeleccionados()"
+    />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<div class="flex items-center gap-3 mb-4">
+  <label for="filtroClasificador" class="font-bold">Clasificador</label>
+  <p-select
+    id="filtroClasificador"
+    inputId="filtroClasificador"
+    [ngModel]="filtroClasificador()"
+    (ngModelChange)="filtroClasificador.set($event)"
+    [options]="opcionesClasificador()"
+    optionLabel="label"
+    optionValue="value"
+    [editable]="false"
+    placeholder="Todos los clasificadores"
+    filter
+    [filterFields]="['label']"
+    [style]="{ minWidth: '20rem' }"
+  />
+</div>
+
+<p-table
+  #dt
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 30]"
+  [globalFilterFields]="['codigo', 'nombre', 'descripcion', 'estado']"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} detalles"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">Gestionar Detalles de Clasificador</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="codigo">Código <p-sortIcon field="codigo" /></th>
+      <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+      <th pSortableColumn="descripcion">Descripción <p-sortIcon field="descripcion" /></th>
+      <th pSortableColumn="orden" style="min-width: 8rem">Orden <p-sortIcon field="orden" /></th>
+      <th pSortableColumn="estado" style="min-width: 10rem">Estado <p-sortIcon field="estado" /></th>
+      <th style="min-width: 10rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-detalle>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="detalle" />
+      </td>
+      <td>{{ detalle.codigo }}</td>
+      <td>{{ detalle.nombre }}</td>
+      <td>{{ detalle.descripcion }}</td>
+      <td>{{ detalle.orden }}</td>
+      <td>
+        <p-tag
+          [value]="detalle.estado"
+          [severity]="detalle.esActivo ? 'success' : 'secondary'"
+        />
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'update'"
+          (onClick)="editDetalle(detalle)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'delete'"
+          (onClick)="deleteDetalle(detalle)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="detalleDialog"
+  [style]="{ width: '450px' }"
+  [header]="esNuevo ? 'Nuevo Detalle de Clasificador' : 'Editar Detalle de Clasificador'"
+  [modal]="true"
+>
+  <div class="flex flex-col gap-6 pt-2">
+    <div>
+      <label for="idClasificador" class="block font-bold mb-3">Clasificador</label>
+      <p-select
+        id="idClasificador"
+        inputId="idClasificador"
+        [(ngModel)]="detalle.idClasificador"
+        [options]="opcionesClasificador()"
+        optionLabel="label"
+        optionValue="value"
+        [editable]="false"
+        placeholder="Seleccioná un clasificador"
+        [disabled]="!esNuevo"
+        filter
+        [filterFields]="['label']"
+        fluid
+      />
+      @if (submitted && !detalle.idClasificador) {
+        <small class="text-red-500">El clasificador es obligatorio.</small>
+      }
+    </div>
+    <div>
+      <label for="codigo" class="block font-bold mb-3">Código</label>
+      <input
+        type="text"
+        pInputText
+        id="codigo"
+        [(ngModel)]="detalle.codigo"
+        autocomplete="off"
+        maxlength="50"
+        fluid
+      />
+    </div>
+    <div>
+      <label for="nombre" class="block font-bold mb-3">Nombre</label>
+      <input
+        type="text"
+        pInputText
+        id="nombre"
+        [(ngModel)]="detalle.nombre"
+        autocomplete="off"
+        maxlength="100"
+        fluid
+      />
+    </div>
+    <div>
+      <label for="descripcion" class="block font-bold mb-3">Descripción</label>
+      <textarea id="descripcion" pTextarea [(ngModel)]="detalle.descripcion" rows="3" fluid></textarea>
+    </div>
+    <div>
+      <label for="orden" class="block font-bold mb-3">Orden</label>
+      <p-inputnumber id="orden" [(ngModel)]="detalle.orden" [useGrouping]="false" fluid />
+      @if (submitted && ordenInvalido()) {
+        <small class="text-red-500">El orden debe ser un número entero.</small>
+      }
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (onClick)="hideDialog()" [disabled]="guardando" />
+    <p-button label="Guardar" icon="pi pi-check" [loading]="guardando" (onClick)="saveDetalle()" />
+  </ng-template>
+</p-dialog>

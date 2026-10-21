@@ -42,3 +42,26 @@ export interface DetalleClasificador {
   fechaCreacion: string;
   fechaModificacion: string | null;
 }
+
+export interface DetalleClasificadorListadoQuery extends PaginationQuery {
+  idClasificador?: string;
+  esActivo?: boolean;
+}
+
+/** Payload de POST /detalles-clasificador. La PK es UUID generada por el backend. */
+export interface CrearDetalleClasificadorPayload {
+  codigo?: string | null;
+  nombre?: string | null;
+  descripcion?: string | null;
+  orden?: number;
+  idClasificador?: string | null;
+}
+
+/** Payload de PATCH /detalles-clasificador/:id. */
+export interface ActualizarDetalleClasificadorPayload {
+  codigo?: string | null;
+  nombre?: string | null;
+  descripcion?: string | null;
+  orden?: number;
+  idClasificador?: string | null;
+}

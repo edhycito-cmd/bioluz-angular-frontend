@@ -71,6 +71,11 @@ const MENU_POR_DEFECTO: MenuItem[] = [
         routerLink: ["/admin/clasificador"],
       },
       {
+        label: "Detalles Clasificadores",
+        icon: "pi pi-fw pi-th-large",
+        routerLink: ["/admin/detalles-clasificador"],
+      },
+      {
         label: "Roles de Usuarios",
         icon: "pi pi-fw pi-user-edit",
         routerLink: ["/admin/roles-usuarios"],

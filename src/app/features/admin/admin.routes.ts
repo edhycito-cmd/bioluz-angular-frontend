@@ -27,6 +27,14 @@ export default [
       import("./clasificadores/clasificador").then((m) => m.Clasificador),
   },
   {
+    path: "detalles-clasificador",
+    canActivate: [permissionGuard],
+    loadComponent: () =>
+      import("./detalles-clasificador/detalle-clasificador").then(
+        (m) => m.DetalleClasificador,
+      ),
+  },
+  {
     path: "roles-usuarios",
     canActivate: [permissionGuard],
     loadComponent: () =>

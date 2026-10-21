@@ -45,12 +45,17 @@ acción, dialog de alta/edición y confirmdialog de borrado, con toasts de resul
   Services: `UsersService`, `DetallesClasificadorService` (opciones de género/tipo de documento).
 - `/admin/clasificador` — CRUD completo contra `GET/POST/PATCH/DELETE /api/clasificadores`.
   Service: `ClasificadoresService`.
+- `/admin/detalles-clasificador` — CRUD de detalles con **filtro por clasificador**
+  (el listado se recarga al cambiarlo) contra
+  `GET/POST/PATCH/DELETE /api/detalles-clasificador?...` (endpoint análogo
+  `/clasificador/:idClasificador`). Service: `DetallesClasificadorService`.
 - `/admin/roles-usuarios` — asignar roles a usuarios contra
   `GET/POST/PATCH/DELETE /api/roles-usuarios` y listado de roles `GET /api/roles`.
   Services: `RolesUsuariosService`, `RolesService`.
 - `/perfil` — muestra los datos de `data.user` + `data.persona`.
 
-**Permisos:** el ítem de menú `/admin/roles-usuarios` se incluye en los seeds del backend
+**Permisos:** los ítems de menú `/admin/roles-usuarios` y `/admin/detalles-clasificador` se incluyen
+en los seeds del backend
 (`prisma/seeds/20260101000200-menus.seed.ts` y `FRONTEND_RESOURCES` de
 `20260101000300-roles.seed.ts`); correr `npm run prisma:seed` si la base es anterior.
 
