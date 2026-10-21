@@ -35,9 +35,24 @@ El backend expone todo bajo el prefijo global `/api` y envuelve las respuestas e
 | Respuesta `{ success, data }` | Los servicios tipan la respuesta como `ApiEnvelope<T>` y hacen `map(res => res.data)` |
 | Errores `{ statusCode, path, timestamp, message }` | `extractErrorMessage()` en cada componente lee `error.error.message` |
 
-**Estado:** el listado de usuarios (`/admin/usuarios`) ya consume `GET /api/usuario` con paginación y
-filtro, y `/perfil` muestra los datos de `data.user` + `data.persona`. Falta sólo conectar
-`POST /api/usuario/registrar-con-persona` (alta de usuarios con persona).
+**Estado:** el CRUD completo está implementado para los tres módulos, siguiendo el diseño de
+`sparked-main` (`pages/crud`): toolbar (Nuevo / Eliminar / Exportar), tabla con búsqueda global,
+ordenamiento por columna, checkboxes de selección, tags de estado y botones circulares de
+acción, dialog de alta/edición y confirmdialog de borrado, con toasts de resultado.
+
+- `/admin/usuarios` — listado + busqueda, alta con persona (`POST /api/usuario/registrar-con-persona`),
+  activar/desactivar (`PATCH /api/usuario/:id/activate|deactivate`), exportar CSV.
+  Services: `UsersService`, `DetallesClasificadorService` (opciones de género/tipo de documento).
+- `/admin/clasificador` — CRUD completo contra `GET/POST/PATCH/DELETE /api/clasificadores`.
+  Service: `ClasificadoresService`.
+- `/admin/roles-usuarios` — asignar roles a usuarios contra
+  `GET/POST/PATCH/DELETE /api/roles-usuarios` y listado de roles `GET /api/roles`.
+  Services: `RolesUsuariosService`, `RolesService`.
+- `/perfil` — muestra los datos de `data.user` + `data.persona`.
+
+**Permisos:** el ítem de menú `/admin/roles-usuarios` se incluye en los seeds del backend
+(`prisma/seeds/20260101000200-menus.seed.ts` y `FRONTEND_RESOURCES` de
+`20260101000300-roles.seed.ts`); correr `npm run prisma:seed` si la base es anterior.
 
 ## Setup
 

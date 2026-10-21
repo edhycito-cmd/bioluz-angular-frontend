@@ -26,4 +26,10 @@ export default [
     loadComponent: () =>
       import("./clasificadores/clasificador").then((m) => m.Clasificador),
   },
+  {
+    path: "roles-usuarios",
+    canActivate: [permissionGuard],
+    loadComponent: () =>
+      import("./roles-usuarios/roles-usuarios").then((m) => m.RolesUsuarios),
+  },
 ] satisfies Routes;

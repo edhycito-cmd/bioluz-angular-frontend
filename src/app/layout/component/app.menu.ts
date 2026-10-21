@@ -66,6 +66,16 @@ const MENU_POR_DEFECTO: MenuItem[] = [
         routerLink: ["/admin/authorization"],
       },
       {
+        label: "Clasificadores",
+        icon: "pi pi-list-check",
+        routerLink: ["/admin/clasificador"],
+      },
+      {
+        label: "Roles de Usuarios",
+        icon: "pi pi-fw pi-user-edit",
+        routerLink: ["/admin/roles-usuarios"],
+      },
+      {
         label: "Configuración",
         icon: "pi pi-fw pi-mobile",
         class: "rotated-icon",

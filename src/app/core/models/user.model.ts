@@ -74,3 +74,22 @@ export interface UsuarioListadoQuery {
   telefono?: string;
 }
 
+/** Coincide con `RegistrarUsuarioConPersonaDto` del backend (POST /usuario/registrar-con-persona). */
+export interface RegistrarUsuarioConPersonaPayload {
+  login: string;
+  password: string;
+  persona: {
+    nombres: string;
+    primerApellido: string;
+    segundoApellido?: string | null;
+    generoId: number;
+    tipoDocumentoIdentidadId?: number | null;
+    numeroDocumento?: string | null;
+    fechaNacimiento?: string | null;
+    telefono?: string | null;
+    email: string;
+    distincion?: string | null;
+    domicilio?: string | null;
+  };
+}
+
