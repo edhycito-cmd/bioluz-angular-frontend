@@ -49,6 +49,7 @@ interface LoginModel {
   ],
   providers: [MessageService],
   templateUrl: "./login.html",
+  styleUrl: "./login.scss",
 })
 export class Login {
   private readonly authService = inject(AuthService);
@@ -68,6 +69,11 @@ export class Login {
   });
 
   protected readonly serverError = signal<string | null>(null);
+  protected readonly mostrarPassword = signal(false);
+
+  protected alternarPassword(): void {
+    this.mostrarPassword.update((visible) => !visible);
+  }
 
   /** Login con Google disponible solo si hay Client ID configurado. */
   protected readonly googleEnabled = signal(this.googleSignIn.isConfigured);

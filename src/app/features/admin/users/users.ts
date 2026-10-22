@@ -51,6 +51,7 @@ interface OpcionTipoDocumento {
 interface NuevoUsuarioModel {
   login: string;
   password: string;
+  confirmPassword: string;
   nombres: string;
   primerApellido: string;
   segundoApellido: string;
@@ -153,6 +154,8 @@ export class Users {
   protected cambiandoEstado = false;
   protected seleccionados: UsuarioRow[] | null = null;
   protected usuario: NuevoUsuarioModel = usuarioVacio();
+  protected mostrarPassword = false;
+  protected mostrarConfirmPassword = false;
 
   protected onGlobalFilter(table: Table, event: Event): void {
     table.filterGlobal((event.target as HTMLInputElement).value, "contains");
@@ -165,12 +168,24 @@ export class Users {
   protected openNew(): void {
     this.usuario = usuarioVacio();
     this.submitted = false;
+    this.mostrarPassword = false;
+    this.mostrarConfirmPassword = false;
     this.usuarioDialog = true;
   }
 
   protected hideDialog(): void {
     this.usuarioDialog = false;
     this.submitted = false;
+    this.mostrarPassword = false;
+    this.mostrarConfirmPassword = false;
+  }
+
+  protected alternarPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
+
+  protected alternarConfirmPassword(): void {
+    this.mostrarConfirmPassword = !this.mostrarConfirmPassword;
   }
 
   protected saveUsuario(): void {
@@ -191,6 +206,8 @@ export class Users {
           this.guardando = false;
           this.usuarioDialog = false;
           this.submitted = false;
+          this.mostrarPassword = false;
+          this.mostrarConfirmPassword = false;
           this.messageService.add({
             severity: "success",
             summary: "Operación exitosa",
@@ -261,6 +278,9 @@ export class Users {
 
     if (!MAIL_OK(u.login.trim())) errores.push("login");
     if (! PASSWORD_OK(u.password)) errores.push("password");
+    if (!u.confirmPassword || u.confirmPassword !== u.password) {
+      errores.push("confirmPassword");
+    }
     if (u.nombres.trim().length < 2) errores.push("nombres");
     if (u.primerApellido.trim().length < 2) errores.push("primerApellido");
     if (u.generoId === null) errores.push("generoId");
@@ -275,6 +295,14 @@ export class Users {
 
   protected passwordInvalido(): boolean {
     return this.submitted && !PASSWORD_OK(this.usuario.password);
+  }
+
+  protected confirmPasswordInvalido(): boolean {
+    return (
+      this.submitted &&
+      (!this.usuario.confirmPassword ||
+        this.usuario.confirmPassword !== this.usuario.password)
+    );
   }
 
   protected nombresInvalido(): boolean {
@@ -329,6 +357,7 @@ function usuarioVacio(): NuevoUsuarioModel {
   return {
     login: "",
     password: "",
+    confirmPassword: "",
     nombres: "",
     primerApellido: "",
     segundoApellido: "",

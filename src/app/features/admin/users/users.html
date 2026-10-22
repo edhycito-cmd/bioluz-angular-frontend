@@ -110,22 +110,64 @@
         <small class="text-red-500">Ingresá un email válido.</small>
       }
     </div>
-    <div>
-      <label for="password" class="block font-bold mb-3">Contraseña</label>
-      <input
-        type="password"
-        pInputText
-        id="password"
-        [(ngModel)]="usuario.password"
-        autocomplete="new-password"
-        fluid
-      />
-      @if (passwordInvalido()) {
-        <small class="text-red-500">
-          La contraseña debe tener 8 a 64 caracteres, con mayúscula, minúscula, número,
-          un carácter especial y sin espacios.
-        </small>
-      }
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-6">
+        <label for="password" class="block font-bold mb-3">Contraseña</label>
+        <div class="relative">
+          <input
+            [type]="mostrarPassword ? 'text' : 'password'"
+            pInputText
+            id="password"
+            [(ngModel)]="usuario.password"
+            autocomplete="new-password"
+            class="w-full users-password-input"
+            fluid
+          />
+          <button
+            type="button"
+            class="users-password-toggle"
+            (click)="alternarPassword()"
+            [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="mostrarPassword"
+            [title]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <i class="pi" [class.pi-eye]="!mostrarPassword" [class.pi-eye-slash]="mostrarPassword"></i>
+          </button>
+        </div>
+        @if (passwordInvalido()) {
+          <small class="block text-red-500 mt-1">
+            8 a 64 caracteres, con mayúscula, minúscula, número, símbolo y sin espacios.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-6">
+        <label for="confirmPassword" class="block font-bold mb-3">Confirmar contraseña</label>
+        <div class="relative">
+          <input
+            [type]="mostrarConfirmPassword ? 'text' : 'password'"
+            pInputText
+            id="confirmPassword"
+            [(ngModel)]="usuario.confirmPassword"
+            autocomplete="new-password"
+            class="w-full users-password-input"
+            fluid
+          />
+          <button
+            type="button"
+            class="users-password-toggle"
+            (click)="alternarConfirmPassword()"
+            [attr.aria-label]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
+            [attr.aria-pressed]="mostrarConfirmPassword"
+            [title]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
+          >
+            <i class="pi" [class.pi-eye]="!mostrarConfirmPassword" [class.pi-eye-slash]="mostrarConfirmPassword"></i>
+          </button>
+        </div>
+        @if (confirmPasswordInvalido()) {
+          <small class="block text-red-500 mt-1">Las contraseñas no coinciden.</small>
+        }
+      </div>
     </div>
 
     <span class="block font-bold">Datos de la persona</span>

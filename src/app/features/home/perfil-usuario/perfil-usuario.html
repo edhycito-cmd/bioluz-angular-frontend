@@ -80,14 +80,30 @@
         <label for="currentPassword" class="text-sm font-medium">
           Contraseña actual
         </label>
-        <input
-          pInputText
-          id="currentPassword"
-          type="password"
-          autocomplete="current-password"
-          [formField]="passwordForm.currentPassword"
-          class="w-full"
-        />
+        <div class="password-field relative">
+          <input
+            pInputText
+            id="currentPassword"
+            [type]="mostrarActual() ? 'text' : 'password'"
+            autocomplete="current-password"
+            [formField]="passwordForm.currentPassword"
+            class="w-full password-input"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="alternarActual()"
+            [attr.aria-label]="mostrarActual() ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'"
+            [attr.aria-pressed]="mostrarActual()"
+            [title]="mostrarActual() ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!mostrarActual()"
+              [class.pi-eye-slash]="mostrarActual()"
+            ></i>
+          </button>
+        </div>
         @let currentField = passwordForm.currentPassword();
         @if (currentField.touched() && currentField.invalid()) {
           <p-message severity="error" size="small" variant="simple">
@@ -107,14 +123,30 @@
         <label for="newPassword" class="text-sm font-medium">
           Nueva contraseña
         </label>
-        <input
-          pInputText
-          id="newPassword"
-          type="password"
-          autocomplete="new-password"
-          [formField]="passwordForm.newPassword"
-          class="w-full"
-        />
+        <div class="password-field relative">
+          <input
+            pInputText
+            id="newPassword"
+            [type]="mostrarNueva() ? 'text' : 'password'"
+            autocomplete="new-password"
+            [formField]="passwordForm.newPassword"
+            class="w-full password-input"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="alternarNueva()"
+            [attr.aria-label]="mostrarNueva() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
+            [attr.aria-pressed]="mostrarNueva()"
+            [title]="mostrarNueva() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!mostrarNueva()"
+              [class.pi-eye-slash]="mostrarNueva()"
+            ></i>
+          </button>
+        </div>
         @let newField = passwordForm.newPassword();
         @if (newField.touched() && newField.invalid()) {
           <p-message severity="error" size="small" variant="simple">
@@ -131,14 +163,30 @@
         <label for="verifyPassword" class="text-sm font-medium">
           Verificar contraseña
         </label>
-        <input
-          pInputText
-          id="verifyPassword"
-          type="password"
-          autocomplete="new-password"
-          [formField]="passwordForm.verifyPassword"
-          class="w-full"
-        />
+        <div class="password-field relative">
+          <input
+            pInputText
+            id="verifyPassword"
+            [type]="mostrarVerificacion() ? 'text' : 'password'"
+            autocomplete="new-password"
+            [formField]="passwordForm.verifyPassword"
+            class="w-full password-input"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="alternarVerificacion()"
+            [attr.aria-label]="mostrarVerificacion() ? 'Ocultar verificación de contraseña' : 'Mostrar verificación de contraseña'"
+            [attr.aria-pressed]="mostrarVerificacion()"
+            [title]="mostrarVerificacion() ? 'Ocultar verificación de contraseña' : 'Mostrar verificación de contraseña'"
+          >
+            <i
+              class="pi"
+              [class.pi-eye]="!mostrarVerificacion()"
+              [class.pi-eye-slash]="mostrarVerificacion()"
+            ></i>
+          </button>
+        </div>
         @let verifyField = passwordForm.verifyPassword();
         @if (verifyField.touched() && verifyField.invalid()) {
           <p-message severity="error" size="small" variant="simple">
@@ -169,7 +217,7 @@
         label="Guardar cambios"
         class="w-fit"
         [loading]="guardandoPassword()"
-        [disabled]="guardandoPassword()"
+        [disabled]="passwordForm().invalid() || guardandoPassword()"
       ></button>
     </form>
   </div>

@@ -110,6 +110,22 @@ export class PerfilUsuario {
   protected readonly passwordError = signal<string | null>(null);
   protected readonly passwordGuardada = signal(false);
 
+  protected readonly mostrarActual = signal(false);
+  protected readonly mostrarNueva = signal(false);
+  protected readonly mostrarVerificacion = signal(false);
+
+  protected alternarActual(): void {
+    this.mostrarActual.update((visible) => !visible);
+  }
+
+  protected alternarNueva(): void {
+    this.mostrarNueva.update((visible) => !visible);
+  }
+
+  protected alternarVerificacion(): void {
+    this.mostrarVerificacion.update((visible) => !visible);
+  }
+
   protected recargar(): void {
     this.cargando.set(true);
     this.error.set(null);
@@ -147,6 +163,9 @@ export class PerfilUsuario {
           }),
         );
         this.passwordGuardada.set(true);
+        this.mostrarActual.set(false);
+        this.mostrarNueva.set(false);
+        this.mostrarVerificacion.set(false);
         this.passwordForm().reset({
           currentPassword: "",
           newPassword: "",

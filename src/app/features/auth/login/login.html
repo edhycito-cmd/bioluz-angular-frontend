@@ -69,8 +69,18 @@
             Password
           </label>
 
-          <input pInputText type="password" id="password" placeholder="Password" autocomplete="current-password"
-            [formField]="loginForm.password" class="w-full h-[30px] text-sm" />
+          <div class="relative">
+            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Password"
+              autocomplete="current-password" [formField]="loginForm.password"
+              class="w-full h-[30px] text-sm login-password-input" />
+
+            <button type="button" class="login-password-toggle" (click)="alternarPassword()"
+              [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="mostrarPassword()"
+              [title]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="pi" [class.pi-eye]="!mostrarPassword()" [class.pi-eye-slash]="mostrarPassword()"></i>
+            </button>
+          </div>
 
           @if (
           loginForm.password().invalid() &&
