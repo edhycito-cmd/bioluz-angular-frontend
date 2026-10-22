@@ -25,7 +25,10 @@ import { RolesUsuariosService } from "../../../core/services/roles-usuarios.serv
 import { HasPermission } from "../../../core/directives/has-permission.directive";
 import { UsuarioListado } from "../../../core/models/user.model";
 import { Rol } from "../../../core/models/rol.model";
-import { RolUsuario } from "../../../core/models/rol-usuario.model";
+import {
+  ActualizarRolUsuarioPayload,
+  RolUsuario,
+} from "../../../core/models/rol-usuario.model";
 
 /** Fila aplanada del listado, para ordenamiento/filtro global con p-table. */
 interface UsuarioOption {
@@ -226,7 +229,7 @@ export class RolesUsuarios {
       return;
     }
 
-    const patch: { idRol: string; fechaInicio?: string } = {
+    const patch: ActualizarRolUsuarioPayload = {
       idRol: this.asignacion.idRol,
     };
     if (fechaInicio) patch.fechaInicio = fechaInicio;
