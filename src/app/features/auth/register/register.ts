@@ -63,7 +63,7 @@ export class Register {
       try {
         const { name, email: userEmail, password } = this.model();
         await firstValueFrom(this.authService.register({ name, email: userEmail, password }));
-        await this.router.navigate(['/dashboard']);
+        await this.router.navigate(['/perfil']);
       } catch (error) {
         this.serverError.set(this.extractErrorMessage(error));
       }

@@ -17,5 +17,5 @@ export const permissionGuard: CanActivateFn = (_route, state) => {
 
   return permissions.can(state.url, 'read')
     ? true
-    : router.createUrlTree(['/dashboard']);
+    : router.createUrlTree(['/perfil']);
 };

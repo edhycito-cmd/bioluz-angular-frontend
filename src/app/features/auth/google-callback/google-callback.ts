@@ -25,7 +25,7 @@ const ERROR_MESSAGES: Readonly<Record<string, string>> = {
  * El backend redirige con `?accessToken=...&refreshToken=...` o `?error=codigo`.
  * Este componente lee esos parámetros, **limpia la URL inmediatamente** (para
  * que los tokens no queden en el historial ni se compartan por accidente),
- * guarda la sesión, carga el perfil y navega al dashboard.
+ * guarda la sesión, carga el perfil y navega a /perfil.
  *
  * El flujo recomendado es el botón de Google Identity Services (POST
  * /auth/google), que no pasa tokens por la URL; este callback existe para que
@@ -71,7 +71,7 @@ export class GoogleCallback implements OnInit {
       await firstValueFrom(
         this.authService.completeGoogleRedirect({ accessToken, refreshToken }),
       );
-      await this.router.navigate(['/dashboard'], { replaceUrl: true });
+      await this.router.navigate(['/perfil'], { replaceUrl: true });
     } catch {
       // No dejamos una sesión a medio crear si falló la carga del perfil.
       this.authService.logout();

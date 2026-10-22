@@ -127,7 +127,7 @@ export class Login {
       await firstValueFrom(
         this.authService.loginWithGoogle({ credential, nonce }),
       );
-      await this.router.navigate(["/dashboard"], { replaceUrl: true });
+      await this.router.navigate(["/perfil"], { replaceUrl: true });
     } catch (error) {
       this.serverError.set(this.extractErrorMessage(error));
     } finally {
@@ -142,7 +142,7 @@ export class Login {
     submit(this.loginForm, async () => {
       try {
         await firstValueFrom(this.authService.login(this.model()));
-        await this.router.navigate(["/dashboard"]);
+        await this.router.navigate(["/perfil"]);
       } catch (error) {
         this.serverError.set(this.extractErrorMessage(error));
       }
