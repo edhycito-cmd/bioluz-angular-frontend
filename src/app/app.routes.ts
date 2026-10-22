@@ -19,6 +19,15 @@ export const routes: Routes = [
       import("./features/auth/register/register").then((m) => m.Register),
   },
   {
+    // Retorno del flujo OAuth redirect de Google. No lleva guestGuard: el
+    // componente lee los tokens de la query, limpia la URL y carga la sesión.
+    path: "auth/callback",
+    loadComponent: () =>
+      import("./features/auth/google-callback/google-callback").then(
+        (m) => m.GoogleCallback,
+      ),
+  },
+  {
     path: "",
     canActivate: [authGuard],
     loadComponent: () =>

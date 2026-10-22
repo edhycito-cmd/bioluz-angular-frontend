@@ -1,0 +1,31 @@
+<div class="min-h-screen w-full bg-surface-50 dark:bg-surface-950 flex items-center justify-center px-6">
+  <div class="w-full max-w-[420px] rounded-3xl bg-surface-0 dark:bg-surface-900 px-8 py-10 text-center shadow-sm">
+    @if (processing()) {
+    <p-progressspinner strokeWidth="4" class="w-10 h-10 inline-block" />
+    <h1 class="text-surface-900 dark:text-surface-0 text-xl font-medium mt-5">
+      Iniciando sesión con Google
+    </h1>
+    <p class="text-muted-color text-sm mt-2">
+      Estamos validando tu cuenta. Esto toma solo un momento…
+    </p>
+    } @else if (error()) {
+    <div
+      class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+      aria-hidden="true"
+    >
+      <span class="text-2xl font-semibold">!</span>
+    </div>
+    <h1 class="text-surface-900 dark:text-surface-0 text-xl font-medium mt-5">
+      No pudimos iniciar tu sesión
+    </h1>
+    <p class="text-muted-color text-sm mt-2" role="alert">{{ error() }}</p>
+
+    <a
+      routerLink="/login"
+      class="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-contrast hover:opacity-90"
+    >
+      Volver al inicio de sesión
+    </a>
+    }
+  </div>
+</div>

@@ -5,10 +5,12 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TokenStorageService } from './token-storage.service';
 import { PermissionsService } from './permissions.service';
+import { GoogleSignInService } from './google-signin.service';
 import {
   ApiEnvelope,
   AuthResult,
   AuthTokens,
+  GoogleLoginPayload,
   LoginPayload,
   RegisterPayload,
 } from '../models/auth.model';
@@ -19,6 +21,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenStorage = inject(TokenStorageService);
   private readonly permissions = inject(PermissionsService);
+  private readonly googleSignIn = inject(GoogleSignInService);
 
   /** Perfil completo (usuario + persona) del usuario autenticado. null si no hay sesión. */
   private readonly _profile = signal<UserProfileResult | null>(null);
@@ -38,7 +41,7 @@ export class AuthService {
       .post<ApiEnvelope<AuthResult>>(`${environment.apiUrl}/auth/register`, payload)
       .pipe(
         map((res) => res.data),
-        tap((result) => this.tokenStorage.setTokens(result)),
+        tap((result) => this.startSession(result)),
         // Encadenado (no fire-and-forget): el observable no completa hasta que
         // currentUser esté seteado, así los guards no leen un estado a medio camino.
         switchMap((result) => this.loadProfile().pipe(map(() => result))),
@@ -50,9 +53,40 @@ export class AuthService {
       .post<ApiEnvelope<AuthResult>>(`${environment.apiUrl}/auth/login`, payload)
       .pipe(
         map((res) => res.data),
-        tap((result) => this.tokenStorage.setTokens(result)),
+        tap((result) => this.startSession(result)),
         switchMap((result) => this.loadProfile().pipe(map(() => result))),
       );
+  }
+
+  /**
+   * Login con Google (Identity Services): valida el ID token en el backend
+   * y continúa igual que login(): guarda tokens y carga perfil + permisos.
+   */
+  loginWithGoogle(payload: GoogleLoginPayload): Observable<AuthResult> {
+    return this.http
+      .post<ApiEnvelope<AuthResult>>(`${environment.apiUrl}/auth/google`, payload)
+      .pipe(
+        map((res) => res.data),
+        tap((result) => this.startSession(result)),
+        switchMap((result) => this.loadProfile().pipe(map(() => result))),
+      );
+  }
+
+  /**
+   * Cierra la sesión iniciada por el flujo OAuth redirect: el backend redirige
+   * a `/auth/callback` con los tokens en la query. El componente de callback
+   * los entrega acá, se guardan y se carga el perfil antes de navegar.
+   */
+  completeGoogleRedirect(tokens: AuthTokens): Observable<UserProfile> {
+    this.startSession(tokens);
+    return this.loadProfile();
+  }
+
+  /** Deja el estado de sesión anterior limpio antes de cargar uno nuevo. */
+  private startSession(tokens: AuthTokens): void {
+    this._profile.set(null);
+    this.permissions.clear();
+    this.tokenStorage.setTokens(tokens);
   }
 
   /** Usado por el interceptor de refresh; no toca el signal de currentUser. */
@@ -96,5 +130,7 @@ export class AuthService {
     this._profile.set(null);
     // Descarta las acciones Casbin de la sesión cerrada.
     this.permissions.clear();
+    // Evita que Google reutilice el estado de auto-selección de la cuenta.
+    this.googleSignIn.disableAutoSelect();
   }
 }

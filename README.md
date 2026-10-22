@@ -35,6 +35,29 @@ El backend expone todo bajo el prefijo global `/api` y envuelve las respuestas e
 | Respuesta `{ success, data }` | Los servicios tipan la respuesta como `ApiEnvelope<T>` y hacen `map(res => res.data)` |
 | Errores `{ statusCode, path, timestamp, message }` | `extractErrorMessage()` en cada componente lee `error.error.message` |
 
+## Login con Google
+
+Hay dos caminos soportados por el backend:
+
+1. **Google Identity Services (recomendado)** — el botón oficial de Google lo renderiza
+   `GoogleSignInService` y entrega un **ID token** (credential). El login lo envía junto a un
+   `nonce` a `POST /api/auth/google`; el backend valida firma/`aud`/`iss`/`exp`/`email_verified`
+   y el nonce, y devuelve los JWT propios. No hay redirect ni tokens en la URL.
+2. **OAuth redirect** — `GET /api/auth/google` → Google → callback del backend →
+   `/auth/callback?accessToken=...&refreshToken=...`. La ruta `/auth/callback`
+   (`GoogleCallback`) lee los tokens, **limpia la URL**, carga el perfil y navega al dashboard.
+
+Configuración:
+
+- Completar `googleClientId` en `src/environments/environment.development.ts` (dev) y
+  `src/environments/environment.ts` (producción) con el **mismo Client ID** que
+  `GOOGLE_CLIENT_ID` del backend. Es un identificador público, no un secreto.
+- En Google Cloud Console → Credentials → OAuth client ID (Web), registrar el origen desde el
+  que se sirve la SPA en **Authorized JavaScript origins** (`http://localhost:4200` en dev).
+  El *Authorized redirect URI* solo hace falta para el flujo redirect.
+- Si `googleClientId` queda vacío o el SDK no carga, el botón de Google se oculta y el login
+  con email/password sigue funcionando.
+
 **Estado:** el CRUD completo está implementado para los tres módulos, siguiendo el diseño de
 `sparked-main` (`pages/crud`): toolbar (Nuevo / Eliminar / Exportar), tabla con búsqueda global,
 ordenamiento por columna, checkboxes de selección, tags de estado y botones circulares de

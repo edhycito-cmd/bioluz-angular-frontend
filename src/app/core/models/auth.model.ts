@@ -22,6 +22,14 @@ export interface LoginPayload {
   rememberMe: boolean;
 }
 
+/** Coincide con googleCredentialSchema del backend (POST /auth/google) */
+export interface GoogleLoginPayload {
+  /** ID token (JWT) que entrega el botón oficial de Google Identity Services. */
+  credential: string;
+  /** Desafío anti-replay incluido como claim `nonce` del ID token. */
+  nonce: string;
+}
+
 /** Envoltorio de respuesta que agrega el ResponseInterceptor global del backend */
 export interface ApiEnvelope<T> {
   success: true;

@@ -5,7 +5,7 @@ import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from
 import { AuthService } from '../services/auth.service';
 import { TokenStorageService } from '../services/token-storage.service';
 
-const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh'];
+const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/google'];
 
 // Estado a nivel de módulo (el interceptor funcional no es una clase instanciable,
 // así que esto actúa como singleton compartido entre todas las requests de la app).

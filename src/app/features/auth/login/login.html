@@ -114,6 +114,38 @@
           <span pButtonLabel>Sign In</span>
         </button>
 
+        <!-- Divider -->
+        @if (googleEnabled()) {
+        <div class="flex items-center gap-3" aria-hidden="true">
+          <span class="h-px flex-1 bg-surface-200 dark:bg-surface-700"></span>
+          <span class="text-muted-color text-xs uppercase tracking-widest">o</span>
+          <span class="h-px flex-1 bg-surface-200 dark:bg-surface-700"></span>
+        </div>
+
+        <!-- Google: botón oficial renderizado por Google Identity Services -->
+        <div class="flex flex-col items-center gap-3">
+          <div class="relative w-full min-h-[40px] flex justify-center items-center">
+            <div
+              #googleButtonContainer
+              class="w-full flex justify-center"
+              aria-label="Iniciar sesión con Google"
+            ></div>
+
+            @if (googleLoading()) {
+            <div class="absolute inset-0 flex items-center justify-center">
+              <p-progressspinner strokeWidth="4" class="w-6 h-6" />
+            </div>
+            }
+          </div>
+
+          @if (googleReady()) {
+          <span class="text-muted-color text-xs">
+            Podés iniciar sesión con tu cuenta de Google y continuar con la misma seguridad.
+          </span>
+          }
+        </div>
+        }
+
       </form>
     </div>
   </div>

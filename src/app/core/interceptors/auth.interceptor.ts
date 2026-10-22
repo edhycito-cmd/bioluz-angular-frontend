@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { TokenStorageService } from '../services/token-storage.service';
 
 /** Endpoints que no requieren (ni deben llevar) el access token actual. */
-const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh'];
+const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/google'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenStorage = inject(TokenStorageService);
