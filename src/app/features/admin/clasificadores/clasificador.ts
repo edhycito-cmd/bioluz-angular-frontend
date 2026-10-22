@@ -73,7 +73,7 @@ export class Clasificador {
 
   /** Columnas para exportar a CSV (molde sparked pages/crud). */
   protected readonly cols = [
-    { field: "id", header: "Id" },
+    { field: "id", header: "ID" },
     { field: "dominio", header: "Dominio" },
     { field: "descripcion", header: "Descripción" },
     { field: "orden", header: "Orden" },

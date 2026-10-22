@@ -33,8 +33,8 @@ export class Register {
     required(path.name, { message: 'El nombre es obligatorio' });
     minLength(path.name, 2, { message: 'El nombre debe tener al menos 2 caracteres' });
 
-    required(path.email, { message: 'El email es obligatorio' });
-    email(path.email, { message: 'Ingresá un email válido' });
+    required(path.email, { message: 'El correo electrónico es obligatorio' });
+    email(path.email, { message: 'Ingresá un correo electrónico válido' });
 
     required(path.password, { message: 'La contraseña es obligatoria' });
     minLength(path.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });

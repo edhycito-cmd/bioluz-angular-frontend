@@ -13,7 +13,7 @@
       </ul>
     }
 
-    <label for="email">Email</label>
+    <label for="email">Correo electrónico</label>
     <input id="email" type="email" [formField]="registerForm.email" autocomplete="email" />
     @let emailField = registerForm.email();
     @if (emailField.touched() && emailField.invalid()) {

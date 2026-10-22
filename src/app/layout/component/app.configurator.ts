@@ -3,6 +3,35 @@ import { FormsModule } from "@angular/forms";
 import { SelectButtonModule } from "@openng/optimus-ui/selectbutton";
 import { ThemeService } from "../service/theme.service";
 
+/** Nombres visibles de las paletas, que internamente usan identificadores en inglés. */
+const NOMBRES_COLORES: Readonly<Record<string, string>> = {
+  emerald: "esmeralda",
+  green: "verde",
+  lime: "lima",
+  orange: "naranja",
+  amber: "ámbar",
+  yellow: "amarillo",
+  teal: "verde azulado",
+  cyan: "cian",
+  sky: "celeste",
+  blue: "azul",
+  indigo: "índigo",
+  violet: "violeta",
+  purple: "púrpura",
+  fuchsia: "fucsia",
+  pink: "rosa",
+  rose: "rosado",
+  slate: "pizarra",
+  gray: "gris",
+  zinc: "zinc",
+  neutral: "neutro",
+  stone: "piedra",
+  soho: "soho",
+  viva: "viva",
+  ocean: "océano",
+  noir: "negro",
+};
+
 /**
  * Selector de colores del tema (paleta primaria, superficie y preset).
  *
@@ -16,12 +45,12 @@ import { ThemeService } from "../service/theme.service";
   template: `
     <div class="flex flex-col gap-4">
       <div>
-        <span class="text-sm text-muted-color font-semibold">Primary</span>
+        <span class="text-sm text-muted-color font-semibold">Color principal</span>
         <div class="pt-2 flex gap-2 flex-wrap justify-start">
           @for (primaryColor of theme.primaryColors(); track primaryColor.name) {
             <button
               type="button"
-              [title]="primaryColor.name"
+              [title]="nombreColor(primaryColor.name)"
               (click)="theme.setPrimaryColor(primaryColor)"
               [class.outline]="primaryColor.name === theme.selectedPrimaryColor()"
               [class.outline-primary]="
@@ -39,12 +68,12 @@ import { ThemeService } from "../service/theme.service";
         </div>
       </div>
       <div>
-        <span class="text-sm text-muted-color font-semibold">Surface</span>
+        <span class="text-sm text-muted-color font-semibold">Color de superficie</span>
         <div class="pt-2 flex gap-2 flex-wrap justify-start">
           @for (surface of theme.surfaces; track surface.name) {
             <button
               type="button"
-              [title]="surface.name"
+              [title]="nombreColor(surface.name)"
               (click)="theme.setSurfaceColor(surface)"
               class="cursor-pointer w-5 h-5 rounded-full flex shrink-0 items-center justify-center p-0 outline-offset-1"
               [class]="{
@@ -62,7 +91,7 @@ import { ThemeService } from "../service/theme.service";
         </div>
       </div>
       <div class="flex flex-col gap-2">
-        <span class="text-sm text-muted-color font-semibold">Presets</span>
+        <span class="text-sm text-muted-color font-semibold">Preajustes</span>
         <p-selectbutton
           [options]="theme.presets"
           [ngModel]="theme.selectedPreset()"
@@ -81,5 +110,9 @@ export class AppConfigurator {
 
   protected onPresetChange(preset: string) {
     this.theme.setPreset(preset);
+  }
+
+  protected nombreColor(nombre?: string): string {
+    return nombre ? (NOMBRES_COLORES[nombre] ?? nombre) : "";
   }
 }

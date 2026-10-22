@@ -8,14 +8,14 @@ import { ButtonModule } from "@openng/optimus-ui/button";
   imports: [TableModule, ButtonModule, RippleModule],
   template: `
     <div class="card mb-8!">
-      <div class="font-semibold text-xl mb-4">Recent Sales</div>
+      <div class="font-semibold text-xl mb-4">Ventas recientes</div>
        <!-- <p-table [value]="products()" [paginator]="true" [rows]="5" responsiveLayout="scroll">
             <ng-template #header>
                 <tr>
-                    <th>Image</th>
-                    <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
-                    <th pSortableColumn="price">Price <p-sortIcon field="price" /></th>
-                    <th>View</th>
+                    <th>Imagen</th>
+                    <th pSortableColumn="name">Nombre <p-sortIcon field="name" /></th>
+                    <th pSortableColumn="price">Precio <p-sortIcon field="price" /></th>
+                    <th>Ver</th>
                 </tr>
             </ng-template>
             <ng-template #body let-product>

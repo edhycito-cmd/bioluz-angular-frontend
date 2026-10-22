@@ -63,8 +63,8 @@ export class Login {
   });
 
   protected readonly loginForm = form(this.model, (path) => {
-    required(path.email, { message: "El email es obligatorio" });
-    email(path.email, { message: "Ingresá un email válido" });
+    required(path.email, { message: "El correo electrónico es obligatorio" });
+    email(path.email, { message: "Ingresá un correo electrónico válido" });
     required(path.password, { message: "La contraseña es obligatoria" });
   });
 

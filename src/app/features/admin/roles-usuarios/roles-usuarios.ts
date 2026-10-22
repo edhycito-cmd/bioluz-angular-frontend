@@ -88,7 +88,7 @@ export class RolesUsuarios {
   /** Columnas para exportar a CSV (molde sparked pages/crud). */
   protected readonly cols = [
     { field: "usuario", header: "Usuario" },
-    { field: "email", header: "Email" },
+    { field: "email", header: "Correo electrónico" },
     { field: "rol", header: "Rol" },
     { field: "fechaInicio", header: "Fecha inicio" },
     { field: "estado", header: "Estado" },

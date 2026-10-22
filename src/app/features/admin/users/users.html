@@ -50,7 +50,7 @@
       </th>
       <th pSortableColumn="nombres" style="min-width: 16rem">Nombres <p-sortIcon field="nombres" /></th>
       <th pSortableColumn="primerApellido" style="min-width: 12rem">Apellidos <p-sortIcon field="primerApellido" /></th>
-      <th pSortableColumn="email" style="min-width: 16rem">Email <p-sortIcon field="email" /></th>
+      <th pSortableColumn="email" style="min-width: 16rem">Correo electrónico <p-sortIcon field="email" /></th>
       <th pSortableColumn="documento" style="min-width: 10rem">Documento <p-sortIcon field="documento" /></th>
       <th pSortableColumn="telefono" style="min-width: 10rem">Teléfono <p-sortIcon field="telefono" /></th>
       <th pSortableColumn="estado" style="min-width: 10rem">Estado <p-sortIcon field="estado" /></th>
@@ -96,7 +96,7 @@
 >
   <div class="flex flex-col gap-6 pt-2">
     <div>
-      <label for="login" class="block font-bold mb-3">Email de acceso (login)</label>
+      <label for="login" class="block font-bold mb-3">Correo de acceso</label>
       <input
         type="text"
         pInputText
@@ -107,7 +107,7 @@
         fluid
       />
       @if (loginInvalido()) {
-        <small class="text-red-500">Ingresá un email válido.</small>
+        <small class="text-red-500">Ingresá un correo electrónico válido.</small>
       }
     </div>
     <div class="grid grid-cols-12 gap-4">
@@ -230,10 +230,10 @@
         <input type="text" pInputText id="telefono" [(ngModel)]="usuario.telefono" fluid />
       </div>
       <div class="col-span-6">
-        <label for="emailPersona" class="block font-bold mb-3">Email de contacto</label>
+        <label for="emailPersona" class="block font-bold mb-3">Correo de contacto</label>
         <input type="text" pInputText id="emailPersona" [(ngModel)]="usuario.email" fluid />
         @if (personaEmailInvalido()) {
-          <small class="text-red-500">Ingresá un email válido.</small>
+          <small class="text-red-500">Ingresá un correo electrónico válido.</small>
         }
       </div>
       <div class="col-span-6">

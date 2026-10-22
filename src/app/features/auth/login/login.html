@@ -38,7 +38,7 @@
         </h1>
 
         <span class="text-muted-color text-sm">
-          Sign in to continue
+          Iniciá sesión para continuar
         </span>
       </div>
 
@@ -48,10 +48,10 @@
         <!-- Email -->
         <div class="flex flex-col gap-1">
           <label for="email" class="text-surface-900 dark:text-surface-0 text-sm font-medium">
-            Email
+            Correo electrónico
           </label>
 
-          <input pInputText type="email" id="email" placeholder="Email address" autocomplete="email"
+          <input pInputText type="email" id="email" placeholder="Ingresá tu correo electrónico" autocomplete="email"
             [formField]="loginForm.email" class="w-full h-[30px] text-sm" />
 
           @if (loginForm.email().invalid() && loginForm.email().touched()) {
@@ -66,11 +66,11 @@
         <!-- Password -->
         <div class="flex flex-col gap-1">
           <label for="password" class="text-surface-900 dark:text-surface-0 text-sm font-medium">
-            Password
+            Contraseña
           </label>
 
           <div class="relative">
-            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Password"
+            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Ingresá tu contraseña"
               autocomplete="current-password" [formField]="loginForm.password"
               class="w-full h-[30px] text-sm login-password-input" />
 
@@ -103,12 +103,12 @@
             <p-checkbox inputId="remember" [formField]="loginForm.rememberMe" />
 
             <label for="remember" class="text-surface-700 dark:text-surface-300 text-xs">
-              Remember me
+              Recordarme
             </label>
           </div>
 
           <button type="button" class="text-primary text-xs font-medium hover:underline">
-            Forgot password?
+            ¿Olvidaste tu contraseña?
           </button>
         </div>
 
@@ -121,7 +121,7 @@
 
         <!-- Submit -->
         <button pButton severity="primary" type="submit" class="w-full h-[30px] mt-1">
-          <span pButtonLabel>Sign In</span>
+          <span pButtonLabel>Iniciar sesión</span>
         </button>
 
         <!-- Divider -->

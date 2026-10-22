@@ -1,14 +1,14 @@
 <h1>Autorización</h1>
 <p class="page-hint">
-  Requiere el rol <code>admin</code> (o cualquier rol con permiso <code>manage</code> sobre
-  <code>/api/authorization</code>). El backend no expone un listado de usuarios todavía, así que
-  el ID de usuario se pega a mano — podés copiarlo desde el Dashboard.
+  Requiere el rol <code>ADMINISTRADOR</code> (o cualquier rol con permiso para administrar
+  <code>/api/authorization</code>). El servidor no expone un listado de usuarios todavía, así que
+  el ID de usuario se pega a mano — podés copiarlo desde el Panel.
 </p>
 
 @if (permisosPagina().length) {
   <p class="page-hint">
-    Acciones Casbin de tu rol sobre esta página:
-    <strong>{{ permisosPagina().join(' | ') }}</strong>
+    Acciones de tu rol sobre esta página:
+    <strong>{{ permisosPaginaVisibles().join(' | ') }}</strong>
   </p>
 }
 
@@ -17,7 +17,7 @@
 
   <form novalidate>
     <label for="userId">ID de usuario</label>
-    <input id="userId" type="text" [formField]="roleForm.userId" placeholder="uuid del usuario" />
+    <input id="userId" type="text" [formField]="roleForm.userId" placeholder="UUID del usuario" />
     @let userIdField = roleForm.userId();
     @if (userIdField.touched() && userIdField.invalid()) {
       <ul class="field-errors">
@@ -28,7 +28,7 @@
     }
 
     <label for="role">Rol</label>
-    <input id="role" type="text" [formField]="roleForm.role" placeholder="admin, user, ..." />
+    <input id="role" type="text" [formField]="roleForm.role" placeholder="ADMINISTRADOR, USUARIO, ..." />
     @let roleField = roleForm.role();
     @if (roleField.touched() && roleField.invalid()) {
       <ul class="field-errors">
@@ -71,11 +71,11 @@
 </section>
 
 <section class="panel">
-  <h2>Policies</h2>
+  <h2>Políticas</h2>
 
   <form novalidate>
     <label for="policyRole">Rol</label>
-    <input id="policyRole" type="text" [formField]="policyForm.role" placeholder="admin, user, ..." />
+    <input id="policyRole" type="text" [formField]="policyForm.role" placeholder="ADMINISTRADOR, USUARIO, ..." />
     @let policyRoleField = policyForm.role();
     @if (policyRoleField.touched() && policyRoleField.invalid()) {
       <ul class="field-errors">
@@ -104,7 +104,7 @@
     <label for="action">Acción</label>
     <select id="action" [formField]="policyForm.action">
       @for (accion of accionesDisponibles; track accion) {
-        <option [value]="accion">{{ accion }}</option>
+        <option [value]="accion">{{ etiquetaAccion(accion) }}</option>
       }
     </select>
     @let actionField = policyForm.action();
@@ -116,10 +116,10 @@
       </ul>
     }
 
-    <label for="app">Ámbito (app)</label>
+    <label for="app">Ámbito de la aplicación</label>
     <select id="app" [formField]="policyForm.app">
       @for (app of appsDisponibles; track app) {
-        <option [value]="app">{{ app }}</option>
+        <option [value]="app">{{ etiquetaApp(app) }}</option>
       }
     </select>
     @let appField = policyForm.app();
@@ -147,7 +147,7 @@
         [disabled]="policyForm().invalid() || policyForm().submitting()"
         (click)="addPolicy($event)"
       >
-        Agregar policy
+        Agregar política
       </button>
       <!-- Quitar policy = acción `delete` en Casbin (DELETE /api/authorization/policies). -->
       <button
@@ -157,7 +157,7 @@
         [disabled]="policyForm().invalid() || policyForm().submitting()"
         (click)="removePolicy($event)"
       >
-        Quitar policy
+        Quitar política
       </button>
     </div>
   </form>

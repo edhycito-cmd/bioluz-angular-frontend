@@ -12,13 +12,25 @@ import { MenuService } from "../../core/services/menu.service";
 import { AppMenuitem } from "./app.menuitem";
 
 /**
+ * Etiquetas del menú que llegan en inglés desde datos existentes y deben
+ * mostrarse en español sin modificar el backend.
+ */
+const ETIQUETAS_VISIBLES: Readonly<Record<string, string>> = {
+  Dashboard: "Panel",
+  Home: "Inicio",
+};
+
+const etiquetaVisible = (label: string): string =>
+  ETIQUETAS_VISIBLES[label] ?? label;
+
+/**
  * Adapta un nodo del árbol del backend (`GET /api/menus/arbol`) a `MenuItem`.
  * El backend ya envía `label`, `icon`, `path`, `routerLink`, `visible` e
  * `items`; aquí solo se normaliza la forma para no acoplar la plantilla al DTO.
  */
 const aMenuItem = (nodo: MenuArbolItem): MenuItem => ({
   id: nodo.id,
-  label: nodo.label,
+  label: etiquetaVisible(nodo.label),
   icon: nodo.icon,
   path: nodo.path,
   routerLink: nodo.routerLink,
@@ -53,7 +65,7 @@ const MENU_POR_DEFECTO: MenuItem[] = [
     path: "/dashboard",
     items: [
       {
-        label: "Dashboard",
+        label: "Panel",
         icon: "pi pi-fw pi-home",
         routerLink: ["/dashboard"],
       },

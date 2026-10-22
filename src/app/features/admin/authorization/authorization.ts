@@ -19,6 +19,18 @@ interface PolicyModel {
   app: PermissionApp;
 }
 
+const ETIQUETAS_ACCION: Readonly<Record<PermissionAction, string>> = {
+  read: "Leer",
+  update: "Actualizar",
+  create: "Crear",
+  delete: "Eliminar",
+};
+
+const ETIQUETAS_APP: Readonly<Record<PermissionApp, string>> = {
+  backend: "Servidor",
+  frontend: "Interfaz",
+};
+
 @Component({
   selector: 'app-authorization',
   imports: [FormField, HasPermission],
@@ -34,6 +46,11 @@ export class Authorization {
   /** Acciones concedidas por Casbin sobre la página (`/admin/authorization`). */
   protected readonly permisosPagina = computed(() =>
     [...this.permisos.acciones('/admin/authorization')].sort(),
+  );
+
+  /** Las mismas acciones, con sus etiquetas visibles en español. */
+  protected readonly permisosPaginaVisibles = computed(() =>
+    this.permisosPagina().map((accion) => this.etiquetaAccion(accion)),
   );
 
   // Ámbitos y acciones válidas según el backend (authorization.dto.ts).
@@ -88,7 +105,7 @@ export class Authorization {
     });
   }
 
-  // --- Policies (recurso + acción por rol) ---
+  // --- Políticas (recurso + acción por rol) ---
   protected readonly policyModel = signal<PolicyModel>({
     role: '',
     resource: '',
@@ -113,7 +130,7 @@ export class Authorization {
         const payload = this.policyModel();
         await firstValueFrom(this.authorizationService.addPolicy(payload));
         this.policyMessage.set(
-          `Policy agregada: ${payload.role} puede "${payload.action}" sobre ${payload.resource}`,
+          `Política agregada: ${payload.role} puede "${this.etiquetaAccion(payload.action)}" sobre ${payload.resource}`,
         );
       } catch (error) {
         this.policyError.set(this.extractErrorMessage(error));
@@ -132,13 +149,21 @@ export class Authorization {
         const payload = this.policyModel();
         await firstValueFrom(this.authorizationService.removePolicy(payload));
         this.policyMessage.set(
-          `Policy eliminada: ${payload.role} / ${payload.resource} / ${payload.action}`,
+          `Política eliminada: ${payload.role} / ${payload.resource} / ${this.etiquetaAccion(payload.action)}`,
         );
       } catch (error) {
         this.policyError.set(this.extractErrorMessage(error));
       }
       return undefined;
     });
+  }
+
+  protected etiquetaAccion(accion: string): string {
+    return ETIQUETAS_ACCION[accion as PermissionAction] ?? accion;
+  }
+
+  protected etiquetaApp(app: PermissionApp): string {
+    return ETIQUETAS_APP[app] ?? app;
   }
 
   private extractErrorMessage(error: unknown): string {

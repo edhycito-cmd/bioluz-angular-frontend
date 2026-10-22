@@ -58,7 +58,7 @@
       <th style="width: 3rem">
         <p-tableHeaderCheckbox />
       </th>
-      <th pSortableColumn="id">Id <p-sortIcon field="id" /></th>
+      <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
       <th pSortableColumn="dominio">Dominio <p-sortIcon field="dominio" /></th>
       <th pSortableColumn="descripcion">Descripción <p-sortIcon field="descripcion" /></th>
       <th pSortableColumn="orden" style="min-width: 8rem">Orden <p-sortIcon field="orden" /></th>
@@ -111,7 +111,7 @@
 >
   <div class="flex flex-col gap-6 pt-2">
     <div>
-      <label for="id" class="block font-bold mb-3">Id</label>
+      <label for="id" class="block font-bold mb-3">ID</label>
       <input
         type="text"
         pInputText
@@ -123,7 +123,7 @@
         fluid
       />
       @if (submitted && esNuevo && !clasificador.id.trim()) {
-        <small class="text-red-500">El Id es obligatorio.</small>
+        <small class="text-red-500">El ID es obligatorio.</small>
       }
     </div>
     <div>

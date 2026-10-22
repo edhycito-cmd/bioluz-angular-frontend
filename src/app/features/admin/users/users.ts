@@ -102,7 +102,7 @@ export class Users {
   protected readonly cols = [
     { field: "nombres", header: "Nombres" },
     { field: "primerApellido", header: "Apellidos" },
-    { field: "email", header: "Email" },
+    { field: "email", header: "Correo electrónico" },
     { field: "documento", header: "Documento" },
     { field: "telefono", header: "Teléfono" },
     { field: "estado", header: "Estado" },
