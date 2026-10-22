@@ -31,6 +31,19 @@ const aMenuItem = (nodo: MenuArbolItem): MenuItem => ({
 });
 
 /**
+ * El perfil dejó de ser una opción del menú lateral: se accede desde el avatar
+ * del topbar. Se filtra también aquí para las bases ya sembradas con el menú
+ * `/perfil`, sin necesidad de volver a ejecutar los seeds.
+ */
+const sinPerfil = (items: MenuItem[]): MenuItem[] =>
+  items
+    .filter((item) => item['path'] !== '/perfil' && item['routerLink']?.join('/') !== '/perfil')
+    .map((item) => ({
+      ...item,
+      items: item.items ? sinPerfil(item.items) : undefined,
+    }));
+
+/**
  * Menú de respaldo: se usa únicamente si el backend no responde, para que la
  * navegación siga disponible. La fuente de verdad es el árbol de la API.
  */
@@ -43,11 +56,6 @@ const MENU_POR_DEFECTO: MenuItem[] = [
         label: "Dashboard",
         icon: "pi pi-fw pi-home",
         routerLink: ["/dashboard"],
-      },
-      {
-        label: "Perfil",
-        icon: "pi pi-fw pi-user",
-        routerLink: ["/perfil"],
       },
     ],
   },
@@ -124,9 +132,9 @@ export class AppMenu {
    */
   readonly model = computed<MenuItem[]>(() => {
     if (this.arbol.hasValue()) {
-      return this.arbol.value()!.map(aMenuItem);
+      return sinPerfil(this.arbol.value()!.map(aMenuItem));
     }
     // Mientras carga no se muestra nada; si falla, el menú de respaldo.
-    return this.arbol.error() ? MENU_POR_DEFECTO : [];
+    return this.arbol.error() ? sinPerfil(MENU_POR_DEFECTO) : [];
   });
 }
