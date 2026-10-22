@@ -2,14 +2,12 @@ import { Component, computed, HostListener, inject, ChangeDetectionStrategy, sig
 import { Router, RouterModule } from '@angular/router';
 
 import { AvatarModule } from '@openng/optimus-ui/avatar';
-import { StyleClassModule } from '@openng/optimus-ui/styleclass';
-import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-topbar',
-    imports: [RouterModule, StyleClassModule, AppConfigurator, AvatarModule],
+    imports: [RouterModule, AvatarModule],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
@@ -43,20 +41,6 @@ import { AuthService } from '../../core/services/auth.service';
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [class]="{ pi: true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
-                <div class="relative">
-                    <button
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                        pStyleClass="@next"
-                        enterFromClass="hidden"
-                        enterActiveClass="animate-scalein"
-                        leaveToClass="hidden"
-                        leaveActiveClass="animate-fadeout"
-                        [hideOnOutsideClick]="true"
-                    >
-                        <i class="pi pi-palette"></i>
-                    </button>
-                    <app-configurator />
-                </div>
             </div>
 
             <div class="layout-user-menu-wrapper" (click)="$event.stopPropagation()">

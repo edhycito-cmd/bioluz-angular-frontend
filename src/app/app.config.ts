@@ -1,4 +1,9 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideOptimus } from '@openng/optimus-ui/config';
@@ -6,6 +11,7 @@ import Aura from '@openng/optimus-ui-themes/aura';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { ThemeService } from './layout/service/theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,5 +31,8 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    // Después de que Optimus inicialice su tema, aplicamos el tema global
+    // guardado en la BD antes de mostrar la aplicación.
+    provideAppInitializer(() => inject(ThemeService).load()),
   ],
 };

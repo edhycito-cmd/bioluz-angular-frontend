@@ -1,25 +1,55 @@
 <div class="card max-w-xl">
   <div class="font-semibold text-xl mb-4">Configuración</div>
 
-  <form (submit)="onSubmit($event)" class="flex flex-col gap-5">
-    <div class="flex items-center gap-3">
-      <p-checkbox inputId="darkTheme" [formField]="configForm.darkTheme" />
-      <label for="darkTheme" class="text-sm font-medium">Tema oscuro</label>
-    </div>
+  @if (puedeEditar()) {
+    <form (submit)="onSubmit($event)" class="flex flex-col gap-5">
+      <div class="flex flex-col gap-3">
+        <div class="font-semibold">Tema</div>
 
-    <div class="flex items-center gap-3">
-      <p-checkbox inputId="overlayMenu" [formField]="configForm.overlayMenu" />
-      <label for="overlayMenu" class="text-sm font-medium">
-        Menú superpuesto (overlay)
-      </label>
-    </div>
+        <div class="flex items-center gap-3">
+          <p-checkbox inputId="darkTheme" [formField]="configForm.darkTheme" />
+          <label for="darkTheme" class="text-sm font-medium">Tema oscuro</label>
+        </div>
 
-    @if (guardado()) {
-      <p-message severity="success" size="small" variant="simple">
-        Preferencias guardadas.
-      </p-message>
-    }
+        <div class="flex items-center gap-3">
+          <p-checkbox inputId="overlayMenu" [formField]="configForm.overlayMenu" />
+          <label for="overlayMenu" class="text-sm font-medium">
+            Menú superpuesto (overlay)
+          </label>
+        </div>
+      </div>
 
-    <button pButton type="submit" label="Guardar" class="w-fit"></button>
-  </form>
+      <div class="flex flex-col gap-3 border-t border-surface pt-4">
+        <div class="font-semibold">Colores del tema</div>
+        <p class="text-sm text-muted-color m-0">
+          Estos valores se aplican a todos los usuarios de la aplicación.
+        </p>
+        <app-configurator />
+      </div>
+
+      @if (guardado()) {
+        <p-message severity="success" size="small" variant="simple">
+          Configuración guardada.
+        </p-message>
+      }
+
+      @if (error()) {
+        <p-message severity="error" size="small" variant="simple">
+          {{ error() }}
+        </p-message>
+      }
+
+      <button
+        pButton
+        type="submit"
+        label="Guardar"
+        class="w-fit"
+        [loading]="guardando()"
+      ></button>
+    </form>
+  } @else {
+    <p-message severity="warn" size="small" variant="simple">
+      No tenés permiso para modificar la configuración.
+    </p-message>
+  }
 </div>
