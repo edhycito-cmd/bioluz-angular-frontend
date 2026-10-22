@@ -25,8 +25,9 @@ export interface AsignarRolUsuarioPayload {
   fechaInicio?: string | null;
 }
 
-/** Payload de PATCH /roles-usuarios/:id (los demás campos no son actualizables). */
+/** Payload de PATCH /roles-usuarios/:id (usuario y estado no son actualizables desde aquí). */
 export interface ActualizarRolUsuarioPayload {
+  idRol?: string;
   fechaInicio?: string;
 }
 

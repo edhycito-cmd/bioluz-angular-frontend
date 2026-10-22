@@ -230,12 +230,15 @@ con autenticación.
 
 ### Roles de usuarios (`/admin/roles-usuarios`)
 
-- `RolesUsuariosService`: listar, listar por usuario, asignar, actualizar y revocar.
+- `RolesUsuariosService`: listar, listar por usuario, asignar, actualizar, habilitar y revocar.
 - `RolesService`: catálogo de roles para el select.
-- En edición solo se puede cambiar `fechaInicio`; para cambiar rol o usuario hay que revocar y
-  crear una asignación nueva.
+- En edición se pueden cambiar `idRol` y `fechaInicio`; el usuario queda fijo. La edición
+  solo está disponible para asignaciones activas.
 - Revocar hace `DELETE /roles-usuarios/:id`; el backend marca la asignación inactiva, fija
   `fechaFin` y quita el rol de Casbin.
+- Habilitar aparece solo en asignaciones revocadas y hace
+  `PATCH /roles-usuarios/:id/habilitar`; el backend inicia una nueva vigencia, limpia
+  `fechaFin` y vuelve a asignar el rol en Casbin.
 
 ### Configuración (`/admin/configuracion`)
 

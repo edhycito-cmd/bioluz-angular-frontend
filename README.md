@@ -82,7 +82,7 @@ El backend expone todo bajo `/api` y envuelve las respuestas exitosas en
 | `GET /configuraciones/tema` / `PUT /configuraciones/tema` | `ConfiguracionService` + `ThemeService` |
 | `GET/POST/PATCH/DELETE /clasificadores` | `ClasificadoresService` |
 | `GET/POST/PATCH/DELETE /detalles-clasificador` | `DetallesClasificadorService` |
-| `GET /roles`, `GET/POST/PATCH/DELETE /roles-usuarios` | `RolesService`, `RolesUsuariosService` |
+| `GET /roles`, `GET/POST/PATCH/DELETE /roles-usuarios`, `PATCH /roles-usuarios/:id/habilitar` | `RolesService`, `RolesUsuariosService` |
 | `POST/DELETE /authorization/roles` y `/authorization/policies` | `AuthorizationService` |
 
 ## Autenticación y sesión
@@ -160,7 +160,8 @@ Configuración:
   al cambiar el filtro se recarga el listado. Incluye exportación y acciones condicionadas por
   permisos.
 - **Roles de usuarios** (`/admin/roles-usuarios`): listado y alta de asignaciones con selects de
-  usuario y rol; edición limitada a la fecha de inicio; revocación con confirmación; exportación.
+  usuario y rol; edición de rol y fecha de inicio; habilitación de asignaciones revocadas;
+  revocación con confirmación; exportación.
 - **Configuración** (`/admin/configuracion`): tema global y ubicación del menú. Solo los roles con
   `update` sobre `/admin/configuracion` pueden guardar; el resto ve un aviso.
 

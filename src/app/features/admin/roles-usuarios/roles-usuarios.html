@@ -63,7 +63,7 @@
       <th pSortableColumn="rol" style="min-width: 10rem">Rol <p-sortIcon field="rol" /></th>
       <th pSortableColumn="fechaInicio" style="min-width: 10rem">Fecha inicio <p-sortIcon field="fechaInicio" /></th>
       <th pSortableColumn="estado" style="min-width: 10rem">Estado <p-sortIcon field="estado" /></th>
-      <th style="min-width: 10rem"></th>
+      <th style="min-width: 12rem"></th>
     </tr>
   </ng-template>
   <ng-template #body let-asignacion>
@@ -84,23 +84,36 @@
         />
       </td>
       <td>
-        <p-button
-          icon="pi pi-pencil"
-          class="mr-2"
-          [rounded]="true"
-          [outlined]="true"
-          *appHasPermission="'update'"
-          (onClick)="editAsignacion(asignacion)"
-        />
-        <p-button
-          icon="pi pi-trash"
-          severity="danger"
-          [rounded]="true"
-          [outlined]="true"
-          [disabled]="!asignacion.esActivo"
-          *appHasPermission="'delete'"
-          (onClick)="revocarAsignacion(asignacion)"
-        />
+        @if (asignacion.esActivo) {
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            [rounded]="true"
+            [outlined]="true"
+            *appHasPermission="'update'"
+            (onClick)="editAsignacion(asignacion)"
+          />
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            [rounded]="true"
+            [outlined]="true"
+            *appHasPermission="'delete'"
+            (onClick)="revocarAsignacion(asignacion)"
+          />
+        } @else {
+          <p-button
+            label="Habilitar"
+            icon="pi pi-replay"
+            severity="success"
+            size="small"
+            [text]="true"
+            [loading]="habilitandoId === asignacion.id"
+            [disabled]="habilitandoId !== null && habilitandoId !== asignacion.id"
+            *appHasPermission="'update'"
+            (onClick)="habilitarAsignacion(asignacion)"
+          />
+        }
       </td>
     </tr>
   </ng-template>
@@ -144,19 +157,17 @@
         optionValue="id"
         [editable]="false"
         placeholder="Seleccioná un rol"
-        [disabled]="!esNueva"
         filter
         [filterFields]="['label']"
         fluid
       />
-      @if (submitted && esNueva && !asignacion.idRol) {
+      @if (submitted && !asignacion.idRol) {
         <small class="text-red-500">El rol es obligatorio.</small>
       }
     </div>
     @if (!esNueva) {
       <p-message severity="info" size="small" variant="simple">
-        En modo edición solo puede ajustarse la fecha de inicio: para cambiar el rol
-        revoqué la asignación y creá una nueva.
+        Podés cambiar el rol y la fecha de inicio. El usuario de la asignación no se modifica.
       </p-message>
     }
     <div>

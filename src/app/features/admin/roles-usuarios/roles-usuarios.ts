@@ -145,6 +145,7 @@ export class RolesUsuarios {
   protected submitted = false;
   protected guardando = false;
   protected revocando = false;
+  protected habilitandoId: string | null = null;
   protected seleccionados: RolUsuarioRow[] | null = null;
   protected asignacion: AsignacionModel = asignacionVacia();
   protected esNueva = false;
@@ -165,6 +166,7 @@ export class RolesUsuarios {
   }
 
   protected editAsignacion(row: RolUsuarioRow): void {
+    if (!row.esActivo) return;
     this.asignacion = {
       id: row.id,
       idUsuario: row.idUsuario,
@@ -184,7 +186,8 @@ export class RolesUsuarios {
   protected saveAsignacion(): void {
     this.submitted = true;
 
-    if (this.esNueva && (!this.asignacion.idUsuario || !this.asignacion.idRol)) return;
+    if (!this.asignacion.idRol) return;
+    if (this.esNueva && !this.asignacion.idUsuario) return;
 
     this.guardando = true;
     const fechaInicio = this.asignacion.fechaInicio?.toISOString();
@@ -223,7 +226,9 @@ export class RolesUsuarios {
       return;
     }
 
-    const patch: { fechaInicio?: string } = {};
+    const patch: { idRol: string; fechaInicio?: string } = {
+      idRol: this.asignacion.idRol,
+    };
     if (fechaInicio) patch.fechaInicio = fechaInicio;
 
     this.rolesUsuariosService.actualizar(this.asignacion.id as string, patch).subscribe({
@@ -234,7 +239,7 @@ export class RolesUsuarios {
         this.messageService.add({
           severity: "success",
           summary: "Operación exitosa",
-          detail: `Asignación de rol actualizada (${actualizada.id.slice(0, 8)}…)`,
+          detail: `Asignación de rol actualizada para ${this.nombreDeUsuario(actualizada.idUsuario)}`,
           life: 3000,
         });
         this.asignacion = asignacionVacia();
@@ -247,6 +252,40 @@ export class RolesUsuarios {
           summary: "Error",
           detail: this.extractErrorMessage(error),
           life: 5000,
+        });
+      },
+    });
+  }
+
+  protected habilitarAsignacion(row: RolUsuarioRow): void {
+    this.confirmationService.confirm({
+      message: `¿Habilitar nuevamente el rol ${row.rol} al usuario ${row.usuario || row.email}? Se iniciará una nueva vigencia desde ahora.`,
+      header: "Confirmar",
+      icon: "pi pi-check-circle",
+      acceptLabel: "Sí",
+      rejectLabel: "No",
+      accept: () => {
+        this.habilitandoId = row.id;
+        this.rolesUsuariosService.habilitar(row.id).subscribe({
+          next: () => {
+            this.habilitandoId = null;
+            this.messageService.add({
+              severity: "success",
+              summary: "Operación exitosa",
+              detail: `Rol ${row.rol} habilitado`,
+              life: 3000,
+            });
+            this.asignaciones.reload();
+          },
+          error: (error: unknown) => {
+            this.habilitandoId = null;
+            this.messageService.add({
+              severity: "error",
+              summary: "Error",
+              detail: this.extractErrorMessage(error),
+              life: 5000,
+            });
+          },
         });
       },
     });
@@ -344,7 +383,7 @@ export class RolesUsuarios {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403) return "No tenés permiso para gestionar roles de usuarios.";
-      if (error.status === 409) return "El usuario ya tiene asignado ese rol (o ya está revocado).";
+      if (error.status === 409) return "La operación entra en conflicto con el estado actual de la asignación.";
     }
     return "Ocurrió un error inesperado. Intentá de nuevo.";
   }

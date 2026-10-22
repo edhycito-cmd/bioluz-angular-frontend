@@ -60,6 +60,13 @@ export class RolesUsuariosService {
       .pipe(map((res) => res.data));
   }
 
+  /** Habilita una asignación revocada: nueva vigencia, esActivo = true y alta en Casbin. */
+  habilitar(id: string): Observable<RolUsuario> {
+    return this.http
+      .patch<ApiEnvelope<RolUsuario>>(`${this.baseUrl}/${id}/habilitar`, {})
+      .pipe(map((res) => res.data));
+  }
+
   /** Revoca la asignación: fechaFin = hoy, esActivo = false y baja el rol en Casbin. */
   revocar(id: string): Observable<RolUsuario> {
     return this.http
