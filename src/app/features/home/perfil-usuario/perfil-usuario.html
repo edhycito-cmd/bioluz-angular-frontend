@@ -67,6 +67,112 @@
       </dl>
     </div>
   }
+
+  <div class="card max-w-2xl mt-6">
+    <div class="font-semibold text-xl mb-6">Cambiar contraseña</div>
+
+    <form
+      (submit)="onSubmitPassword($event)"
+      novalidate
+      class="flex flex-col gap-5"
+    >
+      <div class="flex flex-col gap-2">
+        <label for="currentPassword" class="text-sm font-medium">
+          Contraseña actual
+        </label>
+        <input
+          pInputText
+          id="currentPassword"
+          type="password"
+          autocomplete="current-password"
+          [formField]="passwordForm.currentPassword"
+          class="w-full"
+        />
+        @let currentField = passwordForm.currentPassword();
+        @if (currentField.touched() && currentField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            <ul class="m-0 pl-4">
+              @for (error of currentField.errors(); track error.kind) {
+                <li>{{ error.message }}</li>
+              }
+            </ul>
+          </p-message>
+        }
+        <p class="text-sm text-muted-color m-0">
+          ¿Olvidaste tu contraseña? Contactá al administrador para restablecerla.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="newPassword" class="text-sm font-medium">
+          Nueva contraseña
+        </label>
+        <input
+          pInputText
+          id="newPassword"
+          type="password"
+          autocomplete="new-password"
+          [formField]="passwordForm.newPassword"
+          class="w-full"
+        />
+        @let newField = passwordForm.newPassword();
+        @if (newField.touched() && newField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            <ul class="m-0 pl-4">
+              @for (error of newField.errors(); track error.kind) {
+                <li>{{ error.message }}</li>
+              }
+            </ul>
+          </p-message>
+        }
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="verifyPassword" class="text-sm font-medium">
+          Verificar contraseña
+        </label>
+        <input
+          pInputText
+          id="verifyPassword"
+          type="password"
+          autocomplete="new-password"
+          [formField]="passwordForm.verifyPassword"
+          class="w-full"
+        />
+        @let verifyField = passwordForm.verifyPassword();
+        @if (verifyField.touched() && verifyField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            <ul class="m-0 pl-4">
+              @for (error of verifyField.errors(); track error.kind) {
+                <li>{{ error.message }}</li>
+              }
+            </ul>
+          </p-message>
+        }
+      </div>
+
+      @if (passwordGuardada()) {
+        <p-message severity="success" size="small" variant="simple">
+          Contraseña actualizada correctamente.
+        </p-message>
+      }
+
+      @if (passwordError()) {
+        <p-message severity="error" size="small" variant="simple">
+          {{ passwordError() }}
+        </p-message>
+      }
+
+      <button
+        pButton
+        type="submit"
+        label="Guardar cambios"
+        class="w-fit"
+        [loading]="guardandoPassword()"
+        [disabled]="guardandoPassword()"
+      ></button>
+    </form>
+  </div>
 } @else {
   <div class="card max-w-2xl">
     @if (error()) {

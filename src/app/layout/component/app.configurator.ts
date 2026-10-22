@@ -67,6 +67,7 @@ import { ThemeService } from "../service/theme.service";
           [options]="theme.presets"
           [ngModel]="theme.selectedPreset()"
           (ngModelChange)="onPresetChange($event)"
+          [ngModelOptions]="{ standalone: true }"
           [allowEmpty]="false"
           size="small"
         />

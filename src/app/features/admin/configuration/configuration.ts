@@ -1,24 +1,34 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   computed,
   inject,
   signal,
 } from "@angular/core";
 import { HttpErrorResponse } from "@angular/common/http";
+import { FormsModule } from "@angular/forms";
 import { firstValueFrom } from "rxjs";
 import { FormField, form, submit } from "@angular/forms/signals";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { CheckboxModule } from "@openng/optimus-ui/checkbox";
 import { MessageModule } from "@openng/optimus-ui/message";
+import { SelectModule } from "@openng/optimus-ui/select";
 import { AppConfigurator } from "../../../layout/component/app.configurator";
 import { LayoutService } from "../../../layout/service/layout.service";
 import { ThemeService } from "../../../layout/service/theme.service";
 import { PermissionsService } from "../../../core/services/permissions.service";
 
+type MenuMode = "static" | "overlay";
+
 interface ConfigurationModel {
   darkTheme: boolean;
-  overlayMenu: boolean;
+  menuMode: MenuMode;
+}
+
+interface OpcionMenuMode {
+  label: string;
+  value: MenuMode;
 }
 
 @Component({
@@ -27,14 +37,16 @@ interface ConfigurationModel {
   imports: [
     AppConfigurator,
     FormField,
+    FormsModule,
     CheckboxModule,
+    SelectModule,
     ButtonModule,
     MessageModule,
   ],
   templateUrl: "./configuration.html",
   styleUrl: "./configuration.scss",
 })
-export class Configuration {
+export class Configuration implements OnInit {
   private readonly layoutService = inject(LayoutService);
   private readonly themeService = inject(ThemeService);
   private readonly permissions = inject(PermissionsService);
@@ -44,9 +56,16 @@ export class Configuration {
     this.permissions.can("/admin/configuracion", "update"),
   );
 
+  protected readonly opcionesMenu: OpcionMenuMode[] = [
+    { label: "Estático", value: "static" },
+    { label: "Superpuesto", value: "overlay" },
+  ];
+
   protected readonly model = signal<ConfigurationModel>({
     darkTheme: this.layoutService.layoutConfig().darkTheme,
-    overlayMenu: this.layoutService.layoutConfig().menuMode === "overlay",
+    menuMode: this.normalizarMenuMode(
+      this.layoutService.layoutConfig().menuMode,
+    ),
   });
 
   protected readonly configForm = form(this.model, () => {});
@@ -54,6 +73,26 @@ export class Configuration {
   protected readonly guardando = signal(false);
   protected readonly guardado = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    // La página siempre parte del valor persistido en la BD, sin depender de
+    // cuándo terminó de aplicarse el tema durante el arranque de la SPA.
+    this.themeService.reload().subscribe((tema) => {
+      if (!tema) return;
+
+      this.model.set({
+        darkTheme: tema.darkTheme,
+        menuMode: this.normalizarMenuMode(tema.menuMode),
+      });
+    });
+  }
+
+  protected onMenuModeChange(menuMode: string): void {
+    this.model.update((model) => ({
+      ...model,
+      menuMode: this.normalizarMenuMode(menuMode),
+    }));
+  }
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
@@ -63,11 +102,11 @@ export class Configuration {
     this.error.set(null);
 
     submit(this.configForm, async () => {
-      const { darkTheme, overlayMenu } = this.model();
+      const { darkTheme, menuMode } = this.model();
       const config = {
         ...this.layoutService.layoutConfig(),
         darkTheme,
-        menuMode: overlayMenu ? "overlay" : "static",
+        menuMode: this.normalizarMenuMode(menuMode),
       };
 
       this.guardando.set(true);
@@ -81,6 +120,10 @@ export class Configuration {
       }
       return undefined;
     });
+  }
+
+  private normalizarMenuMode(menuMode: string): MenuMode {
+    return menuMode === "overlay" ? "overlay" : "static";
   }
 
   private extractErrorMessage(error: unknown): string {

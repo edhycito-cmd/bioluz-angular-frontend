@@ -235,7 +235,7 @@ export class ThemeService {
 
   /** Carga el tema global y lo aplica. No bloquea el arranque si falla. */
   load(): Observable<void> {
-    return this.configuracionService.obtenerTema().pipe(
+    return this.fetchTema().pipe(
       tap((tema) => {
         if (!tema) return;
         // Se difiere un tick para que Optimus cargue su tema base antes de
@@ -243,9 +243,27 @@ export class ThemeService {
         setTimeout(() => this.apply(tema));
       }),
       map(() => undefined),
+    );
+  }
+
+  /**
+   * Vuelve a leer el tema desde la base de datos y lo aplica de inmediato.
+   * La usa la página de configuración para mostrar siempre el valor persistido,
+   * sin depender del orden en que se ejecutó el inicializador de la app.
+   */
+  reload(): Observable<TemaConfig | null> {
+    return this.fetchTema().pipe(
+      tap((tema) => {
+        if (tema) this.apply(tema);
+      }),
+    );
+  }
+
+  private fetchTema(): Observable<TemaConfig | null> {
+    return this.configuracionService.obtenerTema().pipe(
       catchError((error: unknown) => {
-        console.warn('[Theme] No se pudo cargar el tema global', error);
-        return of(undefined);
+        console.warn('[Theme] No se pudo obtener el tema global', error);
+        return of(null);
       }),
     );
   }

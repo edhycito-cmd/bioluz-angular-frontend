@@ -17,6 +17,18 @@ export interface RegistrarUsuarioConPersonaResult {
   persona: unknown;
 }
 
+/** Body de PATCH /usuario/perfil/contrasena. */
+export interface CambiarContrasenaPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/** Respuesta de PATCH /usuario/perfil/contrasena. */
+export interface CambiarContrasenaResult {
+  success: boolean;
+  user: { id: string; email: string; name: string };
+}
+
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
@@ -45,5 +57,17 @@ export class UsersService {
       `${this.baseUrl}/registrar-con-persona`,
       payload,
     );
+  }
+
+  /** Cambia la contraseña del usuario autenticado (PATCH /usuario/perfil/contrasena). */
+  cambiarContrasena(
+    payload: CambiarContrasenaPayload,
+  ): Observable<CambiarContrasenaResult> {
+    return this.http
+      .patch<ApiEnvelope<CambiarContrasenaResult>>(
+        `${this.baseUrl}/perfil/contrasena`,
+        payload,
+      )
+      .pipe(map((res) => res.data));
   }
 }
