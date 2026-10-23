@@ -15,8 +15,9 @@ está en español.
 - Login email/password y registro con confirmación de contraseña; ambos formularios validan en
   cliente y muestran los errores del backend en español.
 - Login con **Google Identity Services** (recomendado) y soporte del flujo OAuth redirect.
-- Sesión con access + refresh token en `localStorage`, rehidratación al recargar y refresh
-  automático con cola para peticiones concurrentes.
+- Sesión con **access token solo en memoria** y **refresh token en cookie HttpOnly**; la sesión
+  se rehidrata al recargar con `POST /auth/refresh` y el refresh se serializa entre pestañas con
+  Web Locks.
 - Menú lateral dinámico desde `GET /api/menus/arbol`; perfil y cierre de sesión desde el avatar
   del topbar. El perfil ya no aparece como ítem del menú lateral.
 - Guard de autenticación, guard de invitados y guard de permisos por ruta; directiva
@@ -49,7 +50,7 @@ está en español.
 | `/` | Redirige | Redirige a `/perfil` |
 | `/login` | `guestGuard` | Login email/password + Google |
 | `/register` | `guestGuard` | Alta de cuenta con confirmación de contraseña |
-| `/auth/callback` | Sin guard | Retorno del flujo OAuth redirect de Google; limpia tokens de la URL |
+| `/auth/callback` | Sin guard | Retorno del flujo OAuth redirect de Google; canjea la cookie de sesión (sin tokens en la URL) |
 | `/dashboard` | `authGuard` (layout) | Dashboard con widgets de ejemplo |
 | `/perfil` | `authGuard` (layout) | Página por defecto; datos de usuario/persona y cambio de contraseña |
 | `/admin` | `authGuard` (layout) | Redirige a `/admin/usuarios` |
@@ -87,23 +88,33 @@ El backend expone todo bajo `/api` y envuelve las respuestas exitosas en
 
 ## Autenticación y sesión
 
-- `TokenStorageService` guarda `accessToken` y `refreshToken` en `localStorage`
-  (`ncl_access_token`, `ncl_refresh_token`). Es el único punto a cambiar si se migra a cookies
-  `httpOnly`.
+- `TokenStorageService` mantiene **solo el access token en memoria**. No se guardan tokens en
+  `localStorage` ni `sessionStorage`. En la primera carga tras actualizar desde la versión
+  anterior, elimina las claves legacy `ncl_access_token`/`ncl_refresh_token`.
+- El **refresh token** vive en una cookie `HttpOnly` que administra el backend; JavaScript no
+  puede leerla. `AuthService` usa `withCredentials` en login, registro, Google, refresh y logout.
 - `authInterceptor` agrega `Authorization: Bearer <accessToken>` salvo en endpoints públicos de
   autenticación.
-- `authGuard` rehidrata la sesión al recargar: si hay refresh token pero el signal de perfil está
-  vacío, llama a `GET /usuario/perfil` antes de decidir si redirige a `/login`.
+- `authGuard` rehidrata la sesión al recargar o abrir una pestaña: si no hay perfil en memoria,
+  llama a `POST /auth/refresh` (cookie) y luego a `GET /usuario/perfil` antes de decidir si
+  redirige a `/login`.
 - `errorInterceptor` reacciona a **401** en endpoints protegidos: ejecuta un único
-  `POST /auth/refresh` aunque fallen varias peticiones a la vez, encola las demás, reintenta la
-  petición original con el token nuevo y hace logout local si el refresh falla.
+  `POST /auth/refresh` por pestaña aunque fallen varias peticiones a la vez, propaga el error a
+  todas las peticiones en espera si el refresh falla (sin dejarlas colgadas), reintenta la
+  petición original con el token nuevo y limpia la sesión/navega a `/login` si corresponde.
+  `AuthService` serializa además el refresh entre pestañas con **Web Locks** (HTTPS o localhost)
+  para evitar que dos pestañas usen simultáneamente el mismo refresh token rotado. En HTTP puro
+  fuera de localhost el navegador no expone Web Locks; por eso producción debe usar HTTPS.
 - Un **403** (por ejemplo, usuario sin rol vigente) no dispara refresh; el error se muestra en la
   pantalla que hizo la petición.
-- El botón **Cerrar sesión** del avatar limpia los tokens y los permisos en memoria y navega a
-  `/login`. En el estado actual no invoca `POST /auth/logout`; el refresh token del backend
-  expira o se revoca desde otro flujo.
-- El checkbox **Recordarme** del login se envía al backend, pero hoy no modifica la duración de
-  la sesión (el backend usa la expiración configurada para el refresh token).
+- El botón **Cerrar sesión** del avatar limpia el estado local, invoca `POST /auth/logout` para
+  revocar la sesión y borrar la cookie, y navega a `/login`.
+- El checkbox **Recordarme** del login se envía al backend: con `true` la sesión y la cookie son
+  persistentes (`JWT_REFRESH_EXPIRES_IN`, por defecto 30 días); con `false` son de navegador
+  (`JWT_REFRESH_SESSION_EXPIRES_IN`, por defecto 12 horas).
+- En producción, la SPA y la API deben servirse por HTTPS y `CORS_ORIGINS` debe contener el origen
+  exacto de la SPA. Si están en sitios distintos, configurar `AUTH_COOKIE_SAMESITE=none` y
+  `AUTH_COOKIE_SECURE=true`.
 - El formulario de perfil valida la nueva contraseña (8–64 caracteres, mayúscula, minúscula,
   número, carácter especial, sin espacios) y exige que la confirmación coincida.
 
@@ -112,12 +123,14 @@ El backend expone todo bajo `/api` y envuelve las respuestas exitosas en
 Hay dos caminos soportados por el backend:
 
 1. **Google Identity Services (recomendado)** — `GoogleSignInService` renderiza el botón oficial,
-   recibe un ID token (`credential`) y lo envía junto a un `nonce` a `POST /api/auth/google`. El
-   backend valida firma, `aud`, `iss`, `exp`, `email_verified` y nonce, y devuelve los JWT propios.
-   No hay tokens en la URL.
+   recibe un ID token (`credential`) y lo envía junto a un `nonce` y el valor de `rememberMe` a
+   `POST /api/auth/google`. El backend valida firma, `aud`, `iss`, `exp`, `email_verified` y
+   nonce, deja el refresh token en cookie HttpOnly y devuelve el access token. No hay tokens en
+   la URL.
 2. **OAuth redirect** — `GET /api/auth/google` → Google → callback del backend →
-   `/auth/callback?accessToken=...&refreshToken=...`. `GoogleCallback` lee los tokens, **limpia la
-   URL**, carga perfil/permisos y navega a **`/perfil`**.
+   `/auth/callback`. El backend deja la cookie HttpOnly y redirige sin tokens en la URL;
+   `GoogleCallback` canjea la cookie con `POST /auth/refresh`, carga perfil/permisos y navega a
+   **`/perfil`**. Este flujo usa sesión de navegador (sin `rememberMe`).
 
 Configuración:
 

@@ -100,7 +100,11 @@
         <!-- Remember / Forgot -->
         <div class="flex flex-wrap items-center justify-between gap-2 -mt-1">
           <div class="flex items-center gap-2">
-            <p-checkbox inputId="remember" [formField]="loginForm.rememberMe" />
+            <p-checkbox
+              inputId="remember"
+              [binary]="true"
+              [formField]="loginForm.rememberMe"
+            />
 
             <label for="remember" class="text-surface-700 dark:text-surface-300 text-xs">
               Recordarme

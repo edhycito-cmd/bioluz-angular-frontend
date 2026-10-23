@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, switchMap, tap } from 'rxjs';
+import { Observable, firstValueFrom, from, switchMap, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TokenStorageService } from './token-storage.service';
@@ -38,19 +38,25 @@ export class AuthService {
 
   register(payload: RegisterPayload): Observable<AuthResult> {
     return this.http
-      .post<ApiEnvelope<AuthResult>>(`${environment.apiUrl}/auth/register`, payload)
+      .post<ApiEnvelope<AuthResult>>(
+        `${environment.apiUrl}/auth/register`,
+        payload,
+        { withCredentials: true },
+      )
       .pipe(
         map((res) => res.data),
         tap((result) => this.startSession(result)),
-        // Encadenado (no fire-and-forget): el observable no completa hasta que
-        // currentUser esté seteado, así los guards no leen un estado a medio camino.
         switchMap((result) => this.loadProfile().pipe(map(() => result))),
       );
   }
 
   login(payload: LoginPayload): Observable<AuthResult> {
     return this.http
-      .post<ApiEnvelope<AuthResult>>(`${environment.apiUrl}/auth/login`, payload)
+      .post<ApiEnvelope<AuthResult>>(
+        `${environment.apiUrl}/auth/login`,
+        payload,
+        { withCredentials: true },
+      )
       .pipe(
         map((res) => res.data),
         tap((result) => this.startSession(result)),
@@ -59,12 +65,16 @@ export class AuthService {
   }
 
   /**
-   * Login con Google (Identity Services): valida el ID token en el backend
-   * y continúa igual que login(): guarda tokens y carga perfil + permisos.
+   * Login con Google (Identity Services): valida el ID token en el backend.
+   * El refresh token queda en cookie HttpOnly; el access token en memoria.
    */
   loginWithGoogle(payload: GoogleLoginPayload): Observable<AuthResult> {
     return this.http
-      .post<ApiEnvelope<AuthResult>>(`${environment.apiUrl}/auth/google`, payload)
+      .post<ApiEnvelope<AuthResult>>(
+        `${environment.apiUrl}/auth/google`,
+        payload,
+        { withCredentials: true },
+      )
       .pipe(
         map((res) => res.data),
         tap((result) => this.startSession(result)),
@@ -73,31 +83,63 @@ export class AuthService {
   }
 
   /**
-   * Cierra la sesión iniciada por el flujo OAuth redirect: el backend redirige
-   * a `/auth/callback` con los tokens en la query. El componente de callback
-   * los entrega acá, se guardan y se carga el perfil antes de navegar.
+   * Retorno del flujo OAuth redirect de Google: el backend dejó la sesión en
+   * una cookie HttpOnly. No hay tokens en la URL; se canjea la cookie por un
+   * access token nuevo y se carga el perfil.
    */
-  completeGoogleRedirect(tokens: AuthTokens): Observable<UserProfile> {
-    this.startSession(tokens);
-    return this.loadProfile();
+  completeGoogleRedirect(): Observable<UserProfile> {
+    return this.restoreSession();
+  }
+
+  /**
+   * Rehidrata la sesión al recargar o abrir una pestaña nueva. Si no existe
+   * cookie de refresh válida, el observable falla y el guard manda a /login.
+   */
+  restoreSession(): Observable<UserProfile> {
+    return this.refreshTokens().pipe(switchMap(() => this.loadProfile()));
   }
 
   /** Deja el estado de sesión anterior limpio antes de cargar uno nuevo. */
   private startSession(tokens: AuthTokens): void {
     this._profile.set(null);
     this.permissions.clear();
-    this.tokenStorage.setTokens(tokens);
+    this.tokenStorage.setAccessToken(tokens.accessToken);
   }
 
-  /** Usado por el interceptor de refresh; no toca el signal de currentUser. */
+  /** Canjea la cookie HttpOnly por un nuevo access token y rota el refresh. */
   refreshTokens(): Observable<AuthTokens> {
-    const refreshToken = this.tokenStorage.getRefreshToken();
-    return this.http
-      .post<ApiEnvelope<AuthTokens>>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
+    const request$ = this.http
+      .post<ApiEnvelope<AuthTokens>>(
+        `${environment.apiUrl}/auth/refresh`,
+        {},
+        { withCredentials: true },
+      )
       .pipe(
         map((res) => res.data),
-        tap((tokens) => this.tokenStorage.setTokens(tokens)),
+        tap((tokens) => this.tokenStorage.setAccessToken(tokens.accessToken)),
       );
+
+    // El refresh token se rota en cada uso. Si dos pestañas refrescan a la vez
+    // con la misma cookie, la segunda usaría un token ya rotado y el backend
+    // revocaría la sesión por posible reuso. Web Locks serializa el refresh
+    // entre pestañas del mismo navegador (HTTPS/localhost).
+    const locks = (
+      globalThis.navigator as
+        | (Navigator & {
+            locks?: {
+              request<T>(name: string, callback: () => Promise<T>): Promise<T>;
+            };
+          })
+        | undefined
+    )?.locks;
+
+    if (!locks?.request) {
+      return request$;
+    }
+
+    return from(
+      locks.request('muspa-auth-refresh', () => firstValueFrom(request$)),
+    );
   }
 
   loadProfile(): Observable<UserProfile> {
@@ -125,7 +167,24 @@ export class AuthService {
       .pipe(map((res) => res.data));
   }
 
+  /**
+   * Limpia el estado local de inmediato y pide al backend revocar la sesión y
+   * borrar la cookie HttpOnly. No se espera la respuesta para no bloquear la UI;
+   * si falla la red, el access token local ya quedó inutilizable.
+   */
   logout(): void {
+    this.clearLocalSession();
+
+    this.http
+      .post<ApiEnvelope<{ message: string }>>(
+        `${environment.apiUrl}/auth/logout`,
+        {},
+        { withCredentials: true },
+      )
+      .subscribe({ error: () => undefined });
+  }
+
+  private clearLocalSession(): void {
     this.tokenStorage.clear();
     this._profile.set(null);
     // Descarta las acciones Casbin de la sesión cerrada.

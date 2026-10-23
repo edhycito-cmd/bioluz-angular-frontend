@@ -1,35 +1,45 @@
-import { Injectable } from '@angular/core';
-import { AuthTokens } from '../models/auth.model';
-
-const ACCESS_TOKEN_KEY = 'ncl_access_token';
-const REFRESH_TOKEN_KEY = 'ncl_refresh_token';
+import { Injectable, signal } from '@angular/core';
 
 /**
- * Encapsula el acceso a localStorage para los tokens. Mantenerlo en un único
- * servicio permite cambiar la estrategia de persistencia (ej. cookies httpOnly
- * servidas por un BFF) sin tocar el resto de la app.
+ * El access token vive únicamente en memoria. Al recargar la página se
+ * recupera mediante el refresh token HttpOnly que administra el backend.
+ *
+ * Esto evita dejar credenciales persistentes en `localStorage`/`sessionStorage`,
+ * donde un XSS podría exfiltrarlas. El refresh token nunca es accesible desde JS.
  */
+const LEGACY_TOKEN_KEYS = ['ncl_access_token', 'ncl_refresh_token'];
+
 @Injectable({ providedIn: 'root' })
 export class TokenStorageService {
+  private readonly _accessToken = signal<string | null>(null);
+
+  constructor() {
+    // Limpieza de migración: versiones anteriores guardaban los tokens en
+    // localStorage. Al desplegar esta versión hay que borrarlos para que no
+    // queden credenciales expuestas a XSS.
+    try {
+      for (const key of LEGACY_TOKEN_KEYS) {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      }
+    } catch {
+      // Storage deshabilitado (modo privado, políticas del navegador): no aplica.
+    }
+  }
+
   getAccessToken(): string | null {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return this._accessToken();
   }
 
-  getRefreshToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
-  }
-
-  setTokens(tokens: AuthTokens): void {
-    localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+  setAccessToken(accessToken: string): void {
+    this._accessToken.set(accessToken);
   }
 
   clear(): void {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    this._accessToken.set(null);
   }
 
-  hasSession(): boolean {
-    return this.getRefreshToken() !== null;
+  hasToken(): boolean {
+    return this._accessToken() !== null;
   }
 }

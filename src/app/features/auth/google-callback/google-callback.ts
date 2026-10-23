@@ -22,14 +22,12 @@ const ERROR_MESSAGES: Readonly<Record<string, string>> = {
  * Punto de llegada del flujo OAuth 2.0 con redirect
  * (`GET /api/auth/google` → Google → `/api/auth/google/callback`).
  *
- * El backend redirige con `?accessToken=...&refreshToken=...` o `?error=codigo`.
- * Este componente lee esos parámetros, **limpia la URL inmediatamente** (para
- * que los tokens no queden en el historial ni se compartan por accidente),
- * guarda la sesión, carga el perfil y navega a /perfil.
+ * El backend deja el refresh token en una cookie HttpOnly y redirige sin
+ * tokens en la URL (`?error=codigo` solo si falló). Este componente canjea la
+ * cookie por un access token en memoria, carga el perfil y navega a /perfil.
  *
  * El flujo recomendado es el botón de Google Identity Services (POST
- * /auth/google), que no pasa tokens por la URL; este callback existe para que
- * el flujo redirect siga siendo funcional.
+ * /auth/google); este callback mantiene operativo el flujo redirect.
  */
 @Component({
   selector: 'app-google-callback',
@@ -51,26 +49,18 @@ export class GoogleCallback implements OnInit {
 
   private async completeLogin(): Promise<void> {
     const params = this.route.snapshot.queryParamMap;
-    const accessToken = params.get('accessToken');
-    const refreshToken = params.get('refreshToken');
     const errorCode = params.get('error');
 
-    // Los tokens nunca deben quedar visibles en la barra de direcciones.
+    // Limpia cualquier parámetro (incluido un posible código de error) de la URL.
     this.location.replaceState('/auth/callback');
 
     if (errorCode) {
       this.fail(errorCode);
       return;
     }
-    if (!accessToken || !refreshToken) {
-      this.fail('missing_tokens');
-      return;
-    }
 
     try {
-      await firstValueFrom(
-        this.authService.completeGoogleRedirect({ accessToken, refreshToken }),
-      );
+      await firstValueFrom(this.authService.completeGoogleRedirect());
       await this.router.navigate(['/perfil'], { replaceUrl: true });
     } catch {
       // No dejamos una sesión a medio crear si falló la carga del perfil.

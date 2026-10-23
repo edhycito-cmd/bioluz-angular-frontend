@@ -125,7 +125,11 @@ export class Login {
     this.googleLoading.set(true);
     try {
       await firstValueFrom(
-        this.authService.loginWithGoogle({ credential, nonce }),
+        this.authService.loginWithGoogle({
+          credential,
+          nonce,
+          rememberMe: this.model().rememberMe,
+        }),
       );
       await this.router.navigate(["/perfil"], { replaceUrl: true });
     } catch (error) {

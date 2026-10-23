@@ -1,11 +1,15 @@
 import { User } from './user.model';
 
+/**
+ * Respuesta de /auth/login, /auth/register, /auth/google y /auth/refresh.
+ * El refresh token no se expone al JavaScript: viaja en una cookie HttpOnly.
+ */
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
+  rememberMe: boolean;
 }
 
-/** Coincide con AuthResult del backend (respuesta de /auth/register y /auth/login) */
+/** Coincide con PublicAuthResult del backend (login/registro/Google). */
 export interface AuthResult extends AuthTokens {
   user: User;
 }
@@ -28,6 +32,8 @@ export interface GoogleLoginPayload {
   credential: string;
   /** Desafío anti-replay incluido como claim `nonce` del ID token. */
   nonce: string;
+  /** Persistir la sesión (cookie de larga duración) o no. */
+  rememberMe: boolean;
 }
 
 /** Envoltorio de respuesta que agrega el ResponseInterceptor global del backend */
