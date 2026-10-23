@@ -1,5 +1,5 @@
 <p-toast />
-<p-confirmdialog [style]="{ width: '450px' }" />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
@@ -30,10 +30,12 @@
 
 <p-table
   #dt
+  styleClass="mobile-card-table"
   [value]="filas() ?? []"
   [columns]="cols"
   [rows]="10"
   [paginator]="true"
+  [scrollable]="true"
   dataKey="id"
   [rowHover]="true"
   [rowsPerPageOptions]="[10, 20, 30]"
@@ -45,11 +47,11 @@
   [(selection)]="seleccionados"
 >
   <ng-template #caption>
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h5 class="m-0">Gestionar Clasificadores</h5>
-      <p-iconfield>
+      <p-iconfield class="w-full sm:w-auto">
         <p-inputicon styleClass="pi pi-search" />
-        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+        <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
       </p-iconfield>
     </div>
   </ng-template>
@@ -71,11 +73,11 @@
       <td style="width: 3rem">
         <p-tableCheckbox [value]="clasificador" />
       </td>
-      <td>{{ clasificador.id }}</td>
-      <td>{{ clasificador.dominio }}</td>
-      <td>{{ clasificador.descripcion }}</td>
-      <td>{{ clasificador.orden }}</td>
-      <td>
+      <td data-label="ID">{{ clasificador.id }}</td>
+      <td data-label="Dominio">{{ clasificador.dominio }}</td>
+      <td data-label="Descripción">{{ clasificador.descripcion }}</td>
+      <td data-label="Orden">{{ clasificador.orden }}</td>
+      <td data-label="Estado">
         <p-tag
           [value]="clasificador.estado"
           [severity]="clasificador.esActivo ? 'success' : 'secondary'"
@@ -105,7 +107,7 @@
 
 <p-dialog
   [(visible)]="clasificadorDialog"
-  [style]="{ width: '450px' }"
+  [style]="{ width: 'min(450px, calc(100vw - 2rem))' }"
   [header]="esNuevo ? 'Nuevo Clasificador' : 'Editar Clasificador'"
   [modal]="true"
 >

@@ -56,7 +56,7 @@ const NOMBRES_COLORES: Readonly<Record<string, string>> = {
               [class.outline-primary]="
                 primaryColor.name === theme.selectedPrimaryColor()
               "
-              class="cursor-pointer w-5 h-5 rounded-full flex shrink-0 items-center justify-center outline-offset-1 shadow"
+              class="cursor-pointer w-8 h-8 rounded-full flex shrink-0 items-center justify-center outline-offset-1 shadow"
               [style]="{
                 'background-color':
                   primaryColor?.name === 'noir'
@@ -75,7 +75,7 @@ const NOMBRES_COLORES: Readonly<Record<string, string>> = {
               type="button"
               [title]="nombreColor(surface.name)"
               (click)="theme.setSurfaceColor(surface)"
-              class="cursor-pointer w-5 h-5 rounded-full flex shrink-0 items-center justify-center p-0 outline-offset-1"
+              class="cursor-pointer w-8 h-8 rounded-full flex shrink-0 items-center justify-center p-0 outline-offset-1"
               [class]="{
                 'outline outline-primary': theme.selectedSurfaceColor()
                   ? theme.selectedSurfaceColor() === surface.name
@@ -98,6 +98,7 @@ const NOMBRES_COLORES: Readonly<Record<string, string>> = {
           (ngModelChange)="onPresetChange($event)"
           [ngModelOptions]="{ standalone: true }"
           [allowEmpty]="false"
+          [fluid]="true"
           size="small"
         />
       </div>

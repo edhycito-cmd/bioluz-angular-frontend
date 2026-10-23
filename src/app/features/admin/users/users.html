@@ -1,5 +1,5 @@
 <p-toast />
-<p-confirmdialog [style]="{ width: '450px' }" />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
@@ -20,10 +20,12 @@
 
 <p-table
   #dt
+  styleClass="mobile-card-table"
   [value]="filas() ?? []"
   [columns]="cols"
   [rows]="10"
   [paginator]="true"
+  [scrollable]="true"
   dataKey="id"
   [rowHover]="true"
   [rowsPerPageOptions]="[10, 20, 30]"
@@ -35,11 +37,11 @@
   [(selection)]="seleccionados"
 >
   <ng-template #caption>
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h5 class="m-0">Gestionar Usuarios</h5>
-      <p-iconfield>
+      <p-iconfield class="w-full sm:w-auto">
         <p-inputicon styleClass="pi pi-search" />
-        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+        <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
       </p-iconfield>
     </div>
   </ng-template>
@@ -62,12 +64,12 @@
       <td style="width: 3rem">
         <p-tableCheckbox [value]="usuario" />
       </td>
-      <td style="min-width: 16rem">{{ usuario.nombres || '—' }}</td>
-      <td style="min-width: 12rem">{{ usuario.primerApellido || '—' }}</td>
-      <td style="min-width: 16rem">{{ usuario.email }}</td>
-      <td style="min-width: 10rem">{{ usuario.documento || '—' }}</td>
-      <td style="min-width: 10rem">{{ usuario.telefono || '—' }}</td>
-      <td style="min-width: 10rem">
+      <td data-label="Nombres" style="min-width: 16rem">{{ usuario.nombres || '—' }}</td>
+      <td data-label="Apellidos" style="min-width: 12rem">{{ usuario.primerApellido || '—' }}</td>
+      <td data-label="Correo" style="min-width: 16rem">{{ usuario.email }}</td>
+      <td data-label="Documento" style="min-width: 10rem">{{ usuario.documento || '—' }}</td>
+      <td data-label="Teléfono" style="min-width: 10rem">{{ usuario.telefono || '—' }}</td>
+      <td data-label="Estado" style="min-width: 10rem">
         <p-tag
           [value]="usuario.estado"
           [severity]="usuario.esActivo ? 'success' : 'danger'"
@@ -90,7 +92,7 @@
 
 <p-dialog
   [(visible)]="usuarioDialog"
-  [style]="{ width: '560px' }"
+  [style]="{ width: 'min(560px, calc(100vw - 2rem))' }"
   header="Nuevo Usuario"
   [modal]="true"
 >
@@ -111,7 +113,7 @@
       }
     </div>
     <div class="grid grid-cols-12 gap-4">
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="password" class="block font-bold mb-3">Contraseña</label>
         <div class="relative">
           <input
@@ -141,7 +143,7 @@
         }
       </div>
 
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="confirmPassword" class="block font-bold mb-3">Confirmar contraseña</label>
         <div class="relative">
           <input
@@ -173,25 +175,25 @@
     <span class="block font-bold">Datos de la persona</span>
 
     <div class="grid grid-cols-12 gap-4">
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="nombres" class="block font-bold mb-3">Nombres</label>
         <input type="text" pInputText id="nombres" [(ngModel)]="usuario.nombres" fluid />
         @if (nombresInvalido()) {
           <small class="text-red-500">Al menos 2 caracteres.</small>
         }
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="primerApellido" class="block font-bold mb-3">Primer apellido</label>
         <input type="text" pInputText id="primerApellido" [(ngModel)]="usuario.primerApellido" fluid />
         @if (primerApellidoInvalido()) {
           <small class="text-red-500">Al menos 2 caracteres.</small>
         }
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="segundoApellido" class="block font-bold mb-3">Segundo apellido</label>
         <input type="text" pInputText id="segundoApellido" [(ngModel)]="usuario.segundoApellido" fluid />
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="genero" class="block font-bold mb-3">Género</label>
         <p-select
           id="genero"
@@ -207,7 +209,7 @@
           <small class="text-red-500">El género es obligatorio.</small>
         }
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="tipoDocumento" class="block font-bold mb-3">Tipo de documento</label>
         <p-select
           id="tipoDocumento"
@@ -221,22 +223,22 @@
           fluid
         />
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="numeroDocumento" class="block font-bold mb-3">N° de documento</label>
         <input type="text" pInputText id="numeroDocumento" [(ngModel)]="usuario.numeroDocumento" fluid />
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="telefono" class="block font-bold mb-3">Teléfono</label>
         <input type="text" pInputText id="telefono" [(ngModel)]="usuario.telefono" fluid />
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="emailPersona" class="block font-bold mb-3">Correo de contacto</label>
         <input type="text" pInputText id="emailPersona" [(ngModel)]="usuario.email" fluid />
         @if (personaEmailInvalido()) {
           <small class="text-red-500">Ingresá un correo electrónico válido.</small>
         }
       </div>
-      <div class="col-span-6">
+      <div class="col-span-12 sm:col-span-6">
         <label for="fechaNacimiento" class="block font-bold mb-3">Fecha de nacimiento</label>
         <p-datepicker
           id="fechaNacimiento"

@@ -1,9 +1,9 @@
 <p-toast />
 <app-floating-configurator />
 
-<div class="min-h-screen w-full overflow-hidden bg-surface-50 dark:bg-surface-950 flex items-center justify-center">
+<div class="min-h-dvh w-full bg-surface-50 dark:bg-surface-950 flex items-center justify-center px-3 py-6 sm:py-8">
   <!-- Card wrapper -->
-  <div class="w-full max-w-[510px] p-[3px] rounded-[50px]" style="
+  <div class="w-full max-w-[510px] p-[3px] rounded-[28px] sm:rounded-[50px]" style="
       background: linear-gradient(
         180deg,
         var(--primary-color) 10%,
@@ -11,9 +11,9 @@
       );
     ">
     <!-- Card -->
-    <div class="w-full min-h-[495px] rounded-[47px] bg-surface-0 dark:bg-surface-900 px-8 sm:px-16 py-10">
+    <div class="w-full rounded-[25px] sm:rounded-[47px] bg-surface-0 dark:bg-surface-900 px-5 sm:px-16 py-8 sm:py-10 sm:min-h-[495px]">
       <!-- Header -->
-      <div class="text-center mb-7">
+      <div class="text-center mb-6 sm:mb-7">
 
         <!-- Logo -->
         <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-12 h-auto mx-auto mb-6">
@@ -52,7 +52,7 @@
           </label>
 
           <input pInputText type="email" id="email" placeholder="Ingresá tu correo electrónico" autocomplete="email"
-            [formField]="loginForm.email" class="w-full h-[30px] text-sm" />
+            [formField]="loginForm.email" class="w-full h-11 text-base sm:text-sm" />
 
           @if (loginForm.email().invalid() && loginForm.email().touched()) {
           <p-message severity="error" size="small" variant="simple">
@@ -72,7 +72,7 @@
           <div class="relative">
             <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Ingresá tu contraseña"
               autocomplete="current-password" [formField]="loginForm.password"
-              class="w-full h-[30px] text-sm login-password-input" />
+              class="w-full h-11 text-base sm:text-sm login-password-input" />
 
             <button type="button" class="login-password-toggle" (click)="alternarPassword()"
               [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Remember / Forgot -->
-        <div class="flex items-center justify-between -mt-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 -mt-1">
           <div class="flex items-center gap-2">
             <p-checkbox inputId="remember" [formField]="loginForm.rememberMe" />
 
@@ -120,7 +120,7 @@
         }
 
         <!-- Submit -->
-        <button pButton severity="primary" type="submit" class="w-full h-[30px] mt-1">
+        <button pButton severity="primary" type="submit" class="w-full h-11 mt-1">
           <span pButtonLabel>Iniciar sesión</span>
         </button>
 

@@ -228,10 +228,22 @@
 
 @media (max-width: 991px) {
     .layout-topbar {
-        padding: 0 2rem;
+        padding: 0 1rem;
 
         .layout-topbar-logo-container {
             width: auto;
+        }
+
+        .layout-topbar-logo {
+            font-size: 1.25rem;
+
+            svg {
+                width: 2.5rem;
+            }
+        }
+
+        .layout-topbar-actions {
+            gap: 0.5rem;
         }
 
         .layout-menu-button {
@@ -249,7 +261,7 @@
         }
 
         .layout-user-menu {
-            width: min(18rem, calc(100vw - 4rem));
+            width: min(18rem, calc(100vw - 2rem));
         }
     }
 }
