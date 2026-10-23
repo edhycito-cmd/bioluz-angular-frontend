@@ -1,10 +1,20 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  padding: 1rem;
+  background: var(--surface-ground);
+}
+
 .auth-card {
-  max-width: 380px;
-  margin: 48px auto;
-  padding: 32px;
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  width: min(380px, 100%);
+  padding: clamp(1.25rem, 6vw, 2rem);
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
   h1 {
     margin: 0 0 24px;
@@ -24,44 +34,51 @@
   }
 
   input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2.75rem;
     padding: 10px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    font-size: 0.95rem;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--content-border-radius);
+    background: var(--surface-card);
+    color: var(--text-color);
+    font-size: 16px;
 
     &:focus {
       outline: none;
-      border-color: var(--color-primary);
+      border-color: var(--primary-color);
     }
   }
 
   .field-errors {
     margin: 4px 0 0;
     padding-left: 18px;
-    color: var(--color-danger);
+    color: var(--p-red-500);
     font-size: 0.8rem;
   }
 
   .server-error {
     margin-top: 12px;
     padding: 10px 12px;
-    border-radius: var(--radius);
-    background: #fef2f2;
-    color: var(--color-danger);
+    border-radius: var(--content-border-radius);
+    background: color-mix(in srgb, var(--p-red-500) 10%, transparent);
+    color: var(--p-red-500);
     font-size: 0.85rem;
   }
 
   button[type='submit'] {
+    min-height: 2.75rem;
     margin-top: 20px;
     padding: 10px;
     border: none;
-    border-radius: var(--radius);
-    background: var(--color-primary);
-    color: #fff;
+    border-radius: var(--content-border-radius);
+    background: var(--primary-color);
+    color: var(--primary-contrast-color);
+    font-size: 1rem;
     font-weight: 600;
 
     &:hover:not(:disabled) {
-      background: var(--color-primary-dark);
+      filter: brightness(0.95);
     }
 
     &:disabled {
@@ -74,10 +91,10 @@
     margin-top: 20px;
     text-align: center;
     font-size: 0.85rem;
-    color: var(--color-text-muted);
+    color: var(--text-color-secondary);
 
     a {
-      color: var(--color-primary);
+      color: var(--primary-color);
       font-weight: 600;
       text-decoration: none;
     }

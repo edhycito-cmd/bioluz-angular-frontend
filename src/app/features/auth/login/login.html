@@ -1,9 +1,9 @@
 <p-toast />
 <app-floating-configurator />
 
-<div class="min-h-screen w-full overflow-hidden bg-surface-50 dark:bg-surface-950 flex items-center justify-center">
+<div class="min-h-dvh w-full bg-surface-50 dark:bg-surface-950 flex items-center justify-center px-3 py-6 sm:py-8">
   <!-- Card wrapper -->
-  <div class="w-full max-w-[510px] p-[3px] rounded-[50px]" style="
+  <div class="w-full max-w-[510px] p-[3px] rounded-[28px] sm:rounded-[50px]" style="
       background: linear-gradient(
         180deg,
         var(--primary-color) 10%,
@@ -11,9 +11,9 @@
       );
     ">
     <!-- Card -->
-    <div class="w-full min-h-[495px] rounded-[47px] bg-surface-0 dark:bg-surface-900 px-8 sm:px-16 py-10">
+    <div class="w-full rounded-[25px] sm:rounded-[47px] bg-surface-0 dark:bg-surface-900 px-5 sm:px-16 py-8 sm:py-10 sm:min-h-[495px]">
       <!-- Header -->
-      <div class="text-center mb-7">
+      <div class="text-center mb-6 sm:mb-7">
 
         <!-- Logo -->
         <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-12 h-auto mx-auto mb-6">
@@ -38,7 +38,7 @@
         </h1>
 
         <span class="text-muted-color text-sm">
-          Sign in to continue
+          Iniciá sesión para continuar
         </span>
       </div>
 
@@ -48,11 +48,11 @@
         <!-- Email -->
         <div class="flex flex-col gap-1">
           <label for="email" class="text-surface-900 dark:text-surface-0 text-sm font-medium">
-            Email
+            Correo electrónico
           </label>
 
-          <input pInputText type="email" id="email" placeholder="Email address" autocomplete="email"
-            [formField]="loginForm.email" class="w-full h-[30px] text-sm" />
+          <input pInputText type="email" id="email" placeholder="Ingresá tu correo electrónico" autocomplete="email"
+            [formField]="loginForm.email" class="w-full h-11 text-base sm:text-sm" />
 
           @if (loginForm.email().invalid() && loginForm.email().touched()) {
           <p-message severity="error" size="small" variant="simple">
@@ -66,11 +66,21 @@
         <!-- Password -->
         <div class="flex flex-col gap-1">
           <label for="password" class="text-surface-900 dark:text-surface-0 text-sm font-medium">
-            Password
+            Contraseña
           </label>
 
-          <input pInputText type="password" id="password" placeholder="Password" autocomplete="current-password"
-            [formField]="loginForm.password" class="w-full h-[30px] text-sm" />
+          <div class="relative">
+            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Ingresá tu contraseña"
+              autocomplete="current-password" [formField]="loginForm.password"
+              class="w-full h-11 text-base sm:text-sm login-password-input" />
+
+            <button type="button" class="login-password-toggle" (click)="alternarPassword()"
+              [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="mostrarPassword()"
+              [title]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="pi" [class.pi-eye]="!mostrarPassword()" [class.pi-eye-slash]="mostrarPassword()"></i>
+            </button>
+          </div>
 
           @if (
           loginForm.password().invalid() &&
@@ -88,17 +98,21 @@
         </div>
 
         <!-- Remember / Forgot -->
-        <div class="flex items-center justify-between -mt-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 -mt-1">
           <div class="flex items-center gap-2">
-            <p-checkbox inputId="remember" [formField]="loginForm.rememberMe" />
+            <p-checkbox
+              inputId="remember"
+              [binary]="true"
+              [formField]="loginForm.rememberMe"
+            />
 
             <label for="remember" class="text-surface-700 dark:text-surface-300 text-xs">
-              Remember me
+              Recordarme
             </label>
           </div>
 
           <button type="button" class="text-primary text-xs font-medium hover:underline">
-            Forgot password?
+            ¿Olvidaste tu contraseña?
           </button>
         </div>
 
@@ -110,9 +124,41 @@
         }
 
         <!-- Submit -->
-        <button pButton severity="primary" type="submit" class="w-full h-[30px] mt-1">
-          <span pButtonLabel>Sign In</span>
+        <button pButton severity="primary" type="submit" class="w-full h-11 mt-1">
+          <span pButtonLabel>Iniciar sesión</span>
         </button>
+
+        <!-- Divider -->
+        @if (googleEnabled()) {
+        <div class="flex items-center gap-3" aria-hidden="true">
+          <span class="h-px flex-1 bg-surface-200 dark:bg-surface-700"></span>
+          <span class="text-muted-color text-xs uppercase tracking-widest">o</span>
+          <span class="h-px flex-1 bg-surface-200 dark:bg-surface-700"></span>
+        </div>
+
+        <!-- Google: botón oficial renderizado por Google Identity Services -->
+        <div class="flex flex-col items-center gap-3">
+          <div class="relative w-full min-h-[40px] flex justify-center items-center">
+            <div
+              #googleButtonContainer
+              class="w-full flex justify-center"
+              aria-label="Iniciar sesión con Google"
+            ></div>
+
+            @if (googleLoading()) {
+            <div class="absolute inset-0 flex items-center justify-center">
+              <p-progressspinner strokeWidth="4" class="w-6 h-6" />
+            </div>
+            }
+          </div>
+
+          @if (googleReady()) {
+          <span class="text-muted-color text-xs">
+            Podés iniciar sesión con tu cuenta de Google y continuar con la misma seguridad.
+          </span>
+          }
+        </div>
+        }
 
       </form>
     </div>

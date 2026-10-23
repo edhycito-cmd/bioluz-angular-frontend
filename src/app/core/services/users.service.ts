@@ -5,7 +5,29 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiEnvelope } from '../models/auth.model';
 import { PaginatedResult } from '../models/pagination.model';
-import { UsuarioListado, UsuarioListadoQuery } from '../models/user.model';
+import {
+  RegistrarUsuarioConPersonaPayload,
+  UsuarioListado,
+  UsuarioListadoQuery,
+} from '../models/user.model';
+
+/** Respuesta de POST /usuario/registrar-con-persona. */
+export interface RegistrarUsuarioConPersonaResult {
+  user: { id: string; email: string; name: string };
+  persona: unknown;
+}
+
+/** Body de PATCH /usuario/perfil/contrasena. */
+export interface CambiarContrasenaPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/** Respuesta de PATCH /usuario/perfil/contrasena. */
+export interface CambiarContrasenaResult {
+  success: boolean;
+  user: { id: string; email: string; name: string };
+}
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
@@ -24,6 +46,28 @@ export class UsersService {
 
     return this.http
       .get<ApiEnvelope<PaginatedResult<UsuarioListado>>>(this.baseUrl, { params })
+      .pipe(map((res) => res.data));
+  }
+
+  /** Crea un usuario nuevo junto con su persona (POST /usuario/registrar-con-persona). */
+  registrarConPersona(
+    payload: RegistrarUsuarioConPersonaPayload,
+  ): Observable<ApiEnvelope<RegistrarUsuarioConPersonaResult>> {
+    return this.http.post<ApiEnvelope<RegistrarUsuarioConPersonaResult>>(
+      `${this.baseUrl}/registrar-con-persona`,
+      payload,
+    );
+  }
+
+  /** Cambia la contraseña del usuario autenticado (PATCH /usuario/perfil/contrasena). */
+  cambiarContrasena(
+    payload: CambiarContrasenaPayload,
+  ): Observable<CambiarContrasenaResult> {
+    return this.http
+      .patch<ApiEnvelope<CambiarContrasenaResult>>(
+        `${this.baseUrl}/perfil/contrasena`,
+        payload,
+      )
       .pipe(map((res) => res.data));
   }
 }

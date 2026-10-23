@@ -1,7 +1,7 @@
 import { Routes } from "@angular/router";
 
 export default [
-  { path: "", pathMatch: "full", redirectTo: "dashboard" },
+  { path: "", pathMatch: "full", redirectTo: "perfil" },
   {
     path: "dashboard",
     loadComponent: () => import("./dashboard/dashboard").then((m) => m.Dashboard),

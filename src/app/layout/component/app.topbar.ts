@@ -1,14 +1,13 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, HostListener, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 
-import { StyleClassModule } from '@openng/optimus-ui/styleclass';
-import { AppConfigurator } from './app.configurator';
+import { AvatarModule } from '@openng/optimus-ui/avatar';
 import { LayoutService } from '../service/layout.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-topbar',
-    imports: [RouterModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, AvatarModule],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
@@ -33,7 +32,7 @@ import { AuthService } from '../../core/services/auth.service';
                         />
                     </g>
                 </svg>
-                <span>SPARKED</span>
+                <span>MUSPA</span>
             </a>
         </div>
 
@@ -42,37 +41,48 @@ import { AuthService } from '../../core/services/auth.service';
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [class]="{ pi: true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
-                <div class="relative">
-                    <button
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                        pStyleClass="@next"
-                        enterFromClass="hidden"
-                        enterActiveClass="animate-scalein"
-                        leaveToClass="hidden"
-                        leaveActiveClass="animate-fadeout"
-                        [hideOnOutsideClick]="true"
-                    >
-                        <i class="pi pi-palette"></i>
-                    </button>
-                    <app-configurator />
-                </div>
             </div>
 
-            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-                <i class="pi pi-ellipsis-v"></i>
-            </button>
+            <div class="layout-user-menu-wrapper" (click)="$event.stopPropagation()">
+                <button
+                    type="button"
+                    class="layout-user-button"
+                    (click)="toggleUserMenu()"
+                    [attr.aria-expanded]="userMenuOpen()"
+                    aria-haspopup="menu"
+                    aria-label="Menú de usuario"
+                >
+                    <p-avatar [label]="initials()" shape="circle" class="layout-topbar-avatar" />
+                    <span class="layout-user-name">{{ displayName() }}</span>
+                    <i class="pi pi-chevron-down layout-user-chevron" [class.is-open]="userMenuOpen()"></i>
+                </button>
 
-            <div class="layout-topbar-menu hidden lg:block">
-                <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action" (click)="goToProfile()">
-                        <i class="pi pi-user"></i>
-                        <span>Perfil</span>
-                    </button>
-                     <button type="button" class="layout-topbar-action" (click)="logout()">
-                         <i class="pi pi-sign-out"></i>
-                         <span>Salir</span>
-                     </button>
-                </div>
+                @if (userMenuOpen()) {
+                    <div class="layout-user-menu animate-scalein" role="menu">
+                        <div class="layout-user-menu-header">
+                            <span class="layout-user-menu-name">{{ displayName() }}</span>
+                            @if (email()) {
+                                <span class="layout-user-menu-email">{{ email() }}</span>
+                            }
+                        </div>
+
+                        <a class="layout-user-menu-item" role="menuitem" routerLink="/perfil" (click)="closeUserMenu()">
+                            <i class="pi pi-user"></i>
+                            <span>Perfil</span>
+                        </a>
+                        <a class="layout-user-menu-item" role="menuitem" routerLink="/admin/configuracion" (click)="closeUserMenu()">
+                            <i class="pi pi-cog"></i>
+                            <span>Configuración</span>
+                        </a>
+
+                        <div class="layout-user-menu-separator"></div>
+
+                        <button type="button" class="layout-user-menu-item layout-user-menu-item-danger" role="menuitem" (click)="logout()">
+                            <i class="pi pi-sign-out"></i>
+                            <span>Cerrar sesión</span>
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>`
@@ -84,6 +94,34 @@ export class AppTopbar {
 
     private readonly router = inject(Router);
 
+    /** Visibilidad del menú desplegable del avatar. */
+    protected readonly userMenuOpen = signal(false);
+
+    /** Nombre a mostrar: persona asociada si existe; si no, el del usuario. */
+    protected readonly displayName = computed(() => {
+        const persona = this.authService.persona();
+        if (persona) {
+            return [persona.nombres, persona.primerApellido, persona.segundoApellido]
+                .filter((parte): parte is string => !!parte)
+                .join(' ');
+        }
+        return this.authService.currentUser()?.name ?? '';
+    });
+
+    protected readonly email = computed(() => this.authService.currentUser()?.email ?? '');
+
+    /** Iniciales del nombre (o del email) para el avatar cuando no hay imagen. */
+    protected readonly initials = computed(() => {
+        const nombre = this.displayName().trim();
+        if (nombre) {
+            const partes = nombre.split(/\s+/);
+            const primera = partes[0].charAt(0);
+            const ultima = partes.length > 1 ? partes[partes.length - 1].charAt(0) : '';
+            return `${primera}${ultima}`.toUpperCase();
+        }
+        return this.email().charAt(0).toUpperCase() || '?';
+    });
+
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({
             ...state,
@@ -91,12 +129,27 @@ export class AppTopbar {
         }));
     }
 
-    logout() {
-        this.authService.logout();
-        this.router.navigate(['/login']);
+    toggleUserMenu() {
+        this.userMenuOpen.update((abierto) => !abierto);
     }
 
-    goToProfile() {
-        this.router.navigate(['/perfil']);
+    closeUserMenu() {
+        this.userMenuOpen.set(false);
+    }
+
+    @HostListener('document:click')
+    onDocumentClick() {
+        this.closeUserMenu();
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape() {
+        this.closeUserMenu();
+    }
+
+    logout() {
+        this.closeUserMenu();
+        this.authService.logout();
+        this.router.navigate(['/login']);
     }
 }

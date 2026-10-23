@@ -1,125 +1,269 @@
-<div class="card">
-  <div class="font-semibold text-xl mb-4">Usuarios</div>
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-  <form (submit)="aplicarFiltro($event)" class="flex flex-wrap items-end gap-3 mb-6">
-    <div class="flex flex-col gap-1">
-      <label for="filtro" class="text-sm font-medium">Buscar</label>
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      severity="secondary"
+      class="mr-2"
+      *appHasPermission="'create'"
+      (onClick)="openNew()"
+    />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 30]"
+  [globalFilterFields]="['nombres', 'primerApellido', 'email', 'documento', 'telefono', 'estado']"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '60rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Gestionar Usuarios</h5>
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="nombres" style="min-width: 16rem">Nombres <p-sortIcon field="nombres" /></th>
+      <th pSortableColumn="primerApellido" style="min-width: 12rem">Apellidos <p-sortIcon field="primerApellido" /></th>
+      <th pSortableColumn="email" style="min-width: 16rem">Correo electrónico <p-sortIcon field="email" /></th>
+      <th pSortableColumn="documento" style="min-width: 10rem">Documento <p-sortIcon field="documento" /></th>
+      <th pSortableColumn="telefono" style="min-width: 10rem">Teléfono <p-sortIcon field="telefono" /></th>
+      <th pSortableColumn="estado" style="min-width: 10rem">Estado <p-sortIcon field="estado" /></th>
+      <th style="min-width: 8rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-usuario>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="usuario" />
+      </td>
+      <td data-label="Nombres" style="min-width: 16rem">{{ usuario.nombres || '—' }}</td>
+      <td data-label="Apellidos" style="min-width: 12rem">{{ usuario.primerApellido || '—' }}</td>
+      <td data-label="Correo" style="min-width: 16rem">{{ usuario.email }}</td>
+      <td data-label="Documento" style="min-width: 10rem">{{ usuario.documento || '—' }}</td>
+      <td data-label="Teléfono" style="min-width: 10rem">{{ usuario.telefono || '—' }}</td>
+      <td data-label="Estado" style="min-width: 10rem">
+        <p-tag
+          [value]="usuario.estado"
+          [severity]="usuario.esActivo ? 'success' : 'danger'"
+        />
+      </td>
+      <td>
+        <p-button
+          [icon]="usuario.esActivo ? 'pi pi-ban' : 'pi pi-check'"
+          [severity]="usuario.esActivo ? 'danger' : 'success'"
+          [rounded]="true"
+          [outlined]="true"
+          [title]="usuario.esActivo ? 'Desactivar' : 'Activar'"
+          *appHasPermission="'update'"
+          (onClick)="cambiarEstado(usuario)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="usuarioDialog"
+  [style]="{ width: 'min(560px, calc(100vw - 2rem))' }"
+  header="Nuevo Usuario"
+  [modal]="true"
+>
+  <div class="flex flex-col gap-6 pt-2">
+    <div>
+      <label for="login" class="block font-bold mb-3">Correo de acceso</label>
       <input
-        pInputText
-        id="filtro"
         type="text"
-        placeholder="Nombre, email o documento"
+        pInputText
+        id="login"
+        [(ngModel)]="usuario.login"
         autocomplete="off"
-        [formField]="filtroForm.filtro"
-        class="w-72"
+        autofocus
+        fluid
       />
-      @if (filtroForm.filtro().invalid() && filtroForm.filtro().touched()) {
-        <p-message severity="error" size="small" variant="simple">
-          @for (error of filtroForm.filtro().errors(); track error.kind) {
-            {{ error.message }}
-          }
-        </p-message>
+      @if (loginInvalido()) {
+        <small class="text-red-500">Ingresá un correo electrónico válido.</small>
       }
     </div>
-    <button pButton type="submit" label="Buscar"></button>
-    <button
-      pButton
-      type="button"
-      severity="secondary"
-      label="Limpiar"
-      (click)="limpiarFiltro()"
-    ></button>
-  </form>
-
-  @if (accionOk()) {
-    <p-message severity="success" size="small" variant="simple">{{ accionOk() }}</p-message>
-  }
-  @if (accionError()) {
-    <p-message severity="error" size="small" variant="simple">{{ accionError() }}</p-message>
-  }
-
-  @if (usuarios.value(); as resultado) {
-    <table class="w-full text-sm">
-      <thead>
-        <tr class="text-left text-muted-color border-b border-surface">
-          <th class="py-2 font-medium">Usuario</th>
-          <th class="py-2 font-medium">Documento</th>
-          <th class="py-2 font-medium">Teléfono</th>
-          <th class="py-2 font-medium">Estado</th>
-          <th class="py-2 font-medium"></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of resultado.items; track item.user.id) {
-          <tr class="border-b border-surface">
-            <td class="py-3">
-              <div class="font-medium text-surface-900 dark:text-surface-0">
-                {{ item.persona?.nombres }} {{ item.persona?.primerApellido }}
-              </div>
-              <div class="text-muted-color">{{ item.user.email }}</div>
-            </td>
-            <td class="py-3">{{ item.persona?.numeroDocumento || '—' }}</td>
-            <td class="py-3">{{ item.persona?.telefono || '—' }}</td>
-            <td class="py-3">
-              <span
-                class="px-2 py-1 rounded-full text-xs font-semibold"
-                [class]="item.user.esActivo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-              >
-                {{ item.user.esActivo ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td class="py-3 text-right">
-              <button
-                pButton
-                type="button"
-                size="small"
-                [severity]="item.user.esActivo ? 'danger' : 'success'"
-                [label]="item.user.esActivo ? 'Desactivar' : 'Activar'"
-                (click)="cambiarEstado(item)"
-              ></button>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="5" class="py-6 text-center text-muted-color">Sin resultados</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-
-    @if (resultado.totalPaginas > 1) {
-      <div class="flex items-center justify-between mt-4">
-        <span class="text-sm text-muted-color">{{ resultado.total }} usuarios</span>
-        <div class="flex items-center gap-3">
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-12 sm:col-span-6">
+        <label for="password" class="block font-bold mb-3">Contraseña</label>
+        <div class="relative">
+          <input
+            [type]="mostrarPassword ? 'text' : 'password'"
+            pInputText
+            id="password"
+            [(ngModel)]="usuario.password"
+            autocomplete="new-password"
+            class="w-full users-password-input"
+            fluid
+          />
           <button
-            pButton
             type="button"
-            severity="secondary"
-            size="small"
-            label="Anterior"
-            [disabled]="resultado.pagina <= 1"
-            (click)="irAPagina(resultado.pagina - 1)"
-          ></button>
-          <span class="text-sm">{{ resultado.pagina }} / {{ resultado.totalPaginas }}</span>
-          <button
-            pButton
-            type="button"
-            severity="secondary"
-            size="small"
-            label="Siguiente"
-            [disabled]="resultado.pagina >= resultado.totalPaginas"
-            (click)="irAPagina(resultado.pagina + 1)"
-          ></button>
+            class="users-password-toggle"
+            (click)="alternarPassword()"
+            [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="mostrarPassword"
+            [title]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <i class="pi" [class.pi-eye]="!mostrarPassword" [class.pi-eye-slash]="mostrarPassword"></i>
+          </button>
         </div>
+        @if (passwordInvalido()) {
+          <small class="block text-red-500 mt-1">
+            8 a 64 caracteres, con mayúscula, minúscula, número, símbolo y sin espacios.
+          </small>
+        }
       </div>
-    }
-  } @else if (usuarios.isLoading()) {
-    <p class="text-muted-color">Cargando usuarios…</p>
-  } @else if (usuarios.error()) {
-    <p-message severity="error" size="small" variant="simple">
-      No se pudo cargar el listado de usuarios.
+
+      <div class="col-span-12 sm:col-span-6">
+        <label for="confirmPassword" class="block font-bold mb-3">Confirmar contraseña</label>
+        <div class="relative">
+          <input
+            [type]="mostrarConfirmPassword ? 'text' : 'password'"
+            pInputText
+            id="confirmPassword"
+            [(ngModel)]="usuario.confirmPassword"
+            autocomplete="new-password"
+            class="w-full users-password-input"
+            fluid
+          />
+          <button
+            type="button"
+            class="users-password-toggle"
+            (click)="alternarConfirmPassword()"
+            [attr.aria-label]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
+            [attr.aria-pressed]="mostrarConfirmPassword"
+            [title]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
+          >
+            <i class="pi" [class.pi-eye]="!mostrarConfirmPassword" [class.pi-eye-slash]="mostrarConfirmPassword"></i>
+          </button>
+        </div>
+        @if (confirmPasswordInvalido()) {
+          <small class="block text-red-500 mt-1">Las contraseñas no coinciden.</small>
+        }
+      </div>
+    </div>
+
+    <span class="block font-bold">Datos de la persona</span>
+
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-12 sm:col-span-6">
+        <label for="nombres" class="block font-bold mb-3">Nombres</label>
+        <input type="text" pInputText id="nombres" [(ngModel)]="usuario.nombres" fluid />
+        @if (nombresInvalido()) {
+          <small class="text-red-500">Al menos 2 caracteres.</small>
+        }
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="primerApellido" class="block font-bold mb-3">Primer apellido</label>
+        <input type="text" pInputText id="primerApellido" [(ngModel)]="usuario.primerApellido" fluid />
+        @if (primerApellidoInvalido()) {
+          <small class="text-red-500">Al menos 2 caracteres.</small>
+        }
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="segundoApellido" class="block font-bold mb-3">Segundo apellido</label>
+        <input type="text" pInputText id="segundoApellido" [(ngModel)]="usuario.segundoApellido" fluid />
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="genero" class="block font-bold mb-3">Género</label>
+        <p-select
+          id="genero"
+          inputId="genero"
+          [(ngModel)]="usuario.generoId"
+          [options]="generoOptions()"
+          optionLabel="label"
+          optionValue="id"
+          placeholder="Seleccioná un género"
+          fluid
+        />
+        @if (generoInvalido()) {
+          <small class="text-red-500">El género es obligatorio.</small>
+        }
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="tipoDocumento" class="block font-bold mb-3">Tipo de documento</label>
+        <p-select
+          id="tipoDocumento"
+          inputId="tipoDocumento"
+          [(ngModel)]="usuario.tipoDocumentoIdentidadId"
+          [options]="tipoDocumentoOptions()"
+          optionLabel="label"
+          optionValue="id"
+          placeholder="Seleccioná un tipo (opcional)"
+          [showClear]="true"
+          fluid
+        />
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="numeroDocumento" class="block font-bold mb-3">N° de documento</label>
+        <input type="text" pInputText id="numeroDocumento" [(ngModel)]="usuario.numeroDocumento" fluid />
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="telefono" class="block font-bold mb-3">Teléfono</label>
+        <input type="text" pInputText id="telefono" [(ngModel)]="usuario.telefono" fluid />
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="emailPersona" class="block font-bold mb-3">Correo de contacto</label>
+        <input type="text" pInputText id="emailPersona" [(ngModel)]="usuario.email" fluid />
+        @if (personaEmailInvalido()) {
+          <small class="text-red-500">Ingresá un correo electrónico válido.</small>
+        }
+      </div>
+      <div class="col-span-12 sm:col-span-6">
+        <label for="fechaNacimiento" class="block font-bold mb-3">Fecha de nacimiento</label>
+        <p-datepicker
+          id="fechaNacimiento"
+          [(ngModel)]="usuario.fechaNacimiento"
+          inputId="fechaNacimiento"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          fluid
+        />
+      </div>
+      <div class="col-span-12">
+        <label for="domicilio" class="block font-bold mb-3">Domicilio</label>
+        <input type="text" pInputText id="domicilio" [(ngModel)]="usuario.domicilio" fluid />
+      </div>
+    </div>
+
+    <p-message severity="info" size="small" variant="simple">
+      El usuario se registra en estado inactivo; usá el botón de activación del
+      listado para habilitarlo.
     </p-message>
-  } @else {
-    <p class="text-muted-color">Sin resultados.</p>
-  }
-</div>
+  </div>
+
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (onClick)="hideDialog()" [disabled]="guardando" />
+    <p-button label="Guardar" icon="pi pi-check" [loading]="guardando" (onClick)="saveUsuario()" />
+  </ng-template>
+</p-dialog>

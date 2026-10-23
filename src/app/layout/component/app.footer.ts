@@ -4,8 +4,8 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
     selector: 'app-footer',
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `<div class="layout-footer">
-        SPARKED by
-        <a href="https://optimus.openng.org" target="_blank" rel="noopener noreferrer" class="text-primary font-bold hover:underline">Optimus UI</a>
+        Desarrollado por
+        <a href="https://optimus.openng.org" target="_blank" rel="noopener noreferrer" class="text-primary font-bold hover:underline">MUSPA pl</a>
     </div>`
 })
 export class AppFooter {}

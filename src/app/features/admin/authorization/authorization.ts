@@ -1,8 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FormField, form, required, submit } from '@angular/forms/signals';
 import { AuthorizationService } from '../../../core/services/authorization.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
+import { HasPermission } from '../../../core/directives/has-permission.directive';
+import { PermissionAction, PermissionApp } from '../../../core/models/authorization.model';
 
 interface RoleModel {
   userId: string;
@@ -13,16 +16,51 @@ interface PolicyModel {
   role: string;
   resource: string;
   action: string;
+  app: PermissionApp;
 }
+
+const ETIQUETAS_ACCION: Readonly<Record<PermissionAction, string>> = {
+  read: "Leer",
+  update: "Actualizar",
+  create: "Crear",
+  delete: "Eliminar",
+};
+
+const ETIQUETAS_APP: Readonly<Record<PermissionApp, string>> = {
+  backend: "Servidor",
+  frontend: "Interfaz",
+};
 
 @Component({
   selector: 'app-authorization',
-  imports: [FormField],
+  imports: [FormField, HasPermission],
   templateUrl: './authorization.html',
   styleUrl: './authorization.scss',
 })
 export class Authorization {
   private readonly authorizationService = inject(AuthorizationService);
+
+  /** Acciones Casbin de este módulo, para configurar los formularios de la página. */
+  protected readonly permisos = inject(PermissionsService);
+
+  /** Acciones concedidas por Casbin sobre la página (`/admin/authorization`). */
+  protected readonly permisosPagina = computed(() =>
+    [...this.permisos.acciones('/admin/authorization')].sort(),
+  );
+
+  /** Las mismas acciones, con sus etiquetas visibles en español. */
+  protected readonly permisosPaginaVisibles = computed(() =>
+    this.permisosPagina().map((accion) => this.etiquetaAccion(accion)),
+  );
+
+  // Ámbitos y acciones válidas según el backend (authorization.dto.ts).
+  protected readonly appsDisponibles: PermissionApp[] = ['backend', 'frontend'];
+  protected readonly accionesDisponibles: PermissionAction[] = [
+    'read',
+    'update',
+    'create',
+    'delete',
+  ];
 
   // --- Asignación de roles ---
   protected readonly roleModel = signal<RoleModel>({ userId: '', role: '' });
@@ -67,8 +105,13 @@ export class Authorization {
     });
   }
 
-  // --- Policies (recurso + acción por rol) ---
-  protected readonly policyModel = signal<PolicyModel>({ role: '', resource: '', action: '' });
+  // --- Políticas (recurso + acción por rol) ---
+  protected readonly policyModel = signal<PolicyModel>({
+    role: '',
+    resource: '',
+    action: '',
+    app: 'backend',
+  });
   protected readonly policyForm = form(this.policyModel, (path) => {
     required(path.role, { message: 'El rol es obligatorio' });
     required(path.resource, { message: 'El recurso es obligatorio' });
@@ -87,7 +130,7 @@ export class Authorization {
         const payload = this.policyModel();
         await firstValueFrom(this.authorizationService.addPolicy(payload));
         this.policyMessage.set(
-          `Policy agregada: ${payload.role} puede "${payload.action}" sobre ${payload.resource}`,
+          `Política agregada: ${payload.role} puede "${this.etiquetaAccion(payload.action)}" sobre ${payload.resource}`,
         );
       } catch (error) {
         this.policyError.set(this.extractErrorMessage(error));
@@ -106,13 +149,21 @@ export class Authorization {
         const payload = this.policyModel();
         await firstValueFrom(this.authorizationService.removePolicy(payload));
         this.policyMessage.set(
-          `Policy eliminada: ${payload.role} / ${payload.resource} / ${payload.action}`,
+          `Política eliminada: ${payload.role} / ${payload.resource} / ${this.etiquetaAccion(payload.action)}`,
         );
       } catch (error) {
         this.policyError.set(this.extractErrorMessage(error));
       }
       return undefined;
     });
+  }
+
+  protected etiquetaAccion(accion: string): string {
+    return ETIQUETAS_ACCION[accion as PermissionAction] ?? accion;
+  }
+
+  protected etiquetaApp(app: PermissionApp): string {
+    return ETIQUETAS_APP[app] ?? app;
   }
 
   private extractErrorMessage(error: unknown): string {
