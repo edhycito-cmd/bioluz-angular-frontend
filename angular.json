@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "muspa-angular-lite-frontend": {
+    "bioluz-angular-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/muspa-angular-lite-frontend",
+            "outputPath": "dist/bioluz-angular-frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -72,10 +72,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "muspa-angular-lite-frontend:build:production"
+              "buildTarget": "bioluz-angular-frontend:build:production"
             },
             "development": {
-              "buildTarget": "muspa-angular-lite-frontend:build:development"
+              "buildTarget": "bioluz-angular-frontend:build:development"
             }
           },
           "defaultConfiguration": "development",

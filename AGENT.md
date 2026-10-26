@@ -286,7 +286,7 @@ con autenticación.
 
 - `npm run build` compila correctamente. Bundle inicial actual: **803.32 kB**; presupuesto de
   advertencia: **700 kB**; error: **1.5 MB**. La advertencia no rompe el build.
-- Salida: `dist/muspa-angular-lite-frontend/browser`.
+- Salida: `dist/bioluz-angular-frontend/browser`.
 - No hay tests unitarios en `src/`; `npm test` no ejecuta casos. Las verificaciones actuales son
   build y pruebas manuales.
 - Antes de producción, revisar `src/environments/environment.ts`: hoy contiene una URL de backend

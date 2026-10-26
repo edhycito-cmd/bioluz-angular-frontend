@@ -214,7 +214,7 @@ npm install
 # en muspa-nestjs-clean-lite-backend
 npm run start:dev
 
-# en muspa-angular-lite-frontend
+# en bioluz-angular-frontend
 npm start
 ```
 
@@ -229,7 +229,7 @@ Antes de buildear, editá `src/environments/environment.ts` con la URL pública 
 npm run build
 ```
 
-El resultado queda en `dist/muspa-angular-lite-frontend/browser`. Es un sitio estático, servible
+El resultado queda en `dist/bioluz-angular-frontend/browser`. Es un sitio estático, servible
 desde Nginx, S3 + CloudFront, Vercel o cualquier CDN.
 
 > El build de producción actual compila, pero muestra una advertencia porque el bundle inicial
