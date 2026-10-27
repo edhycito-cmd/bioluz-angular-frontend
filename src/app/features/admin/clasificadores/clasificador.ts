@@ -25,6 +25,7 @@ import { HasPermission } from "../../../core/directives/has-permission.directive
 interface ClasificadorRow {
   id: string;
   dominio: string;
+  nombre: string;
   descripcion: string;
   orden: number;
   esActivo: boolean;
@@ -33,11 +34,10 @@ interface ClasificadorRow {
 
 /** Modelo editable del dialog (igual que sparked pages/crud). */
 interface ClasificadorFormModel {
-  id: string;
   dominio: string;
+  nombre: string;
   descripcion: string;
   orden: number;
-  esActivo: boolean;
 }
 
 @Component({
@@ -73,8 +73,8 @@ export class Clasificador {
 
   /** Columnas para exportar a CSV (molde sparked pages/crud). */
   protected readonly cols = [
-    { field: "id", header: "ID" },
     { field: "dominio", header: "Dominio" },
+    { field: "nombre", header: "Nombre" },
     { field: "descripcion", header: "Descripción" },
     { field: "orden", header: "Orden" },
     { field: "estado", header: "Estado" },
@@ -90,7 +90,8 @@ export class Clasificador {
     if (resultado === undefined) return undefined;
     return resultado.items.map((item) => ({
       id: item.id,
-      dominio: item.dominio ?? "",
+      dominio: item.dominio,
+      nombre: item.nombre ?? "",
       descripcion: item.descripcion ?? "",
       orden: item.orden,
       esActivo: item.esActivo,
@@ -106,6 +107,8 @@ export class Clasificador {
   protected seleccionados: ClasificadorRow[] | null = null;
   protected clasificador: ClasificadorFormModel = clasificadorVacio();
   protected esNuevo = false;
+  /** UUID del registro en edición; se asigna desde la fila seleccionada. */
+  protected idEditando: string | null = null;
 
   protected ordenInvalido(): boolean {
     const orden = this.clasificador.orden;
@@ -121,21 +124,23 @@ export class Clasificador {
   }
 
   protected openNew(): void {
-    this.clasificador = { id: "", dominio: "", descripcion: "", orden: 0, esActivo: true };
+    this.clasificador = clasificadorVacio();
+    this.idEditando = null;
     this.esNuevo = true;
     this.submitted = false;
     this.clasificadorDialog = true;
   }
 
   protected editClasificador(row: ClasificadorRow): void {
+    this.idEditando = row.id;
     this.clasificador = {
-      id: row.id,
       dominio: row.dominio,
+      nombre: row.nombre,
       descripcion: row.descripcion,
       orden: row.orden,
-      esActivo: row.esActivo,
     };
-    this.esNuevo = false;    this.submitted = false;
+    this.esNuevo = false;
+    this.submitted = false;
     this.clasificadorDialog = true;
   }
 
@@ -147,20 +152,21 @@ export class Clasificador {
   protected saveClasificador(): void {
     this.submitted = true;
 
-    const id = (this.clasificador.id ?? "").trim();
     const orden = Number(this.clasificador.orden ?? 0);
+    if (Number.isNaN(orden) || !Number.isInteger(orden)) return;
 
-    if (this.esNuevo && !id) return;
-    if (orden === null || Number.isNaN(orden) || !Number.isInteger(orden)) return;
+    // El `dominio` es la clave de negocio: obligatorio al crear y no editable.
+    const dominio = (this.clasificador.dominio ?? "").trim();
+    if (this.esNuevo && !dominio) return;
 
-    const dominio = (this.clasificador.dominio ?? "").trim() || null;
+    const nombre = (this.clasificador.nombre ?? "").trim() || null;
     const descripcion = (this.clasificador.descripcion ?? "").trim() || null;
 
     this.guardando = true;
     const peticion = this.esNuevo
-      ? this.clasificadoresService.crear({ id, dominio, descripcion, orden })
-      : this.clasificadoresService.actualizar(this.clasificador.id as string, {
-          dominio,
+      ? this.clasificadoresService.crear({ dominio, nombre, descripcion, orden })
+      : this.clasificadoresService.actualizar(this.idEditando as string, {
+          nombre,
           descripcion,
           orden,
         });
@@ -174,8 +180,8 @@ export class Clasificador {
           severity: "success",
           summary: "Operación exitosa",
           detail: this.esNuevo
-            ? `Clasificador ${guardado.id} creado`
-            : `Clasificador ${guardado.id} actualizado`,
+            ? `Clasificador ${guardado.dominio} creado`
+            : `Clasificador ${guardado.dominio} actualizado`,
           life: 3000,
         });
         this.clasificador = clasificadorVacio();
@@ -279,10 +285,9 @@ export class Clasificador {
 
 function clasificadorVacio(): ClasificadorFormModel {
   return {
-    id: "",
     dominio: "",
+    nombre: "",
     descripcion: "",
     orden: 0,
-    esActivo: true,
   };
 }

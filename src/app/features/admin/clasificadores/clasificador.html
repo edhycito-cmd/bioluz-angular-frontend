@@ -39,7 +39,7 @@
   dataKey="id"
   [rowHover]="true"
   [rowsPerPageOptions]="[10, 20, 30]"
-  [globalFilterFields]="['id', 'dominio', 'descripcion', 'estado']"
+  [globalFilterFields]="['dominio', 'nombre', 'descripcion', 'estado']"
   currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} clasificadores"
   [showCurrentPageReport]="true"
   [tableStyle]="{ 'min-width': '50rem' }"
@@ -60,8 +60,8 @@
       <th style="width: 3rem">
         <p-tableHeaderCheckbox />
       </th>
-      <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
       <th pSortableColumn="dominio">Dominio <p-sortIcon field="dominio" /></th>
+      <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
       <th pSortableColumn="descripcion">Descripción <p-sortIcon field="descripcion" /></th>
       <th pSortableColumn="orden" style="min-width: 8rem">Orden <p-sortIcon field="orden" /></th>
       <th pSortableColumn="estado" style="min-width: 10rem">Estado <p-sortIcon field="estado" /></th>
@@ -73,8 +73,8 @@
       <td style="width: 3rem">
         <p-tableCheckbox [value]="clasificador" />
       </td>
-      <td data-label="ID">{{ clasificador.id }}</td>
       <td data-label="Dominio">{{ clasificador.dominio }}</td>
+      <td data-label="Nombre">{{ clasificador.nombre }}</td>
       <td data-label="Descripción">{{ clasificador.descripcion }}</td>
       <td data-label="Orden">{{ clasificador.orden }}</td>
       <td data-label="Estado">
@@ -113,28 +113,28 @@
 >
   <div class="flex flex-col gap-6 pt-2">
     <div>
-      <label for="id" class="block font-bold mb-3">ID</label>
-      <input
-        type="text"
-        pInputText
-        id="id"
-        [(ngModel)]="clasificador.id"
-        [disabled]="!esNuevo"
-        autocomplete="off"
-        maxlength="50"
-        fluid
-      />
-      @if (submitted && esNuevo && !clasificador.id.trim()) {
-        <small class="text-red-500">El ID es obligatorio.</small>
-      }
-    </div>
-    <div>
       <label for="dominio" class="block font-bold mb-3">Dominio</label>
       <input
         type="text"
         pInputText
         id="dominio"
         [(ngModel)]="clasificador.dominio"
+        [disabled]="!esNuevo"
+        autocomplete="off"
+        maxlength="50"
+        fluid
+      />
+      @if (submitted && esNuevo && !clasificador.dominio.trim()) {
+        <small class="text-red-500">El dominio es obligatorio.</small>
+      }
+    </div>
+    <div>
+      <label for="nombre" class="block font-bold mb-3">Nombre</label>
+      <input
+        type="text"
+        pInputText
+        id="nombre"
+        [(ngModel)]="clasificador.nombre"
         autocomplete="off"
         maxlength="100"
         fluid

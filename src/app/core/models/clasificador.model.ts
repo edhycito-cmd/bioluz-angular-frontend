@@ -3,7 +3,8 @@ import { PaginatedResult, PaginationQuery } from "./pagination.model";
 /** Coincide con `ClasificadorProps.toPublicObject()` del backend (GET /clasificadores). */
 export interface Clasificador {
   id: string;
-  dominio: string | null;
+  dominio: string;
+  nombre: string | null;
   descripcion: string | null;
   orden: number;
   esActivo: boolean;
@@ -15,17 +16,20 @@ export interface ClasificadorListadoQuery extends PaginationQuery {
   esActivo?: boolean;
 }
 
-/** Payload de POST /clasificadores. El `id` es la PK natural (VarChar 50). */
+/**
+ * Payload de POST /clasificadores. El `id` UUID lo asigna la base de datos;
+ * `dominio` es la clave de negocio única.
+ */
 export interface CrearClasificadorPayload {
-  id: string;
-  dominio?: string | null;
+  dominio: string;
+  nombre?: string | null;
   descripcion?: string | null;
   orden?: number;
 }
 
-/** Payload de PATCH /clasificadores/:id. */
+/** Payload de PATCH /clasificadores/:id. `dominio` no es modificable. */
 export interface ActualizarClasificadorPayload {
-  dominio?: string | null;
+  nombre?: string | null;
   descripcion?: string | null;
   orden?: number;
 }

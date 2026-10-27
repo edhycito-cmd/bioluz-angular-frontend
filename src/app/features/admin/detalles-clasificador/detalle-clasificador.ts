@@ -104,7 +104,9 @@ export class DetalleClasificador {
     if (!resultado) return opciones;
     for (const item of resultado.items) {
       opciones.push({
-        label: item.dominio ? `${item.id} · ${item.dominio}` : item.id,
+        label: item.nombre
+          ? `${item.dominio} · ${item.nombre}`
+          : item.dominio,
         value: item.id,
       });
     }
