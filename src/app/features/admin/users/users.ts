@@ -115,20 +115,20 @@ export class Users {
 
   /** Opciones de género y tipo de documento, desde los detalles de clasificador. */
   protected readonly opcionesGenero = rxResource({
-    stream: () => this.detallesService.listarPorClasificador("genero_id", { limite: 50 }),
+    stream: () => this.detallesService.listarPorCodigoClasificador("GENERO"),
   });
 
   protected readonly opcionesTipoDocumento = rxResource({
     stream: () =>
-      this.detallesService.listarPorClasificador("tipo_documento_id", { limite: 50 }),
+      this.detallesService.listarPorCodigoClasificador("TIPO_DOCUMENTO"),
   });
 
   protected readonly generoOptions = computed<OpcionGenero[]>(() =>
-    aOpcionesNumericas(this.opcionesGenero.value()?.items ?? []),
+    aOpcionesNumericas(this.opcionesGenero.value() ?? []),
   );
 
   protected readonly tipoDocumentoOptions = computed<OpcionTipoDocumento[]>(() =>
-    aOpcionesNumericas(this.opcionesTipoDocumento.value()?.items ?? []),
+    aOpcionesNumericas(this.opcionesTipoDocumento.value() ?? []),
   );
 
   protected readonly filas = computed<UsuarioRow[] | undefined>(() => {
