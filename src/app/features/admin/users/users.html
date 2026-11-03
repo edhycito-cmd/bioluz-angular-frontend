@@ -92,29 +92,29 @@
 
 <p-dialog
   [(visible)]="usuarioDialog"
-  [style]="{ width: 'min(560px, calc(100vw - 2rem))' }"
+  [style]="{ width: 'min(960px, calc(100vw - 2rem))' }"
   header="Nuevo Usuario"
   [modal]="true"
 >
-  <div class="flex flex-col gap-6 pt-2">
-    <div>
-      <label for="login" class="block font-bold mb-3">Correo de acceso</label>
-      <input
-        type="text"
-        pInputText
-        id="login"
-        [(ngModel)]="usuario.login"
-        autocomplete="off"
-        autofocus
-        fluid
-      />
-      @if (loginInvalido()) {
-        <small class="text-red-500">Ingresá un correo electrónico válido.</small>
-      }
-    </div>
-    <div class="grid grid-cols-12 gap-4">
-      <div class="col-span-12 sm:col-span-6">
-        <label for="password" class="block font-bold mb-3">Contraseña</label>
+  <div class="flex flex-col gap-3 pt-1">
+    <div class="grid grid-cols-12 gap-3">
+      <div class="col-span-12 sm:col-span-4">
+        <label for="login" class="block font-bold mb-1">Correo de acceso</label>
+        <input
+          type="text"
+          pInputText
+          id="login"
+          [(ngModel)]="usuario.login"
+          autocomplete="off"
+          autofocus
+          fluid
+        />
+        @if (loginInvalido()) {
+          <small class="text-red-500">Ingresá un correo electrónico válido.</small>
+        }
+      </div>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="password" class="block font-bold mb-1">Contraseña</label>
         <div class="relative">
           <input
             [type]="mostrarPassword ? 'text' : 'password'"
@@ -143,8 +143,8 @@
         }
       </div>
 
-      <div class="col-span-12 sm:col-span-6">
-        <label for="confirmPassword" class="block font-bold mb-3">Confirmar contraseña</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="confirmPassword" class="block font-bold mb-1">Confirmar contraseña</label>
         <div class="relative">
           <input
             [type]="mostrarConfirmPassword ? 'text' : 'password'"
@@ -174,27 +174,27 @@
 
     <span class="block font-bold">Datos de la persona</span>
 
-    <div class="grid grid-cols-12 gap-4">
-      <div class="col-span-12 sm:col-span-6">
-        <label for="nombres" class="block font-bold mb-3">Nombres</label>
+    <div class="grid grid-cols-12 gap-3">
+      <div class="col-span-12 sm:col-span-4">
+        <label for="nombres" class="block font-bold mb-1">Nombres</label>
         <input type="text" pInputText id="nombres" [(ngModel)]="usuario.nombres" fluid />
         @if (nombresInvalido()) {
           <small class="text-red-500">Al menos 2 caracteres.</small>
         }
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="primerApellido" class="block font-bold mb-3">Primer apellido</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="primerApellido" class="block font-bold mb-1">Primer apellido</label>
         <input type="text" pInputText id="primerApellido" [(ngModel)]="usuario.primerApellido" fluid />
         @if (primerApellidoInvalido()) {
           <small class="text-red-500">Al menos 2 caracteres.</small>
         }
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="segundoApellido" class="block font-bold mb-3">Segundo apellido</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="segundoApellido" class="block font-bold mb-1">Segundo apellido</label>
         <input type="text" pInputText id="segundoApellido" [(ngModel)]="usuario.segundoApellido" fluid />
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="genero" class="block font-bold mb-3">Género</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="genero" class="block font-bold mb-1">Género</label>
         <p-select
           id="genero"
           inputId="genero"
@@ -203,14 +203,15 @@
           optionLabel="label"
           optionValue="id"
           placeholder="Seleccioná un género"
+          [appendTo]="'body'"
           fluid
         />
         @if (generoInvalido()) {
           <small class="text-red-500">El género es obligatorio.</small>
         }
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="tipoDocumento" class="block font-bold mb-3">Tipo de documento</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="tipoDocumento" class="block font-bold mb-1">Tipo de documento</label>
         <p-select
           id="tipoDocumento"
           inputId="tipoDocumento"
@@ -220,26 +221,27 @@
           optionValue="id"
           placeholder="Seleccioná un tipo (opcional)"
           [showClear]="true"
+          [appendTo]="'body'"
           fluid
         />
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="numeroDocumento" class="block font-bold mb-3">N° de documento</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="numeroDocumento" class="block font-bold mb-1">N° de documento</label>
         <input type="text" pInputText id="numeroDocumento" [(ngModel)]="usuario.numeroDocumento" fluid />
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="telefono" class="block font-bold mb-3">Teléfono</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="telefono" class="block font-bold mb-1">Teléfono</label>
         <input type="text" pInputText id="telefono" [(ngModel)]="usuario.telefono" fluid />
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="emailPersona" class="block font-bold mb-3">Correo de contacto</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="emailPersona" class="block font-bold mb-1">Correo de contacto</label>
         <input type="text" pInputText id="emailPersona" [(ngModel)]="usuario.email" fluid />
         @if (personaEmailInvalido()) {
           <small class="text-red-500">Ingresá un correo electrónico válido.</small>
         }
       </div>
-      <div class="col-span-12 sm:col-span-6">
-        <label for="fechaNacimiento" class="block font-bold mb-3">Fecha de nacimiento</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="fechaNacimiento" class="block font-bold mb-1">Fecha de nacimiento</label>
         <p-datepicker
           id="fechaNacimiento"
           [(ngModel)]="usuario.fechaNacimiento"
@@ -250,8 +252,32 @@
           fluid
         />
       </div>
-      <div class="col-span-12">
-        <label for="domicilio" class="block font-bold mb-3">Domicilio</label>
+      <div class="col-span-12 sm:col-span-4">
+        <label for="rol" class="block font-bold mb-1">Rol</label>
+        <p-select
+          id="rol"
+          inputId="rol"
+          [(ngModel)]="usuario.idRol"
+          [options]="rolOptions()"
+          optionLabel="label"
+          optionValue="id"
+          placeholder="Seleccioná un rol"
+          filter
+          [filterFields]="['label']"
+          [loading]="roles.isLoading()"
+          [emptyMessage]="'No hay roles disponibles'"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (rolInvalido()) {
+          <small class="text-red-500">El rol es obligatorio.</small>
+        }
+        @if (roles.error()) {
+          <small class="text-red-500">No se pudieron cargar los roles.</small>
+        }
+      </div>
+      <div class="col-span-12 sm:col-span-8">
+        <label for="domicilio" class="block font-bold mb-1">Domicilio</label>
         <input type="text" pInputText id="domicilio" [(ngModel)]="usuario.domicilio" fluid />
       </div>
     </div>

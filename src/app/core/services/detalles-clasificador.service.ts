@@ -32,7 +32,7 @@ export class DetallesClasificadorService {
 
   /**
    * Listado paginado, opcionalmente filtrado por clasificador y/o estado
-   * (permisión `read` sobre `/api/detalles-clasificador`).
+   * (permisión `read` sobre `/api/clasificadores/detalle`).
    */
   listar(
     query: {
@@ -59,7 +59,7 @@ export class DetallesClasificadorService {
 
   obtener(id: string): Observable<DetalleClasificador> {
     return this.http
-      .get<ApiEnvelope<DetalleClasificador>>(`${this.baseUrl}/${id}`)
+      .get<ApiEnvelope<DetalleClasificador>>(`${this.baseUrl}/id/${id}`)
       .pipe(map((res) => res.data));
   }
 

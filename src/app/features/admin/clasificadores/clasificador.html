@@ -39,7 +39,7 @@
   dataKey="id"
   [rowHover]="true"
   [rowsPerPageOptions]="[10, 20, 30]"
-  [globalFilterFields]="['dominio', 'nombre', 'descripcion', 'estado']"
+  [globalFilterFields]="['codigo', 'dominio', 'nombre', 'descripcion', 'estado']"
   currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} clasificadores"
   [showCurrentPageReport]="true"
   [tableStyle]="{ 'min-width': '50rem' }"
@@ -60,6 +60,7 @@
       <th style="width: 3rem">
         <p-tableHeaderCheckbox />
       </th>
+      <th pSortableColumn="codigo">Código <p-sortIcon field="codigo" /></th>
       <th pSortableColumn="dominio">Dominio <p-sortIcon field="dominio" /></th>
       <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
       <th pSortableColumn="descripcion">Descripción <p-sortIcon field="descripcion" /></th>
@@ -73,6 +74,7 @@
       <td style="width: 3rem">
         <p-tableCheckbox [value]="clasificador" />
       </td>
+      <td data-label="Código">{{ clasificador.codigo || '—' }}</td>
       <td data-label="Dominio">{{ clasificador.dominio }}</td>
       <td data-label="Nombre">{{ clasificador.nombre }}</td>
       <td data-label="Descripción">{{ clasificador.descripcion }}</td>
@@ -112,6 +114,22 @@
   [modal]="true"
 >
   <div class="flex flex-col gap-6 pt-2">
+    <div>
+      <label for="codigo" class="block font-bold mb-3">Código</label>
+      <input
+        type="text"
+        pInputText
+        id="codigo"
+        [(ngModel)]="clasificador.codigo"
+        [disabled]="!esNuevo"
+        autocomplete="off"
+        maxlength="50"
+        fluid
+      />
+      @if (submitted && esNuevo && !clasificador.codigo.trim()) {
+        <small class="text-red-500">El código es obligatorio.</small>
+      }
+    </div>
     <div>
       <label for="dominio" class="block font-bold mb-3">Dominio</label>
       <input

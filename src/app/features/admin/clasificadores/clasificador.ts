@@ -24,6 +24,7 @@ import { HasPermission } from "../../../core/directives/has-permission.directive
 /** Fila aplanada del listado, para ordenamiento/filtro global con p-table. */
 interface ClasificadorRow {
   id: string;
+  codigo: string;
   dominio: string;
   nombre: string;
   descripcion: string;
@@ -34,6 +35,7 @@ interface ClasificadorRow {
 
 /** Modelo editable del dialog (igual que sparked pages/crud). */
 interface ClasificadorFormModel {
+  codigo: string;
   dominio: string;
   nombre: string;
   descripcion: string;
@@ -73,6 +75,7 @@ export class Clasificador {
 
   /** Columnas para exportar a CSV (molde sparked pages/crud). */
   protected readonly cols = [
+    { field: "codigo", header: "Código" },
     { field: "dominio", header: "Dominio" },
     { field: "nombre", header: "Nombre" },
     { field: "descripcion", header: "Descripción" },
@@ -90,6 +93,7 @@ export class Clasificador {
     if (resultado === undefined) return undefined;
     return resultado.items.map((item) => ({
       id: item.id,
+      codigo: item.codigo ?? "",
       dominio: item.dominio,
       nombre: item.nombre ?? "",
       descripcion: item.descripcion ?? "",
@@ -134,6 +138,7 @@ export class Clasificador {
   protected editClasificador(row: ClasificadorRow): void {
     this.idEditando = row.id;
     this.clasificador = {
+      codigo: row.codigo,
       dominio: row.dominio,
       nombre: row.nombre,
       descripcion: row.descripcion,
@@ -155,16 +160,18 @@ export class Clasificador {
     const orden = Number(this.clasificador.orden ?? 0);
     if (Number.isNaN(orden) || !Number.isInteger(orden)) return;
 
-    // El `dominio` es la clave de negocio: obligatorio al crear y no editable.
+    // `codigo` y `dominio` son datos de negocio: obligatorios al crear y
+    // no editables después (el backend no los acepta en el PATCH).
+    const codigo = (this.clasificador.codigo ?? "").trim();
     const dominio = (this.clasificador.dominio ?? "").trim();
-    if (this.esNuevo && !dominio) return;
+    if (this.esNuevo && (!codigo || !dominio)) return;
 
     const nombre = (this.clasificador.nombre ?? "").trim() || null;
     const descripcion = (this.clasificador.descripcion ?? "").trim() || null;
 
     this.guardando = true;
     const peticion = this.esNuevo
-      ? this.clasificadoresService.crear({ dominio, nombre, descripcion, orden })
+      ? this.clasificadoresService.crear({ codigo, dominio, nombre, descripcion, orden })
       : this.clasificadoresService.actualizar(this.idEditando as string, {
           nombre,
           descripcion,
@@ -285,6 +292,7 @@ export class Clasificador {
 
 function clasificadorVacio(): ClasificadorFormModel {
   return {
+    codigo: "",
     dominio: "",
     nombre: "",
     descripcion: "",

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiEnvelope } from '../models/auth.model';
 import { Rol, RolListadoQuery } from '../models/rol.model';
@@ -24,6 +24,26 @@ export class RolesService {
     return this.http
       .get<ApiEnvelope<PaginatedResult<Rol>>>(this.baseUrl, { params })
       .pipe(map((res) => res.data));
+  }
+
+  /** Devuelve todos los roles, recorriendo todas las páginas del backend. */
+  listarTodos(): Observable<Rol[]> {
+    return this.listar({ limite: 100, pagina: 1 }).pipe(
+      switchMap((primera) => {
+        const paginasRestantes = Math.max(0, primera.totalPaginas - 1);
+        if (paginasRestantes === 0) return of(primera.items);
+
+        const peticiones = Array.from({ length: paginasRestantes }, (_, i) =>
+          this.listar({ limite: 100, pagina: i + 2 }),
+        );
+        return forkJoin(peticiones).pipe(
+          map((resto) => [
+            ...primera.items,
+            ...resto.flatMap((pagina) => pagina.items),
+          ]),
+        );
+      }),
+    );
   }
 
   obtener(id: string): Observable<Rol> {

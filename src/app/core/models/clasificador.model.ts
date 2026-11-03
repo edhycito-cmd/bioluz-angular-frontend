@@ -3,6 +3,7 @@ import { PaginatedResult, PaginationQuery } from "./pagination.model";
 /** Coincide con `ClasificadorProps.toPublicObject()` del backend (GET /clasificadores). */
 export interface Clasificador {
   id: string;
+  codigo: string | null;
   dominio: string;
   nombre: string | null;
   descripcion: string | null;
@@ -18,23 +19,24 @@ export interface ClasificadorListadoQuery extends PaginationQuery {
 
 /**
  * Payload de POST /clasificadores. El `id` UUID lo asigna la base de datos;
- * `dominio` es la clave de negocio única.
+ * `codigo` y `dominio` son obligatorios.
  */
 export interface CrearClasificadorPayload {
+  codigo: string;
   dominio: string;
   nombre?: string | null;
   descripcion?: string | null;
   orden?: number;
 }
 
-/** Payload de PATCH /clasificadores/:id. `dominio` no es modificable. */
+/** Payload de PATCH /clasificadores/:id. `codigo` y `dominio` no son modificables. */
 export interface ActualizarClasificadorPayload {
   nombre?: string | null;
   descripcion?: string | null;
   orden?: number;
 }
 
-/** Coincide con `DetalleClasificadorProps.toPublicObject()` (GET /detalles-clasificador). */
+/** Coincide con `DetalleClasificadorProps.toPublicObject()` (GET /clasificadores/detalle). */
 export interface DetalleClasificador {
   id: string;
   codigo: string | null;
@@ -52,7 +54,7 @@ export interface DetalleClasificadorListadoQuery extends PaginationQuery {
   esActivo?: boolean;
 }
 
-/** Payload de POST /detalles-clasificador. La PK es UUID generada por el backend. */
+/** Payload de POST /clasificadores/detalle. La PK es UUID generada por el backend. */
 export interface CrearDetalleClasificadorPayload {
   codigo?: string | null;
   nombre?: string | null;
@@ -61,7 +63,7 @@ export interface CrearDetalleClasificadorPayload {
   idClasificador?: string | null;
 }
 
-/** Payload de PATCH /detalles-clasificador/:id. */
+/** Payload de PATCH /clasificadores/detalle/:id. */
 export interface ActualizarDetalleClasificadorPayload {
   codigo?: string | null;
   nombre?: string | null;

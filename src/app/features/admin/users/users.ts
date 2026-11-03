@@ -20,6 +20,7 @@ import { ConfirmDialogModule } from "@openng/optimus-ui/confirmdialog";
 import { UsersService } from "../../../core/services/users.service";
 import { AuthService } from "../../../core/services/auth.service";
 import { DetallesClasificadorService } from "../../../core/services/detalles-clasificador.service";
+import { RolesService } from "../../../core/services/roles.service";
 import { HasPermission } from "../../../core/directives/has-permission.directive";
 import {
   RegistrarUsuarioConPersonaPayload,
@@ -47,6 +48,11 @@ interface OpcionTipoDocumento {
   label: string;
 }
 
+interface OpcionRol {
+  id: string;
+  label: string;
+}
+
 /** Modelo del dialog "Nuevo Usuario" (igual que sparked pages/crud). */
 interface NuevoUsuarioModel {
   login: string;
@@ -61,6 +67,7 @@ interface NuevoUsuarioModel {
   telefono: string;
   email: string;
   fechaNacimiento: Date | null;
+  idRol: string | null;
   domicilio: string;
 }
 
@@ -93,6 +100,7 @@ export class Users {
   private readonly usersService = inject(UsersService);
   private readonly authService = inject(AuthService);
   private readonly detallesService = inject(DetallesClasificadorService);
+  private readonly rolesService = inject(RolesService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
 
@@ -129,6 +137,25 @@ export class Users {
 
   protected readonly tipoDocumentoOptions = computed<OpcionTipoDocumento[]>(() =>
     aOpcionesNumericas(this.opcionesTipoDocumento.value() ?? []),
+  );
+
+  /** Catálogo completo de roles devuelto por GET /roles. */
+  protected readonly roles = rxResource({
+    stream: () => this.rolesService.listarTodos(),
+  });
+
+  protected readonly rolOptions = computed<OpcionRol[]>(() =>
+    (this.roles.value() ?? [])
+      .slice()
+      .sort(
+        (a, b) =>
+          Number(b.esActivo) - Number(a.esActivo) ||
+          a.rol.localeCompare(b.rol),
+      )
+      .map((rol) => ({
+        id: rol.id,
+        label: `${rol.rol} — ${rol.descripcion}${rol.esActivo ? "" : " (inactivo)"}`,
+      })),
   );
 
   protected readonly filas = computed<UsuarioRow[] | undefined>(() => {
@@ -170,6 +197,8 @@ export class Users {
     this.submitted = false;
     this.mostrarPassword = false;
     this.mostrarConfirmPassword = false;
+    // Refresca el catálogo para no trabajar con una lista vieja o incompleta.
+    this.roles.reload();
     this.usuarioDialog = true;
   }
 
@@ -199,6 +228,7 @@ export class Users {
       .registrarConPersona({
         login: this.usuario.login.trim(),
         password: this.usuario.password,
+        idRol: this.usuario.idRol as string,
         persona: personaDesdeModelo(this.usuario),
       })
       .subscribe({
@@ -277,7 +307,7 @@ export class Users {
     const u = this.usuario;
 
     if (!MAIL_OK(u.login.trim())) errores.push("login");
-    if (! PASSWORD_OK(u.password)) errores.push("password");
+    if (!PASSWORD_OK(u.password)) errores.push("password");
     if (!u.confirmPassword || u.confirmPassword !== u.password) {
       errores.push("confirmPassword");
     }
@@ -285,6 +315,7 @@ export class Users {
     if (u.primerApellido.trim().length < 2) errores.push("primerApellido");
     if (u.generoId === null) errores.push("generoId");
     if (!MAIL_OK(u.email.trim())) errores.push("personaEmail");
+    if (!u.idRol) errores.push("idRol");
 
     return errores;
   }
@@ -319,6 +350,10 @@ export class Users {
 
   protected personaEmailInvalido(): boolean {
     return this.submitted && !MAIL_OK(this.usuario.email.trim());
+  }
+
+  protected rolInvalido(): boolean {
+    return this.submitted && !this.usuario.idRol;
   }
 
   protected extractErrorMessage(error: unknown): string {
@@ -367,6 +402,7 @@ function usuarioVacio(): NuevoUsuarioModel {
     telefono: "",
     email: "",
     fechaNacimiento: null,
+    idRol: null,
     domicilio: "",
   };
 }

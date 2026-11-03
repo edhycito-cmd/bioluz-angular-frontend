@@ -78,6 +78,8 @@ export interface UsuarioListadoQuery {
 export interface RegistrarUsuarioConPersonaPayload {
   login: string;
   password: string;
+  /** Rol que se asigna al usuario al momento del alta administrativa. */
+  idRol: string;
   persona: {
     nombres: string;
     primerApellido: string;
