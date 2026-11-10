@@ -1,9 +1,9 @@
-# AGENT.md — Guía del Proyecto MUSPA Frontend
+# AGENT.md — Guía del Proyecto BIOLUZ Frontend
 
 ## Resumen
 
-SPA de **MUSPA** en **Angular 22 standalone** que consume el backend
-`../muspa-nestjs-clean-lite-backend`. Autenticación JWT con refresh automático, Google Sign-In,
+SPA de **BIOLUZ** en **Angular 22 standalone** que consume el backend
+`../bioluz-nestjs-backend`. Autenticación JWT con refresh automático, Google Sign-In,
 permisos Casbin, administración de usuarios/roles/catálogos, perfil con cambio de contraseña y
 tema global persistido.
 
