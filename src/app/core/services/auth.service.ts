@@ -138,7 +138,7 @@ export class AuthService {
     }
 
     return from(
-      locks.request('muspa-auth-refresh', () => firstValueFrom(request$)),
+      locks.request('bioluz-auth-refresh', () => firstValueFrom(request$)),
     );
   }
 

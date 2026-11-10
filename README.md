@@ -1,7 +1,7 @@
-# MUSPA Angular Lite — Frontend (Angular 22)
+# BIOLUZ Angular Lite — Frontend (Angular 22)
 
 SPA standalone en **Angular 22** que consume
-[`muspa-nestjs-clean-lite-backend`](../muspa-nestjs-clean-lite-backend). Incluye autenticación
+[`bioluz-nestjs-backend`](../bioluz-nestjs-backend). Incluye autenticación
 JWT con refresh automático, Google Sign-In, permisos Casbin reflejados en menú y botones,
 administración de usuarios/roles/catálogos, cambio de contraseña y tema global persistido.
 
@@ -211,7 +211,7 @@ npm install
 `proxy.conf.json` reenvía `/api` a `http://localhost:3002`. Levantá el backend en ese puerto:
 
 ```bash
-# en muspa-nestjs-clean-lite-backend
+# en bioluz-nestjs-backend
 npm run start:dev
 
 # en bioluz-angular-frontend

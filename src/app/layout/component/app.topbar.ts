@@ -32,7 +32,7 @@ import { AuthService } from '../../core/services/auth.service';
                         />
                     </g>
                 </svg>
-                <span>MUSPA</span>
+                <span>BIOLUZ</span>
             </a>
         </div>
 
