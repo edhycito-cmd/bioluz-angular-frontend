@@ -1,0 +1,177 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Condiciones fisiológicas</span>
+      <p-button
+        label="Nuevo"
+        icon="pi pi-plus"
+        severity="secondary"
+        *appHasPermission="'create'"
+        (onClick)="openNew()"
+      />
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full sm:w-64"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Buscar..."
+        />
+      </p-iconfield>
+      <p-button
+        label="Exportar"
+        icon="pi pi-upload"
+        severity="secondary"
+        (onClick)="exportCSV()"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  [globalFilterFields]="['codigo', 'nombre', 'estado']"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} condiciones"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '40rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Gestionar Condiciones Fisiológicas</h5>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="codigo" style="min-width: 10rem">
+        Código <p-sortIcon field="codigo" />
+      </th>
+      <th pSortableColumn="nombre" style="min-width: 22rem">
+        Nombre <p-sortIcon field="nombre" />
+      </th>
+      <th pSortableColumn="estado" style="min-width: 8rem">
+        Estado <p-sortIcon field="estado" />
+      </th>
+      <th style="min-width: 8rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-condicion>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="condicion" />
+      </td>
+      <td data-label="Código">{{ condicion.codigo }}</td>
+      <td data-label="Nombre">{{ condicion.nombre }}</td>
+      <td data-label="Estado">
+        <p-tag
+          [value]="condicion.estado"
+          [severity]="condicion.esActivo ? 'success' : 'secondary'"
+        />
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'update'"
+          (onClick)="editCondicion(condicion)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'delete'"
+          (onClick)="eliminar(condicion)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [style]="{ width: 'min(520px, calc(100vw - 2rem))' }"
+  [header]="
+    esNuevo ? 'Nueva Condición Fisiológica' : 'Editar Condición Fisiológica'
+  "
+  [modal]="true"
+>
+  <div class="flex flex-col gap-5 pt-2">
+    <div>
+      <label for="codigo" class="block font-bold mb-2">
+        Código <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        id="codigo"
+        [(ngModel)]="condicion.codigo"
+        autocomplete="off"
+        maxlength="40"
+        placeholder="Ej. EMBARAZO"
+        fluid
+      />
+      @if (submitted && errores().codigo) {
+        <small class="text-red-500">{{ errores().codigo }}</small>
+      }
+    </div>
+    <div>
+      <label for="nombre" class="block font-bold mb-2">
+        Nombre <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        id="nombre"
+        [(ngModel)]="condicion.nombre"
+        autocomplete="off"
+        maxlength="100"
+        placeholder="Nombre de la condición"
+        fluid
+      />
+      @if (submitted && errores().nombre) {
+        <small class="text-red-500">{{ errores().nombre }}</small>
+      }
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="hideDialog()"
+      [disabled]="guardando"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>

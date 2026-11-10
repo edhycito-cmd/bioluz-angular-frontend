@@ -7,5 +7,5 @@ export const environment = {
   // En Google Cloud Console hay que registrar el origen desde el que se sirve
   // esta build (ej. http://192.168.1.50:4200) en "Orígenes autorizados de JavaScript".
   // Si queda vacío, el botón "Sign in with Google" no se muestra en el login.
-  googleClientId: '776610735736-mj0g83kvpt6c2vf48r30qnovm9mbk518.apps.googleusercontent.com',
+  googleClientId: '' //'776610735736-mj0g83kvpt6c2vf48r30qnovm9mbk518.apps.googleusercontent.com',
 };

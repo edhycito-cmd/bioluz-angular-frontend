@@ -1,0 +1,456 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Órdenes de laboratorio</span>
+      <p-button
+        label="Nueva orden"
+        icon="pi pi-plus"
+        severity="secondary"
+        *appHasPermission="'create'"
+        (onClick)="openNew()"
+      />
+    </div>
+  </ng-template>
+
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <input
+        pInputText
+        type="text"
+        class="w-full sm:w-72"
+        [ngModel]="filtro()"
+        (ngModelChange)="filtro.set($event)"
+        placeholder="Buscar folio, paciente, médico..."
+      />
+      <div class="flex gap-2">
+        <p-button
+          icon="pi pi-refresh"
+          severity="secondary"
+          [outlined]="true"
+          pTooltip="Recargar"
+          tooltipPosition="bottom"
+          (onClick)="recargar()"
+        />
+        <p-button
+          label="Exportar"
+          icon="pi pi-upload"
+          severity="secondary"
+          (onClick)="exportar()"
+        />
+      </div>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+@if (errorCarga()) {
+  <small class="mb-3 block text-red-500">
+    No se pudieron cargar las órdenes. Intentá recargar la página.
+  </small>
+}
+
+<p-table
+  styleClass="mobile-card-table"
+  [value]="filasFiltradas()"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [loading]="cargando()"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '78rem' }"
+>
+  <ng-template #caption>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <span class="text-muted-color">
+        Total de órdenes: {{ filasFiltradas().length }}
+      </span>
+      <span class="text-muted-color text-sm">
+        El folio sugerido se calcula por sucursal.
+      </span>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="nroFolio" style="min-width: 6rem">
+        Folio <p-sortIcon field="nroFolio" />
+      </th>
+      <th pSortableColumn="fechaSolicitud" style="min-width: 8rem">
+        Fecha <p-sortIcon field="fechaSolicitud" />
+      </th>
+      <th style="min-width: 14rem">Paciente</th>
+      <th style="min-width: 14rem">Médico</th>
+      <th style="min-width: 12rem">Sucursal</th>
+      <th style="min-width: 12rem">Institución</th>
+      <th style="min-width: 7rem">Edad</th>
+      <th style="min-width: 8rem">Género</th>
+      <th pSortableColumn="estado" style="min-width: 8rem">
+        Estado <p-sortIcon field="estado" />
+      </th>
+      <th style="min-width: 7rem">Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-orden>
+    <tr>
+      <td data-label="Folio">
+        <span class="font-semibold">#{{ orden.nroFolio }}</span>
+      </td>
+      <td data-label="Fecha">{{ fechaTexto(orden.fechaSolicitud) }}</td>
+      <td data-label="Paciente">
+        <div class="font-medium">{{ pacienteLabel(orden.idPaciente) }}</div>
+      </td>
+      <td data-label="Médico">
+        <div>{{ medicoLabel(orden.idMedico) }}</div>
+      </td>
+      <td data-label="Sucursal">{{ sucursalLabel(orden.idSucursal) }}</td>
+      <td data-label="Institución">
+        {{ institucionLabel(orden.idInstitucion) }}
+      </td>
+      <td data-label="Edad">{{ edadTexto(orden) }}</td>
+      <td data-label="Género">{{ generoLabel(orden.generoId) }}</td>
+      <td data-label="Estado">
+        <p-tag
+          [value]="orden.estado"
+          [severity]="estadoSeverity(orden.estado)"
+        />
+      </td>
+      <td data-label="Acciones">
+        <div class="flex gap-2">
+          <p-button
+            icon="pi pi-pencil"
+            [rounded]="true"
+            [outlined]="true"
+            pTooltip="Editar"
+            tooltipPosition="top"
+            *appHasPermission="'update'"
+            (onClick)="openEdit(orden)"
+          />
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            [rounded]="true"
+            [outlined]="true"
+            pTooltip="Eliminar"
+            tooltipPosition="top"
+            *appHasPermission="'delete'"
+            (onClick)="eliminar(orden)"
+          />
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="10" class="py-8 text-center text-muted-color">
+        No hay órdenes registradas. Usá “Nueva orden” para crear la primera.
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  (onHide)="hideDialog()"
+  [style]="{ width: 'min(980px, calc(100vw - 2rem))' }"
+  [header]="tituloDialogo()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="order-dialog">
+    <div class="order-dialog__intro">
+      <i class="pi pi-file-edit" aria-hidden="true"></i>
+      <div>
+        <p class="order-dialog__intro-title">
+          Datos de la solicitud de laboratorio
+        </p>
+        <small class="text-muted-color">
+          Al elegir el paciente se completan automáticamente el género y la
+          edad. Si cambiás la fecha de solicitud, la edad se recalcula.
+        </small>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-4 pt-2">
+      <div class="col-span-12">
+        <span class="order-section-title">Orden</span>
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="nroFolio" class="mb-2 block font-bold">
+          N° de folio <span class="text-red-500">*</span>
+        </label>
+        <p-inputnumber
+          inputId="nroFolio"
+          [ngModel]="orden().nroFolio"
+          (ngModelChange)="setCampo('nroFolio', $event)"
+          [min]="1"
+          [useGrouping]="false"
+          [showButtons]="false"
+          placeholder="Ej. 1"
+          fluid
+        />
+        @if (folioInvalido()) {
+          <small class="mt-1 block text-red-500">
+            El folio debe ser un entero mayor a cero.
+          </small>
+        } @else {
+          <small class="mt-1 block text-muted-color">
+            Se propone el siguiente folio libre de la sucursal.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="fechaSolicitud" class="mb-2 block font-bold">
+          Fecha de solicitud <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          inputId="fechaSolicitud"
+          [ngModel]="orden().fechaSolicitud"
+          (ngModelChange)="onFechaSolicitudChange($event)"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          fluid
+        />
+        @if (invalido('fechaSolicitud')) {
+          <small class="mt-1 block text-red-500">
+            La fecha de solicitud es obligatoria.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="idSucursal" class="mb-2 block font-bold">
+          Sucursal <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="idSucursal"
+          [options]="sucursalOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="orden().idSucursal"
+          (ngModelChange)="onSucursalChange($event)"
+          placeholder="Seleccioná una sucursal"
+          [filter]="true"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (invalido('idSucursal')) {
+          <small class="mt-1 block text-red-500">
+            La sucursal es obligatoria.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="idInstitucion" class="mb-2 block font-bold">
+          Institución <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="idInstitucion"
+          [options]="institucionOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="orden().idInstitucion"
+          (ngModelChange)="setCampo('idInstitucion', $event)"
+          placeholder="Seleccioná una institución"
+          [filter]="true"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (invalido('idInstitucion')) {
+          <small class="mt-1 block text-red-500">
+            La institución es obligatoria.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12">
+        <span class="order-section-title">Paciente y profesional</span>
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="idPaciente" class="mb-2 block font-bold">
+          Paciente <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="idPaciente"
+          [options]="pacienteOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="orden().idPaciente"
+          (ngModelChange)="onPacienteChange($event)"
+          placeholder="Seleccioná un paciente"
+          [filter]="true"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (invalido('idPaciente')) {
+          <small class="mt-1 block text-red-500">
+            El paciente es obligatorio.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="idMedico" class="mb-2 block font-bold">
+          Médico solicitante <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="idMedico"
+          [options]="medicoOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="orden().idMedico"
+          (ngModelChange)="setCampo('idMedico', $event)"
+          placeholder="Seleccioná un médico"
+          [filter]="true"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (invalido('idMedico')) {
+          <small class="mt-1 block text-red-500">
+            El médico solicitante es obligatorio.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="generoId" class="mb-2 block font-bold">
+          Género <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="generoId"
+          [options]="generoOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="orden().generoId"
+          (ngModelChange)="setCampo('generoId', $event)"
+          placeholder="Seleccioná un género"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (invalido('generoId')) {
+          <small class="mt-1 block text-red-500">
+            El género es obligatorio.
+          </small>
+        } @else {
+          <small class="mt-1 block text-muted-color">
+            Se completa desde la persona del paciente.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="estado" class="mb-2 block font-bold">
+          Estado <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="estado"
+          [options]="estadoOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="orden().estado"
+          (ngModelChange)="setCampo('estado', $event)"
+          placeholder="Seleccioná un estado"
+          [appendTo]="'body'"
+          fluid
+        />
+        @if (invalido('estado')) {
+          <small class="mt-1 block text-red-500">
+            El estado es obligatorio.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12">
+        <span class="order-section-title">Edad al momento de la solicitud</span>
+      </div>
+
+      <div class="col-span-12 md:col-span-4">
+        <label for="edadAnios" class="mb-2 block font-bold">Años</label>
+        <p-inputnumber
+          inputId="edadAnios"
+          [ngModel]="orden().edadAnios"
+          (ngModelChange)="setCampo('edadAnios', $event)"
+          [min]="0"
+          [useGrouping]="false"
+          [showButtons]="false"
+          fluid
+        />
+        @if (edadInvalida("edadAnios")) {
+          <small class="mt-1 block text-red-500">
+            Ingresá un entero mayor o igual a cero.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-4">
+        <label for="edadMeses" class="mb-2 block font-bold">Meses</label>
+        <p-inputnumber
+          inputId="edadMeses"
+          [ngModel]="orden().edadMeses"
+          (ngModelChange)="setCampo('edadMeses', $event)"
+          [min]="0"
+          [useGrouping]="false"
+          [showButtons]="false"
+          fluid
+        />
+        @if (edadInvalida("edadMeses")) {
+          <small class="mt-1 block text-red-500">
+            Ingresá un entero mayor o igual a cero.
+          </small>
+        }
+      </div>
+
+      <div class="col-span-12 md:col-span-4">
+        <label for="edadDias" class="mb-2 block font-bold">Días</label>
+        <p-inputnumber
+          inputId="edadDias"
+          [ngModel]="orden().edadDias"
+          (ngModelChange)="setCampo('edadDias', $event)"
+          [min]="0"
+          [useGrouping]="false"
+          [showButtons]="false"
+          fluid
+        />
+        @if (edadInvalida("edadDias")) {
+          <small class="mt-1 block text-red-500">
+            Ingresá un entero mayor o igual a cero.
+          </small>
+        }
+      </div>
+    </div>
+
+    @if (formError()) {
+      <small class="mt-4 block text-red-500">{{ formError() }}</small>
+    }
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="hideDialog()"
+    />
+    <p-button
+      label="Guardar orden"
+      icon="pi pi-check"
+      [loading]="guardando()"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>

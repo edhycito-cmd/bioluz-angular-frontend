@@ -1,0 +1,275 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Valores de referencia</span>
+      <p-button
+        label="Nuevo"
+        icon="pi pi-plus"
+        severity="secondary"
+        *appHasPermission="'create'"
+        (onClick)="openNew()"
+      />
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full sm:w-64"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Buscar..."
+        />
+      </p-iconfield>
+      <p-button
+        label="Exportar"
+        icon="pi pi-upload"
+        severity="secondary"
+        (onClick)="exportCSV()"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  [globalFilterFields]="[
+    'tipoDato',
+    'texto',
+    'condicion',
+    'unidad',
+    'tipos',
+    'estado'
+  ]"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} valores"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '72rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Gestionar Valores de Referencia</h5>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="tipoDato" style="min-width: 10rem">
+        Tipo de dato <p-sortIcon field="tipoDato" />
+      </th>
+      <th pSortableColumn="valorMinimo" style="min-width: 7rem">
+        Mínimo <p-sortIcon field="valorMinimo" />
+      </th>
+      <th pSortableColumn="valorMaximo" style="min-width: 7rem">
+        Máximo <p-sortIcon field="valorMaximo" />
+      </th>
+      <th pSortableColumn="texto" style="min-width: 14rem">
+        Texto <p-sortIcon field="texto" />
+      </th>
+      <th pSortableColumn="condicion" style="min-width: 14rem">
+        Condición <p-sortIcon field="condicion" />
+      </th>
+      <th pSortableColumn="unidad" style="min-width: 10rem">
+        Unidad <p-sortIcon field="unidad" />
+      </th>
+      <th pSortableColumn="estado" style="min-width: 8rem">
+        Estado <p-sortIcon field="estado" />
+      </th>
+      <th style="min-width: 8rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-valor>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="valor" />
+      </td>
+      <td data-label="Tipo de dato">{{ valor.tipoDato }}</td>
+      <td data-label="Mínimo">{{ valor.valorMinimo ?? "—" }}</td>
+      <td data-label="Máximo">{{ valor.valorMaximo ?? "—" }}</td>
+      <td data-label="Texto">{{ valor.texto || "—" }}</td>
+      <td data-label="Condición">{{ valor.condicion }}</td>
+      <td data-label="Unidad">{{ valor.unidad }}</td>
+      <td data-label="Estado">
+        <p-tag
+          [value]="valor.estado"
+          [severity]="valor.esActivo ? 'success' : 'secondary'"
+        />
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'update'"
+          (onClick)="editValor(valor)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'delete'"
+          (onClick)="eliminar(valor)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [style]="{ width: 'min(680px, calc(100vw - 2rem))' }"
+  [header]="esNuevo ? 'Nuevo Valor de Referencia' : 'Editar Valor de Referencia'"
+  [modal]="true"
+>
+  <div class="grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2">
+    <div>
+      <label for="tipoDato" class="block font-bold mb-2">
+        Tipo de dato <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        id="tipoDato"
+        [(ngModel)]="valor.tipoDato"
+        autocomplete="off"
+        maxlength="50"
+        placeholder="Ej. NUMERICO"
+        fluid
+      />
+      @if (submitted && errores().tipoDato) {
+        <small class="text-red-500">{{ errores().tipoDato }}</small>
+      }
+    </div>
+    <div>
+      <label for="tipos" class="block font-bold mb-2">Tipos</label>
+      <input
+        type="text"
+        pInputText
+        id="tipos"
+        [(ngModel)]="valor.tipos"
+        autocomplete="off"
+        maxlength="100"
+        placeholder="Clasificación adicional"
+        fluid
+      />
+      @if (submitted && errores().tipos) {
+        <small class="text-red-500">{{ errores().tipos }}</small>
+      }
+    </div>
+    <div>
+      <label for="valorMinimo" class="block font-bold mb-2">Valor mínimo</label>
+      <p-inputnumber
+        inputId="valorMinimo"
+        [(ngModel)]="valor.valorMinimo"
+        [useGrouping]="false"
+        fluid
+      />
+    </div>
+    <div>
+      <label for="valorMaximo" class="block font-bold mb-2">Valor máximo</label>
+      <p-inputnumber
+        inputId="valorMaximo"
+        [(ngModel)]="valor.valorMaximo"
+        [useGrouping]="false"
+        fluid
+      />
+      @if (submitted && errores().valorMaximo) {
+        <small class="text-red-500">{{ errores().valorMaximo }}</small>
+      }
+    </div>
+    <div class="sm:col-span-2">
+      <label for="texto" class="block font-bold mb-2">Texto</label>
+      <input
+        type="text"
+        pInputText
+        id="texto"
+        [(ngModel)]="valor.texto"
+        autocomplete="off"
+        maxlength="255"
+        placeholder="Valor de referencia cuando no es numérico"
+        fluid
+      />
+      @if (submitted && errores().texto) {
+        <small class="text-red-500">{{ errores().texto }}</small>
+      }
+    </div>
+    <div>
+      <label for="idCondicion" class="block font-bold mb-2">
+        Condición fisiológica
+      </label>
+      <p-select
+        inputId="idCondicion"
+        [options]="condicionOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="valor.idCondicion"
+        placeholder="Sin condición"
+        [showClear]="true"
+        appendTo="body"
+        fluid
+      />
+    </div>
+    <div>
+      <label for="idUnidadMedida" class="block font-bold mb-2">
+        Unidad de medida
+      </label>
+      <p-select
+        inputId="idUnidadMedida"
+        [options]="unidadOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="valor.idUnidadMedida"
+        placeholder="Sin unidad"
+        [showClear]="true"
+        appendTo="body"
+        fluid
+      />
+    </div>
+    <div class="sm:col-span-2">
+      <label for="descripcion" class="block font-bold mb-2">Descripción</label>
+      <textarea
+        id="descripcion"
+        pTextarea
+        rows="3"
+        [(ngModel)]="valor.descripcion"
+        fluid
+      ></textarea>
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="hideDialog()"
+      [disabled]="guardando"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>

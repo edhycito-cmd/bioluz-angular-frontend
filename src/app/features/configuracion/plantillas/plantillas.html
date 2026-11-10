@@ -1,0 +1,195 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Plantillas de informes</span>
+      <p-button
+        label="Nuevo"
+        icon="pi pi-plus"
+        severity="secondary"
+        *appHasPermission="'create'"
+        (onClick)="openNew()"
+      />
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full sm:w-64"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Buscar..."
+        />
+      </p-iconfield>
+      <p-button
+        label="Exportar"
+        icon="pi pi-upload"
+        severity="secondary"
+        (onClick)="exportCSV()"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  [globalFilterFields]="['nombre', 'formato', 'resumen', 'estado']"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} plantillas"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '60rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Gestionar Plantillas de Informes</h5>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="nombre" style="min-width: 18rem">
+        Nombre <p-sortIcon field="nombre" />
+      </th>
+      <th pSortableColumn="formato" style="min-width: 16rem">
+        Formato <p-sortIcon field="formato" />
+      </th>
+      <th pSortableColumn="resumen" style="min-width: 28rem">
+        Contenido <p-sortIcon field="resumen" />
+      </th>
+      <th pSortableColumn="estado" style="min-width: 8rem">
+        Estado <p-sortIcon field="estado" />
+      </th>
+      <th style="min-width: 8rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-plantilla>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="plantilla" />
+      </td>
+      <td data-label="Nombre">{{ plantilla.nombre }}</td>
+      <td data-label="Formato">{{ plantilla.formato }}</td>
+      <td data-label="Contenido">{{ plantilla.resumen }}</td>
+      <td data-label="Estado">
+        <p-tag
+          [value]="plantilla.estado"
+          [severity]="plantilla.esActivo ? 'success' : 'secondary'"
+        />
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'update'"
+          (onClick)="editPlantilla(plantilla)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'delete'"
+          (onClick)="eliminar(plantilla)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [style]="{ width: 'min(640px, calc(100vw - 2rem))' }"
+  [header]="esNuevo ? 'Nueva Plantilla' : 'Editar Plantilla'"
+  [modal]="true"
+>
+  <div class="flex flex-col gap-5 pt-2">
+    <div>
+      <label for="nombre" class="block font-bold mb-2">
+        Nombre <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        id="nombre"
+        [(ngModel)]="plantilla.nombre"
+        autocomplete="off"
+        maxlength="150"
+        placeholder="Nombre de la plantilla"
+        fluid
+      />
+      @if (submitted && errores().nombre) {
+        <small class="text-red-500">{{ errores().nombre }}</small>
+      }
+    </div>
+    <div>
+      <label for="formatoInformeId" class="block font-bold mb-2">
+        Formato de informe <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        inputId="formatoInformeId"
+        [options]="formatoOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="plantilla.formatoInformeId"
+        placeholder="Seleccioná un formato"
+        appendTo="body"
+        fluid
+      />
+      @if (submitted && errores().formatoInformeId) {
+        <small class="text-red-500">{{ errores().formatoInformeId }}</small>
+      }
+    </div>
+    <div>
+      <label for="plantilla" class="block font-bold mb-2">
+        Contenido de la plantilla <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        id="plantilla"
+        pTextarea
+        rows="12"
+        [(ngModel)]="plantilla.plantilla"
+        placeholder="Escribí el contenido que se usará para generar el informe"
+        fluid
+      ></textarea>
+      @if (submitted && errores().plantilla) {
+        <small class="text-red-500">{{ errores().plantilla }}</small>
+      }
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="hideDialog()"
+      [disabled]="guardando"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>

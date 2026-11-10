@@ -1,0 +1,95 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Reporte de resultados</span>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full sm:w-64"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Buscar..."
+        />
+      </p-iconfield>
+      <p-button
+        label="Exportar"
+        icon="pi pi-upload"
+        severity="secondary"
+        (onClick)="exportCSV()"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  [globalFilterFields]="[
+    'examen',
+    'informe',
+    'valorTexto',
+    'interpretacion',
+    'documento'
+  ]"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} resultados"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '70rem' }"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Resultados de laboratorio</h5>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="examen" style="min-width: 18rem">
+        Examen <p-sortIcon field="examen" />
+      </th>
+      <th pSortableColumn="informe" style="min-width: 14rem">
+        Informe <p-sortIcon field="informe" />
+      </th>
+      <th pSortableColumn="valorNumerico" style="min-width: 10rem">
+        Valor numérico <p-sortIcon field="valorNumerico" />
+      </th>
+      <th pSortableColumn="valorTexto" style="min-width: 14rem">
+        Valor texto <p-sortIcon field="valorTexto" />
+      </th>
+      <th pSortableColumn="interpretacion" style="min-width: 18rem">
+        Interpretación <p-sortIcon field="interpretacion" />
+      </th>
+      <th pSortableColumn="documento" style="min-width: 14rem">
+        Documento <p-sortIcon field="documento" />
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-resultado>
+    <tr>
+      <td data-label="Examen">{{ resultado.examen }}</td>
+      <td data-label="Informe">{{ resultado.informe }}</td>
+      <td data-label="Valor numérico">{{ resultado.valorNumerico ?? "—" }}</td>
+      <td data-label="Valor texto">{{ resultado.valorTexto || "—" }}</td>
+      <td data-label="Interpretación">{{ resultado.interpretacion || "—" }}</td>
+      <td data-label="Documento">{{ resultado.documento || "—" }}</td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="6" class="text-center py-6">
+        No hay resultados registrados.
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

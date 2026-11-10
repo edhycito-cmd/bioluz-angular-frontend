@@ -6,5 +6,5 @@ export const environment = {
   // Debe crearse en Google Cloud Console → Credenciales → "ID de cliente OAuth"
   // con "Orígenes autorizados de JavaScript" = http://localhost:4200 (dev).
   // Si queda vacío, el botón "Ingresar con google" no se muestra en el login.
-  googleClientId: '776610735736-mj0g83kvpt6c2vf48r30qnovm9mbk518.apps.googleusercontent.com',
+  googleClientId: '' //'776610735736-mj0g83kvpt6c2vf48r30qnovm9mbk518.apps.googleusercontent.com',
 };

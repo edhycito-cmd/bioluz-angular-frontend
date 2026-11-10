@@ -40,4 +40,24 @@ export default [
     loadComponent: () =>
       import("./roles-usuarios/roles-usuarios").then((m) => m.RolesUsuarios),
   },
+  {
+    path: "empresa",
+    canActivate: [permissionGuard],
+    loadComponent: () =>
+      import("./empresa/empresa").then((m) => m.EmpresaPage),
+  },
+  {
+    path: "sucursal",
+    canActivate: [permissionGuard],
+    loadComponent: () =>
+      import("./sucursal/sucursal").then((m) => m.SucursalPage),
+  },
+  {
+    path: "institucion-convenio",
+    canActivate: [permissionGuard],
+    loadComponent: () =>
+      import("./institucion-convenio/institucion-convenio").then(
+        (m) => m.InstitucionConvenioPage,
+      ),
+  },
 ] satisfies Routes;

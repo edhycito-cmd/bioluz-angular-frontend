@@ -41,6 +41,19 @@ export const routes: Routes = [
         path: "admin",
         loadChildren: () => import("./features/admin/admin.routes"),
       },
+      {
+        path: "configuracion",
+        loadChildren: () =>
+          import("./features/configuracion/configuracion.routes"),
+      },
+      {
+        path: "laboratorio",
+        loadChildren: () => import("./features/laboratorio/laboratorio.routes"),
+      },
+      {
+        path: "reportes",
+        loadChildren: () => import("./features/reportes/reportes.routes"),
+      },
     ],
   },
   // Última instancia: el authGuard del layout se encarga de rebotar a /login

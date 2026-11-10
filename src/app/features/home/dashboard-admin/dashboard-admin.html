@@ -1,0 +1,49 @@
+<div class="grid grid-cols-12 gap-4 sm:gap-6">
+  <div class="col-span-12">
+    <div class="card">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="m-0 text-2xl font-semibold">Panel de administración</h2>
+          <p class="mt-1 mb-0 text-muted-color">
+            Resumen general de usuarios, pacientes y actividad del laboratorio.
+          </p>
+        </div>
+        <i class="pi pi-chart-line text-4xl text-primary"></i>
+      </div>
+    </div>
+  </div>
+
+  @if (resumen.isLoading()) {
+    <div class="col-span-12">
+      <div class="card flex items-center gap-3 text-muted-color">
+        <i class="pi pi-spin pi-spinner"></i>
+        Cargando indicadores...
+      </div>
+    </div>
+  }
+
+  @if (resumen.error()) {
+    <div class="col-span-12">
+      <div class="card text-red-500">
+        No se pudieron cargar los indicadores del panel.
+      </div>
+    </div>
+  }
+
+  @for (tarjeta of tarjetas(); track tarjeta.label) {
+    <div class="col-span-12 sm:col-span-6 xl:col-span-3">
+      <div class="card">
+        <div class="mb-4 flex items-start justify-between">
+          <span class="text-muted-color">{{ tarjeta.label }}</span>
+          <span
+            class="flex h-10 w-10 items-center justify-center rounded-full"
+            [class]="tarjeta.color"
+          >
+            <i [class]="tarjeta.icono"></i>
+          </span>
+        </div>
+        <div class="text-3xl font-semibold">{{ tarjeta.valor }}</div>
+      </div>
+    </div>
+  }
+</div>

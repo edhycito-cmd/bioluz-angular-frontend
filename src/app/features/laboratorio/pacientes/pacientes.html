@@ -1,0 +1,178 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Pacientes</span>
+      <p-button
+        label="Nuevo"
+        icon="pi pi-plus"
+        severity="secondary"
+        *appHasPermission="'create'"
+        (onClick)="openNew()"
+      />
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full sm:w-64"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Buscar..."
+        />
+      </p-iconfield>
+      <p-button
+        label="Exportar"
+        icon="pi pi-upload"
+        severity="secondary"
+        (onClick)="exportCSV()"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  [globalFilterFields]="['codigo', 'persona', 'estado']"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pacientes"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '44rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Gestionar Pacientes</h5>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="codigo" style="min-width: 10rem">
+        Código <p-sortIcon field="codigo" />
+      </th>
+      <th pSortableColumn="persona" style="min-width: 24rem">
+        Persona <p-sortIcon field="persona" />
+      </th>
+      <th pSortableColumn="estado" style="min-width: 8rem">
+        Estado <p-sortIcon field="estado" />
+      </th>
+      <th style="min-width: 8rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-paciente>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="paciente" />
+      </td>
+      <td data-label="Código">{{ paciente.codigo }}</td>
+      <td data-label="Persona">{{ paciente.persona }}</td>
+      <td data-label="Estado">
+        <p-tag
+          [value]="paciente.estado"
+          [severity]="paciente.esActivo ? 'success' : 'secondary'"
+        />
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'update'"
+          (onClick)="editPaciente(paciente)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'delete'"
+          (onClick)="eliminar(paciente)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [style]="{ width: 'min(540px, calc(100vw - 2rem))' }"
+  [header]="esNuevo ? 'Nuevo Paciente' : 'Editar Paciente'"
+  [modal]="true"
+>
+  <div class="flex flex-col gap-5 pt-2">
+    <div>
+      <label for="idPersona" class="block font-bold mb-2">
+        Persona <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        inputId="idPersona"
+        [options]="personaOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="paciente.idPersona"
+        placeholder="Seleccioná una persona"
+        appendTo="body"
+        fluid
+      />
+      <small class="text-surface-500">
+        El paciente se vincula a una persona ya registrada.
+      </small>
+      @if (submitted && errores().idPersona) {
+        <small class="text-red-500">{{ errores().idPersona }}</small>
+      }
+    </div>
+    <div>
+      <label for="codigo" class="block font-bold mb-2">
+        Código de paciente <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        id="codigo"
+        [(ngModel)]="paciente.codigo"
+        autocomplete="off"
+        maxlength="50"
+        placeholder="Ej. PAC-0001"
+        fluid
+      />
+      @if (submitted && errores().codigo) {
+        <small class="text-red-500">{{ errores().codigo }}</small>
+      }
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="hideDialog()"
+      [disabled]="guardando"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>

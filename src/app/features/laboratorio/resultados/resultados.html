@@ -1,0 +1,248 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
+
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-semibold text-xl mr-2">Resultados</span>
+      <p-button
+        label="Nuevo"
+        icon="pi pi-plus"
+        severity="secondary"
+        *appHasPermission="'create'"
+        (onClick)="openNew()"
+      />
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+      <p-iconfield class="w-full sm:w-auto">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full sm:w-64"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Buscar..."
+        />
+      </p-iconfield>
+      <p-button
+        label="Exportar"
+        icon="pi pi-upload"
+        severity="secondary"
+        (onClick)="exportCSV()"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  styleClass="mobile-card-table"
+  [value]="filas() ?? []"
+  [columns]="cols"
+  [rows]="10"
+  [paginator]="true"
+  [scrollable]="true"
+  dataKey="id"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  [globalFilterFields]="[
+    'examen',
+    'informe',
+    'valorTexto',
+    'interpretacion',
+    'estado'
+  ]"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} resultados"
+  [showCurrentPageReport]="true"
+  [tableStyle]="{ 'min-width': '70rem' }"
+  selectionMode="multiple"
+  [(selection)]="seleccionados"
+>
+  <ng-template #caption>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h5 class="m-0">Gestionar Resultados</h5>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="examen" style="min-width: 18rem">
+        Examen <p-sortIcon field="examen" />
+      </th>
+      <th pSortableColumn="informe" style="min-width: 14rem">
+        Informe <p-sortIcon field="informe" />
+      </th>
+      <th pSortableColumn="valorNumerico" style="min-width: 10rem">
+        Valor numérico <p-sortIcon field="valorNumerico" />
+      </th>
+      <th pSortableColumn="valorTexto" style="min-width: 14rem">
+        Valor texto <p-sortIcon field="valorTexto" />
+      </th>
+      <th pSortableColumn="interpretacion" style="min-width: 16rem">
+        Interpretación <p-sortIcon field="interpretacion" />
+      </th>
+      <th pSortableColumn="estado" style="min-width: 8rem">
+        Estado <p-sortIcon field="estado" />
+      </th>
+      <th style="min-width: 8rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-resultado>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="resultado" />
+      </td>
+      <td data-label="Examen">{{ resultado.examen }}</td>
+      <td data-label="Informe">{{ resultado.informe }}</td>
+      <td data-label="Valor numérico">{{ resultado.valorNumerico ?? "—" }}</td>
+      <td data-label="Valor texto">{{ resultado.valorTexto || "—" }}</td>
+      <td data-label="Interpretación">{{ resultado.interpretacion || "—" }}</td>
+      <td data-label="Estado">
+        <p-tag
+          [value]="resultado.estado"
+          [severity]="resultado.esActivo ? 'success' : 'secondary'"
+        />
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'update'"
+          (onClick)="editResultado(resultado)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          *appHasPermission="'delete'"
+          (onClick)="eliminar(resultado)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [style]="{ width: 'min(660px, calc(100vw - 2rem))' }"
+  [header]="esNuevo ? 'Nuevo Resultado' : 'Editar Resultado'"
+  [modal]="true"
+>
+  <div class="flex flex-col gap-5 pt-2">
+    <div>
+      <label for="idExamen" class="block font-bold mb-2">
+        Examen <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        inputId="idExamen"
+        [options]="examenOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="resultado.idExamen"
+        placeholder="Seleccioná un examen"
+        appendTo="body"
+        fluid
+      />
+      @if (submitted && errores().idExamen) {
+        <small class="text-red-500">{{ errores().idExamen }}</small>
+      }
+    </div>
+    <div>
+      <label for="idInforme" class="block font-bold mb-2">
+        Informe <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        inputId="idInforme"
+        [options]="informeOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="resultado.idInforme"
+        placeholder="Seleccioná un informe"
+        appendTo="body"
+        fluid
+      />
+      @if (submitted && errores().idInforme) {
+        <small class="text-red-500">{{ errores().idInforme }}</small>
+      }
+    </div>
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div>
+        <label for="valorNumerico" class="block font-bold mb-2">
+          Valor numérico
+        </label>
+        <p-inputnumber
+          inputId="valorNumerico"
+          [(ngModel)]="resultado.valorNumerico"
+          [useGrouping]="false"
+          fluid
+        />
+      </div>
+      <div>
+        <label for="valorTexto" class="block font-bold mb-2">Valor texto</label>
+        <input
+          type="text"
+          pInputText
+          id="valorTexto"
+          [(ngModel)]="resultado.valorTexto"
+          autocomplete="off"
+          maxlength="255"
+          fluid
+        />
+      </div>
+    </div>
+    @if (submitted && errores().valorTexto) {
+      <small class="text-red-500">{{ errores().valorTexto }}</small>
+    }
+    <div>
+      <label for="interpretacion" class="block font-bold mb-2">
+        Interpretación
+      </label>
+      <textarea
+        id="interpretacion"
+        pTextarea
+        rows="3"
+        [(ngModel)]="resultado.interpretacion"
+        fluid
+      ></textarea>
+    </div>
+    <div>
+      <label for="documento" class="block font-bold mb-2">
+        Documento / referencia
+      </label>
+      <textarea
+        id="documento"
+        pTextarea
+        rows="2"
+        [(ngModel)]="resultado.documento"
+        fluid
+      ></textarea>
+      <small class="text-surface-500">
+        Ruta o identificador del documento asociado al resultado.
+      </small>
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="hideDialog()"
+      [disabled]="guardando"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
