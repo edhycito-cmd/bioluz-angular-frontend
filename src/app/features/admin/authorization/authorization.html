@@ -2,12 +2,12 @@
 <p class="page-hint">
   Requiere el rol <code>ADMINISTRADOR</code> (o cualquier rol con permiso para administrar
   <code>/api/authorization</code>). El servidor no expone un listado de usuarios todavía, así que
-  el ID de usuario se pega a mano — podés copiarlo desde el Panel.
+  el Identificador de usuario debe ingresarse manualmente; puede copiarlo desde el Panel.
 </p>
 
 @if (permisosPagina().length) {
   <p class="page-hint">
-    Acciones de tu rol sobre esta página:
+    Acciones de su rol sobre esta página:
     <strong>{{ permisosPaginaVisibles().join(' | ') }}</strong>
   </p>
 }
@@ -16,8 +16,8 @@
   <h2>Roles</h2>
 
   <form novalidate>
-    <label for="userId">ID de usuario</label>
-    <input id="userId" type="text" [formField]="roleForm.userId" placeholder="UUID del usuario" />
+    <label for="userId">Identificador de usuario</label>
+    <input id="userId" type="text" [formField]="roleForm.userId" placeholder="Identificador del usuario (UUID)" />
     @let userIdField = roleForm.userId();
     @if (userIdField.touched() && userIdField.invalid()) {
       <ul class="field-errors">
@@ -28,7 +28,7 @@
     }
 
     <label for="role">Rol</label>
-    <input id="role" type="text" [formField]="roleForm.role" placeholder="ADMINISTRADOR, USUARIO, ..." />
+    <input id="role" type="text" [formField]="roleForm.role" placeholder="ADMINISTRADOR, PACIENTE, ..." />
     @let roleField = roleForm.role();
     @if (roleField.touched() && roleField.invalid()) {
       <ul class="field-errors">
@@ -75,7 +75,7 @@
 
   <form novalidate>
     <label for="policyRole">Rol</label>
-    <input id="policyRole" type="text" [formField]="policyForm.role" placeholder="ADMINISTRADOR, USUARIO, ..." />
+    <input id="policyRole" type="text" [formField]="policyForm.role" placeholder="ADMINISTRADOR, PACIENTE, ..." />
     @let policyRoleField = policyForm.role();
     @if (policyRoleField.touched() && policyRoleField.invalid()) {
       <ul class="field-errors">

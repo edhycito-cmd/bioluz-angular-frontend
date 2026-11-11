@@ -258,10 +258,10 @@ export class ValoresReferenciaPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Valor de referencia ${guardado.tipoDato} creado`
-            : `Valor de referencia ${guardado.tipoDato} actualizado`,
+            ? `Se creó el valor de referencia ${guardado.tipoDato}.`
+            : `Se actualizó el valor de referencia ${guardado.tipoDato}.`,
           life: 3000,
         });
         this.valores.reload();
@@ -270,7 +270,7 @@ export class ValoresReferenciaPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar el valor de referencia",
+          summary: "No fue posible guardar el valor de referencia",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -290,8 +290,8 @@ export class ValoresReferenciaPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Valor de referencia ${row.tipoDato} eliminado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó el valor de referencia ${row.tipoDato}.`,
               life: 3000,
             });
             this.valores.reload();
@@ -299,7 +299,7 @@ export class ValoresReferenciaPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -331,10 +331,10 @@ export class ValoresReferenciaPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar valores de referencia.";
+        return "No tiene permiso para gestionar valores de referencia.";
       if (error.status === 409)
         return "No se puede eliminar el valor de referencia porque tiene registros asociados.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

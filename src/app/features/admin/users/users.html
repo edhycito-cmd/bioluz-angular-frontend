@@ -38,7 +38,7 @@
 >
   <ng-template #caption>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar Usuarios</h5>
+      <h5 class="m-0">Gestionar usuarios</h5>
       <p-iconfield class="w-full sm:w-auto">
         <p-inputicon styleClass="pi pi-search" />
         <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
@@ -93,7 +93,7 @@
 <p-dialog
   [(visible)]="usuarioDialog"
   [style]="{ width: 'min(960px, calc(100vw - 2rem))' }"
-  header="Nuevo Usuario"
+  header="Nuevo usuario"
   [modal]="true"
 >
   <div class="flex flex-col gap-3 pt-1">
@@ -110,7 +110,7 @@
           fluid
         />
         @if (loginInvalido()) {
-          <small class="text-red-500">Ingresá un correo electrónico válido.</small>
+          <small class="text-red-500">Introduzca un correo electrónico válido.</small>
         }
       </div>
       <div class="col-span-12 sm:col-span-4">
@@ -202,7 +202,7 @@
           [options]="generoOptions()"
           optionLabel="label"
           optionValue="id"
-          placeholder="Seleccioná un género"
+          placeholder="Seleccione un género"
           [appendTo]="'body'"
           fluid
         />
@@ -219,14 +219,14 @@
           [options]="tipoDocumentoOptions()"
           optionLabel="label"
           optionValue="id"
-          placeholder="Seleccioná un tipo (opcional)"
+          placeholder="Seleccione un tipo (opcional)"
           [showClear]="true"
           [appendTo]="'body'"
           fluid
         />
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="numeroDocumento" class="block font-bold mb-1">N° de documento</label>
+        <label for="numeroDocumento" class="block font-bold mb-1">N.° de documento</label>
         <input type="text" pInputText id="numeroDocumento" [(ngModel)]="usuario.numeroDocumento" fluid />
       </div>
       <div class="col-span-12 sm:col-span-4">
@@ -237,7 +237,7 @@
         <label for="emailPersona" class="block font-bold mb-1">Correo de contacto</label>
         <input type="text" pInputText id="emailPersona" [(ngModel)]="usuario.email" fluid />
         @if (personaEmailInvalido()) {
-          <small class="text-red-500">Ingresá un correo electrónico válido.</small>
+          <small class="text-red-500">Introduzca un correo electrónico válido.</small>
         }
       </div>
       <div class="col-span-12 sm:col-span-4">
@@ -261,7 +261,7 @@
           [options]="rolOptions()"
           optionLabel="label"
           optionValue="id"
-          placeholder="Seleccioná un rol"
+          placeholder="Seleccione un rol"
           filter
           [filterFields]="['label']"
           [loading]="roles.isLoading()"
@@ -273,7 +273,7 @@
           <small class="text-red-500">El rol es obligatorio.</small>
         }
         @if (roles.error()) {
-          <small class="text-red-500">No se pudieron cargar los roles.</small>
+          <small class="text-red-500">No fue posible cargar los roles.</small>
         }
       </div>
       <div class="col-span-12 sm:col-span-8">
@@ -283,7 +283,7 @@
     </div>
 
     <p-message severity="info" size="small" variant="simple">
-      El usuario se registra en estado inactivo; usá el botón de activación del
+      El usuario se registra en estado inactivo; utilice el botón de activación del
       listado para habilitarlo.
     </p-message>
   </div>

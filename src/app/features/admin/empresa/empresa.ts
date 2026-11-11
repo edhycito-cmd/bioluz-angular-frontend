@@ -79,7 +79,7 @@ export class EmpresaPage {
   protected readonly cols = [
     { field: "nombre", header: "Nombre" },
     { field: "nit", header: "NIT" },
-    { field: "slogan", header: "Slogan" },
+    { field: "slogan", header: "Eslogan" },
     { field: "estado", header: "Estado" },
   ];
 
@@ -116,7 +116,7 @@ export class EmpresaPage {
       errores.nit = "El NIT no debe superar los 20 caracteres.";
 
     if (this.empresa.slogan.trim().length > 500)
-      errores.slogan = "El slogan no debe superar los 500 caracteres.";
+      errores.slogan = "El eslogan no debe superar los 500 caracteres.";
 
     return errores;
   }
@@ -177,10 +177,10 @@ export class EmpresaPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Empresa ${guardada.nombre} creada`
-            : `Empresa ${guardada.nombre} actualizada`,
+            ? `Se creó la empresa ${guardada.nombre}.`
+            : `Se actualizó la empresa ${guardada.nombre}.`,
           life: 3000,
         });
         this.empresas.reload();
@@ -189,7 +189,7 @@ export class EmpresaPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar la empresa",
+          summary: "No fue posible guardar la empresa",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -209,8 +209,8 @@ export class EmpresaPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Empresa ${row.nombre} eliminada`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó la empresa ${row.nombre}.`,
               life: 3000,
             });
             this.empresas.reload();
@@ -218,7 +218,7 @@ export class EmpresaPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -243,9 +243,9 @@ export class EmpresaPage {
       const body = error.error as { message?: string | string[] } | undefined;
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
-      if (error.status === 403) return "No tenés permiso para gestionar empresas.";
+      if (error.status === 403) return "No tiene permiso para gestionar empresas.";
       if (error.status === 409) return "Ya existe una empresa con esos datos.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

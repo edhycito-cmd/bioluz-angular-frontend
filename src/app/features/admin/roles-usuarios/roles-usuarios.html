@@ -48,7 +48,7 @@
 >
   <ng-template #caption>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar Roles de Usuarios</h5>
+      <h5 class="m-0">Gestionar roles de usuarios</h5>
       <p-iconfield class="w-full sm:w-auto">
         <p-inputicon styleClass="pi pi-search" />
         <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
@@ -124,7 +124,7 @@
 <p-dialog
   [(visible)]="asignacionDialog"
   [style]="{ width: 'min(450px, calc(100vw - 2rem))' }"
-  [header]="esNueva ? 'Asignar Rol a Usuario' : 'Editar Asignación de Rol'"
+  [header]="esNueva ? 'Asignar rol a usuario' : 'Editar asignación de rol'"
   [modal]="true"
 >
   <div class="flex flex-col gap-6 pt-2">
@@ -138,7 +138,7 @@
         optionLabel="label"
         optionValue="id"
         [editable]="false"
-        placeholder="Seleccioná un usuario"
+        placeholder="Seleccione un usuario"
         [disabled]="!esNueva"
         filter
         [filterFields]="['label']"
@@ -158,7 +158,7 @@
         optionLabel="label"
         optionValue="id"
         [editable]="false"
-        placeholder="Seleccioná un rol"
+        placeholder="Seleccione un rol"
         filter
         [filterFields]="['label']"
         fluid
@@ -169,7 +169,7 @@
     </div>
     @if (!esNueva) {
       <p-message severity="info" size="small" variant="simple">
-        Podés cambiar el rol y la fecha de inicio. El usuario de la asignación no se modifica.
+        Puede cambiar el rol y la fecha de inicio. El usuario de la asignación no se modifica.
       </p-message>
     }
     <div>

@@ -94,7 +94,7 @@ export class PerfilUsuario {
     );
 
     required(path.verifyPassword, {
-      message: "Verificá la nueva contraseña",
+      message: "Verifique la nueva contraseña",
     });
     validate(path.verifyPassword, (ctx) =>
       ctx.value() === ctx.valueOf(path.newPassword)
@@ -137,7 +137,7 @@ export class PerfilUsuario {
         this.error.set(
           this.extractErrorMessage(
             error,
-            "No se pudo cargar el perfil. Intentá de nuevo.",
+            "No fue posible cargar el perfil. Intente nuevamente.",
           ),
         );
       },
@@ -175,7 +175,7 @@ export class PerfilUsuario {
         this.passwordError.set(
           this.extractErrorMessage(
             error,
-            "No se pudo cambiar la contraseña. Intentá de nuevo.",
+            "No fue posible cambiar la contraseña. Intente nuevamente.",
           ),
         );
       } finally {

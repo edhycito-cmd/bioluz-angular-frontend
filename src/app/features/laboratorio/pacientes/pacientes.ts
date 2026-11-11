@@ -188,10 +188,10 @@ export class PacientesPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Paciente ${guardado.codigo} creado`
-            : `Paciente ${guardado.codigo} actualizado`,
+            ? `Se creó el paciente ${guardado.codigo}.`
+            : `Se actualizó el paciente ${guardado.codigo}.`,
           life: 3000,
         });
         this.pacientes.reload();
@@ -200,7 +200,7 @@ export class PacientesPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar el paciente",
+          summary: "No fue posible guardar el paciente",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -220,8 +220,8 @@ export class PacientesPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Paciente ${row.codigo} eliminado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó el paciente ${row.codigo}.`,
               life: 3000,
             });
             this.pacientes.reload();
@@ -229,7 +229,7 @@ export class PacientesPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -269,10 +269,10 @@ export class PacientesPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar pacientes.";
+        return "No tiene permiso para gestionar pacientes.";
       if (error.status === 409)
         return "Ya existe un paciente con ese código.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

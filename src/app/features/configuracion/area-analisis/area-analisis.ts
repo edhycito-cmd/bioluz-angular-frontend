@@ -171,10 +171,10 @@ export class AreaAnalisisPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Área ${guardada.nombre} creada`
-            : `Área ${guardada.nombre} actualizada`,
+            ? `Se creó el área ${guardada.nombre}.`
+            : `Se actualizó el área ${guardada.nombre}.`,
           life: 3000,
         });
         this.areas.reload();
@@ -183,7 +183,7 @@ export class AreaAnalisisPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar el área de análisis",
+          summary: "No fue posible guardar el área de análisis",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -203,8 +203,8 @@ export class AreaAnalisisPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Área ${row.nombre} eliminada`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó el área ${row.nombre}.`,
               life: 3000,
             });
             this.areas.reload();
@@ -212,7 +212,7 @@ export class AreaAnalisisPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -234,10 +234,10 @@ export class AreaAnalisisPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar áreas de análisis.";
+        return "No tiene permiso para gestionar áreas de análisis.";
       if (error.status === 409)
         return "No se puede eliminar el área porque tiene registros asociados.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

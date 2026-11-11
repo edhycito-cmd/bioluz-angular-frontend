@@ -209,10 +209,10 @@ export class PlantillasPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Plantilla ${guardada.nombre} creada`
-            : `Plantilla ${guardada.nombre} actualizada`,
+            ? `Se creó la plantilla ${guardada.nombre}.`
+            : `Se actualizó la plantilla ${guardada.nombre}.`,
           life: 3000,
         });
         this.plantillas.reload();
@@ -221,7 +221,7 @@ export class PlantillasPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar la plantilla",
+          summary: "No fue posible guardar la plantilla",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -241,8 +241,8 @@ export class PlantillasPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Plantilla ${row.nombre} eliminada`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó la plantilla ${row.nombre}.`,
               life: 3000,
             });
             this.plantillas.reload();
@@ -250,7 +250,7 @@ export class PlantillasPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -272,10 +272,10 @@ export class PlantillasPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar plantillas.";
+        return "No tiene permiso para gestionar plantillas.";
       if (error.status === 409)
         return "No se puede eliminar la plantilla porque tiene registros asociados.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

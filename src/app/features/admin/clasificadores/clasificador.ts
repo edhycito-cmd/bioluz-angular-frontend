@@ -185,10 +185,10 @@ export class Clasificador {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Clasificador ${guardado.dominio} creado`
-            : `Clasificador ${guardado.dominio} actualizado`,
+            ? `Se creó el clasificador ${guardado.dominio}.`
+            : `Se actualizó el clasificador ${guardado.dominio}.`,
           life: 3000,
         });
         this.clasificador = clasificadorVacio();
@@ -198,7 +198,7 @@ export class Clasificador {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "Error",
+          summary: "Se produjo un error",
           detail: this.extractErrorMessage(error),
           life: 5000,
         });
@@ -218,8 +218,8 @@ export class Clasificador {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Clasificador ${row.id} eliminado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó el clasificador ${row.id}.`,
               life: 3000,
             });
             this.clasificador = clasificadorVacio();
@@ -228,7 +228,7 @@ export class Clasificador {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             }),
@@ -257,8 +257,8 @@ export class Clasificador {
             this.seleccionados = null;
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: "Clasificadores eliminados",
+              summary: "Operación realizada correctamente",
+              detail: "Se eliminaron los clasificadores seleccionados.",
               life: 3000,
             });
             this.clasificadores.reload();
@@ -267,7 +267,7 @@ export class Clasificador {
             this.deleteseleccionando = false;
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             });
@@ -283,10 +283,10 @@ export class Clasificador {
       const body = error.error as { message?: string | string[] } | undefined;
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
-      if (error.status === 403) return "No tenés permiso para gestionar clasificadores.";
+      if (error.status === 403) return "No tiene permiso para gestionar clasificadores.";
       if (error.status === 409) return "Ya existe un registro con esa clave.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }
 

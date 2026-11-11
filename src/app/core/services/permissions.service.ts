@@ -46,7 +46,7 @@ export class PermissionsService {
       // El árbol es la única fuente de permisos: ante un fallo quedamos
       // "cargado" con permisos vacíos (deny-by-default).
       catchError((error: unknown) => {
-        console.warn('[Permissions] No se pudo cargar el árbol de menús', error);
+        console.warn('[Permissions] No fue posible cargar el árbol de menús', error);
         return of(false);
       }),
       finalize(() => (this.inFlight = undefined)),

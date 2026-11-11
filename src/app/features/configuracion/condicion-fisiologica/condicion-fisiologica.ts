@@ -168,10 +168,10 @@ export class CondicionFisiologicaPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Condición ${guardada.nombre} creada`
-            : `Condición ${guardada.nombre} actualizada`,
+            ? `Se creó la condición ${guardada.nombre}.`
+            : `Se actualizó la condición ${guardada.nombre}.`,
           life: 3000,
         });
         this.condiciones.reload();
@@ -180,7 +180,7 @@ export class CondicionFisiologicaPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar la condición fisiológica",
+          summary: "No fue posible guardar la condición fisiológica",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -200,8 +200,8 @@ export class CondicionFisiologicaPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Condición ${row.nombre} eliminada`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó la condición ${row.nombre}.`,
               life: 3000,
             });
             this.condiciones.reload();
@@ -209,7 +209,7 @@ export class CondicionFisiologicaPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -224,10 +224,10 @@ export class CondicionFisiologicaPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar condiciones fisiológicas.";
+        return "No tiene permiso para gestionar condiciones fisiológicas.";
       if (error.status === 409)
         return "Ya existe una condición con ese código.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

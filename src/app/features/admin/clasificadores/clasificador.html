@@ -48,7 +48,7 @@
 >
   <ng-template #caption>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar Clasificadores</h5>
+      <h5 class="m-0">Gestionar clasificadores</h5>
       <p-iconfield class="w-full sm:w-auto">
         <p-inputicon styleClass="pi pi-search" />
         <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
@@ -110,7 +110,7 @@
 <p-dialog
   [(visible)]="clasificadorDialog"
   [style]="{ width: 'min(450px, calc(100vw - 2rem))' }"
-  [header]="esNuevo ? 'Nuevo Clasificador' : 'Editar Clasificador'"
+  [header]="esNuevo ? 'Nuevo clasificador' : 'Editar clasificador'"
   [modal]="true"
 >
   <div class="flex flex-col gap-6 pt-2">

@@ -38,7 +38,7 @@
         </h3>
 
         <span class="text-muted-color text-sm">
-          Iniciá sesión para continuar
+          Inicie sesión para continuar
         </span>
       </div>
 
@@ -51,7 +51,7 @@
             Correo electrónico
           </label>
 
-          <input pInputText type="email" id="email" placeholder="Ingresá tu correo electrónico" autocomplete="email"
+          <input pInputText type="email" id="email" placeholder="Introduzca su correo electrónico" autocomplete="email"
             [formField]="loginForm.email" class="w-full h-11 text-base sm:text-sm" />
 
           @if (loginForm.email().invalid() && loginForm.email().touched()) {
@@ -70,7 +70,7 @@
           </label>
 
           <div class="relative">
-            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Ingresá tu contraseña"
+            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Introduzca su contraseña"
               autocomplete="current-password" [formField]="loginForm.password"
               class="w-full h-11 text-base sm:text-sm login-password-input" />
 
@@ -107,12 +107,12 @@
             />
 
             <label for="remember" class="text-surface-700 dark:text-surface-300 text-xs">
-              Recordarme
+              Recordar mi sesión
             </label>
           </div>
 
           <button type="button" class="text-primary text-xs font-medium hover:underline">
-            ¿Olvidaste tu contraseña?
+            ¿Olvidó su contraseña?
           </button>
         </div>
 
@@ -154,7 +154,7 @@
 
           @if (googleReady()) {
           <span class="text-muted-color text-xs">
-            Podés iniciar sesión con tu cuenta de Google y continuar con la misma seguridad.
+            Puede iniciar sesión con su cuenta de Google y continuar con la misma seguridad.
           </span>
           }
         </div>

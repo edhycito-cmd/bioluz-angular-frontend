@@ -53,7 +53,7 @@ interface OpcionRol {
   label: string;
 }
 
-/** Modelo del dialog "Nuevo Usuario" (igual que sparked pages/crud). */
+/** Modelo del dialog "Nuevo usuario" (igual que sparked pages/crud). */
 interface NuevoUsuarioModel {
   login: string;
   password: string;
@@ -240,8 +240,8 @@ export class Users {
           this.mostrarConfirmPassword = false;
           this.messageService.add({
             severity: "success",
-            summary: "Operación exitosa",
-            detail: `Usuario ${respuesta.data.user.email} registrado (queda inactivo hasta su activación)`,
+            summary: "Operación realizada correctamente",
+            detail: `Se registró el usuario ${respuesta.data.user.email}; permanecerá inactivo hasta su activación.`,
             life: 3000,
           });
           this.usuario = usuarioVacio();
@@ -251,7 +251,7 @@ export class Users {
           this.guardando = false;
           this.messageService.add({
             severity: "error",
-            summary: "Error",
+            summary: "Se produjo un error",
             detail: this.extractErrorMessage(error),
             life: 5000,
           });
@@ -262,7 +262,7 @@ export class Users {
   protected cambiarEstado(row: UsuarioRow): void {
     const accion = row.esActivo ? "desactivar" : "activar";
     this.confirmationService.confirm({
-      message: `¿Confirmás ${accion} al usuario ${row.email}?`,
+      message: `¿Confirma que desea ${accion} al usuario ${row.email}?`,
       header: "Confirmar",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Sí",
@@ -278,8 +278,8 @@ export class Users {
             this.cambiandoEstado = false;
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Usuario ${row.email} ${row.esActivo ? "desactivado" : "activado"}`,
+              summary: "Operación realizada correctamente",
+              detail: `Se ${row.esActivo ? "desactivó" : "activó"} al usuario ${row.email}.`,
               life: 3000,
             });
             this.usuarios.reload();
@@ -288,7 +288,7 @@ export class Users {
             this.cambiandoEstado = false;
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             });
@@ -361,9 +361,9 @@ export class Users {
       const body = error.error as { message?: string | string[] } | undefined;
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
-      if (error.status === 403) return "No tenés permiso para gestionar usuarios.";
+      if (error.status === 403) return "No tiene permiso para gestionar usuarios.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }
 

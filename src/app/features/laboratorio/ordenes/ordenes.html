@@ -47,7 +47,7 @@
 
 @if (errorCarga()) {
   <small class="mb-3 block text-red-500">
-    No se pudieron cargar las órdenes. Intentá recargar la página.
+    No fue posible cargar las órdenes. Intente recargar la página.
   </small>
 }
 
@@ -150,7 +150,7 @@
   <ng-template #emptymessage>
     <tr>
       <td colspan="10" class="py-8 text-center text-muted-color">
-        No hay órdenes registradas. Usá “Nueva orden” para crear la primera.
+        No hay órdenes registradas. Utilice «Nueva orden» para crear la primera.
       </td>
     </tr>
   </ng-template>
@@ -175,7 +175,7 @@
         </p>
         <small class="text-muted-color">
           Al elegir el paciente se completan automáticamente el género y la
-          edad. Si cambiás la fecha de solicitud, la edad se recalcula.
+          edad. Si modifica la fecha de solicitud, la edad se recalculará.
         </small>
       </div>
     </div>
@@ -187,7 +187,7 @@
 
       <div class="col-span-12 md:col-span-6">
         <label for="nroFolio" class="mb-2 block font-bold">
-          N° de folio <span class="text-red-500">*</span>
+          N.° de folio <span class="text-red-500">*</span>
         </label>
         <p-inputnumber
           inputId="nroFolio"
@@ -201,7 +201,7 @@
         />
         @if (folioInvalido()) {
           <small class="mt-1 block text-red-500">
-            El folio debe ser un entero mayor a cero.
+            El folio debe ser un número entero mayor que cero.
           </small>
         } @else {
           <small class="mt-1 block text-muted-color">
@@ -241,7 +241,7 @@
           optionValue="value"
           [ngModel]="orden().idSucursal"
           (ngModelChange)="onSucursalChange($event)"
-          placeholder="Seleccioná una sucursal"
+          placeholder="Seleccione una sucursal"
           [filter]="true"
           [appendTo]="'body'"
           fluid
@@ -264,7 +264,7 @@
           optionValue="value"
           [ngModel]="orden().idInstitucion"
           (ngModelChange)="setCampo('idInstitucion', $event)"
-          placeholder="Seleccioná una institución"
+          placeholder="Seleccione una institución"
           [filter]="true"
           [appendTo]="'body'"
           fluid
@@ -291,7 +291,7 @@
           optionValue="value"
           [ngModel]="orden().idPaciente"
           (ngModelChange)="onPacienteChange($event)"
-          placeholder="Seleccioná un paciente"
+          placeholder="Seleccione un paciente"
           [filter]="true"
           [appendTo]="'body'"
           fluid
@@ -314,7 +314,7 @@
           optionValue="value"
           [ngModel]="orden().idMedico"
           (ngModelChange)="setCampo('idMedico', $event)"
-          placeholder="Seleccioná un médico"
+          placeholder="Seleccione un médico"
           [filter]="true"
           [appendTo]="'body'"
           fluid
@@ -337,7 +337,7 @@
           optionValue="value"
           [ngModel]="orden().generoId"
           (ngModelChange)="setCampo('generoId', $event)"
-          placeholder="Seleccioná un género"
+          placeholder="Seleccione un género"
           [appendTo]="'body'"
           fluid
         />
@@ -347,7 +347,7 @@
           </small>
         } @else {
           <small class="mt-1 block text-muted-color">
-            Se completa desde la persona del paciente.
+            Se completa a partir de los datos de la persona del paciente.
           </small>
         }
       </div>
@@ -363,7 +363,7 @@
           optionValue="value"
           [ngModel]="orden().estado"
           (ngModelChange)="setCampo('estado', $event)"
-          placeholder="Seleccioná un estado"
+          placeholder="Seleccione un estado"
           [appendTo]="'body'"
           fluid
         />
@@ -391,7 +391,7 @@
         />
         @if (edadInvalida("edadAnios")) {
           <small class="mt-1 block text-red-500">
-            Ingresá un entero mayor o igual a cero.
+            Introduzca un número entero mayor o igual a cero.
           </small>
         }
       </div>
@@ -409,7 +409,7 @@
         />
         @if (edadInvalida("edadMeses")) {
           <small class="mt-1 block text-red-500">
-            Ingresá un entero mayor o igual a cero.
+            Introduzca un número entero mayor o igual a cero.
           </small>
         }
       </div>
@@ -427,7 +427,7 @@
         />
         @if (edadInvalida("edadDias")) {
           <small class="mt-1 block text-red-500">
-            Ingresá un entero mayor o igual a cero.
+            Introduzca un número entero mayor o igual a cero.
           </small>
         }
       </div>

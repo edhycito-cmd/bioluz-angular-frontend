@@ -65,7 +65,7 @@ export class Authorization {
   // --- Asignación de roles ---
   protected readonly roleModel = signal<RoleModel>({ userId: '', role: '' });
   protected readonly roleForm = form(this.roleModel, (path) => {
-    required(path.userId, { message: 'El ID de usuario es obligatorio' });
+    required(path.userId, { message: 'El Identificador de usuario es obligatorio' });
     required(path.role, { message: 'El rol es obligatorio' });
   });
   protected readonly roleMessage = signal<string | null>(null);
@@ -171,8 +171,8 @@ export class Authorization {
       const body = error.error as { message?: string | string[] } | undefined;
       if (Array.isArray(body?.message)) return body.message.join(', ');
       if (typeof body?.message === 'string') return body.message;
-      if (error.status === 403) return 'No tenés permiso para gestionar autorización.';
+      if (error.status === 403) return 'No tiene permiso para gestionar autorización.';
     }
-    return 'Ocurrió un error inesperado. Intentá de nuevo.';
+    return 'Se produjo un error inesperado. Intente nuevamente.';
   }
 }

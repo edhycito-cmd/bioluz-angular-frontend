@@ -62,7 +62,7 @@
 >
   <ng-template #caption>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar Resultados</h5>
+      <h5 class="m-0">Gestionar resultados</h5>
     </div>
   </ng-template>
   <ng-template #header>
@@ -132,7 +132,7 @@
 <p-dialog
   [(visible)]="dialogVisible"
   [style]="{ width: 'min(660px, calc(100vw - 2rem))' }"
-  [header]="esNuevo ? 'Nuevo Resultado' : 'Editar Resultado'"
+  [header]="esNuevo ? 'Nuevo resultado' : 'Editar resultado'"
   [modal]="true"
 >
   <div class="flex flex-col gap-5 pt-2">
@@ -146,7 +146,7 @@
         optionLabel="label"
         optionValue="value"
         [(ngModel)]="resultado.idExamen"
-        placeholder="Seleccioná un examen"
+        placeholder="Seleccione un examen"
         appendTo="body"
         fluid
       />
@@ -164,7 +164,7 @@
         optionLabel="label"
         optionValue="value"
         [(ngModel)]="resultado.idInforme"
-        placeholder="Seleccioná un informe"
+        placeholder="Seleccione un informe"
         appendTo="body"
         fluid
       />

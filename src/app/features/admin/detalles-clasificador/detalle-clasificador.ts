@@ -231,10 +231,10 @@ export class DetalleClasificador {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Detalle ${this.etiqueta(guardado)} creado`
-            : `Detalle ${this.etiqueta(guardado)} actualizado`,
+            ? `Se creó el detalle ${this.etiqueta(guardado)}.`
+            : `Se actualizó el detalle ${this.etiqueta(guardado)}.`,
           life: 3000,
         });
         this.detalle = detalleVacio();
@@ -244,7 +244,7 @@ export class DetalleClasificador {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "Error",
+          summary: "Se produjo un error",
           detail: this.extractErrorMessage(error),
           life: 5000,
         });
@@ -264,8 +264,8 @@ export class DetalleClasificador {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Detalle ${this.etiqueta(row)} eliminado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó el detalle ${this.etiqueta(row)}.`,
               life: 3000,
             });
             this.detalle = detalleVacio();
@@ -274,7 +274,7 @@ export class DetalleClasificador {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             }),
@@ -301,8 +301,8 @@ export class DetalleClasificador {
             this.seleccionados = null;
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: "Detalles eliminados",
+              summary: "Operación realizada correctamente",
+              detail: "Se eliminaron los detalles seleccionados.",
               life: 3000,
             });
             this.detalles.reload();
@@ -311,7 +311,7 @@ export class DetalleClasificador {
             this.deleteSeleccionando = false;
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             });
@@ -327,10 +327,10 @@ export class DetalleClasificador {
       const body = error.error as { message?: string | string[] } | undefined;
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
-      if (error.status === 403) return "No tenés permiso para gestionar los detalles de clasificador.";
+      if (error.status === 403) return "No tiene permiso para gestionar los detalles de clasificador.";
       if (error.status === 409) return "Ya existe un registro con esa clave.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }
 

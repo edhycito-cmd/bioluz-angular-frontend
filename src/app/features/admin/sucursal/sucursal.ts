@@ -225,10 +225,10 @@ export class SucursalPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Sucursal ${guardada.codigo} creada`
-            : `Sucursal ${guardada.codigo} actualizada`,
+            ? `Se creó la sucursal ${guardada.codigo}.`
+            : `Se actualizó la sucursal ${guardada.codigo}.`,
           life: 3000,
         });
         this.sucursales.reload();
@@ -237,7 +237,7 @@ export class SucursalPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar la sucursal",
+          summary: "No fue posible guardar la sucursal",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -257,8 +257,8 @@ export class SucursalPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Sucursal ${row.codigo} eliminada`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó la sucursal ${row.codigo}.`,
               life: 3000,
             });
             this.sucursales.reload();
@@ -266,7 +266,7 @@ export class SucursalPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -288,10 +288,10 @@ export class SucursalPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar sucursales.";
+        return "No tiene permiso para gestionar sucursales.";
       if (error.status === 409)
         return "Ya existe una sucursal con ese código en la empresa.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

@@ -308,13 +308,13 @@ export class OrdenesLaboratorioPage {
       orden.generoId === null ||
       !orden.fechaSolicitud
     ) {
-      this.formError.set("Completá todos los campos obligatorios.");
+      this.formError.set("Complete todos los campos obligatorios.");
       return;
     }
 
     const folio = Number(orden.nroFolio);
     if (!Number.isInteger(folio) || folio < 1) {
-      this.formError.set("El número de folio debe ser un entero mayor a cero.");
+      this.formError.set("El número de folio debe ser un número entero mayor que cero.");
       return;
     }
 
@@ -324,7 +324,7 @@ export class OrdenesLaboratorioPage {
         return !Number.isInteger(numero) || numero < 0;
       })
     ) {
-      this.formError.set("Las edades deben ser enteros mayores o iguales a cero.");
+      this.formError.set("Las edades deben ser números enteros mayores o iguales a cero.");
       return;
     }
 
@@ -343,7 +343,7 @@ export class OrdenesLaboratorioPage {
         this.messageService.add({
           severity: "success",
           summary: this.esNuevo() ? "Orden creada" : "Orden actualizada",
-          detail: `La orden N° ${payload.nroFolio} se guardó correctamente.`,
+          detail: `La orden N.° ${payload.nroFolio} se guardó correctamente.`,
           life: 4000,
         });
         this.ordenesRes.reload();
@@ -352,7 +352,7 @@ export class OrdenesLaboratorioPage {
         this.guardando.set(false);
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar la orden",
+          summary: "No fue posible guardar la orden",
           detail: extractApiErrorMessage(error),
           life: 6000,
         });
@@ -362,7 +362,7 @@ export class OrdenesLaboratorioPage {
 
   protected eliminar(orden: OrdenLaboratorio): void {
     this.confirmationService.confirm({
-      message: `¿Eliminar la orden N° ${orden.nroFolio}?`,
+      message: `¿Eliminar la orden N.° ${orden.nroFolio}?`,
       header: "Confirmar eliminación",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Sí, eliminar",
@@ -373,7 +373,7 @@ export class OrdenesLaboratorioPage {
             this.messageService.add({
               severity: "success",
               summary: "Orden eliminada",
-              detail: `La orden N° ${orden.nroFolio} fue eliminada.`,
+              detail: `La orden N.° ${orden.nroFolio} fue eliminada.`,
               life: 3000,
             });
             this.ordenesRes.reload();
@@ -381,7 +381,7 @@ export class OrdenesLaboratorioPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: extractApiErrorMessage(error),
               life: 5000,
             }),
@@ -400,7 +400,7 @@ export class OrdenesLaboratorioPage {
       this.messageService.add({
         severity: "info",
         summary: "Sin datos",
-        detail: "No hay órdenes para exportar.",
+        detail: "No hay órdenes disponibles para exportar.",
       });
       return;
     }

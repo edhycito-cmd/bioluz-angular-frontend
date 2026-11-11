@@ -142,10 +142,10 @@ export class InstitucionConvenioPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Institución ${guardada.nombre} creada`
-            : `Institución ${guardada.nombre} actualizada`,
+            ? `Se creó la institución ${guardada.nombre}.`
+            : `Se actualizó la institución ${guardada.nombre}.`,
           life: 3000,
         });
         this.instituciones.reload();
@@ -154,7 +154,7 @@ export class InstitucionConvenioPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar la institución",
+          summary: "No fue posible guardar la institución",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -174,8 +174,8 @@ export class InstitucionConvenioPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Institución ${row.nombre} eliminada`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó la institución ${row.nombre}.`,
               life: 3000,
             });
             this.instituciones.reload();
@@ -183,7 +183,7 @@ export class InstitucionConvenioPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -198,10 +198,10 @@ export class InstitucionConvenioPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar instituciones.";
+        return "No tiene permiso para gestionar instituciones.";
       if (error.status === 409)
         return "Ya existe una institución con ese nombre.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

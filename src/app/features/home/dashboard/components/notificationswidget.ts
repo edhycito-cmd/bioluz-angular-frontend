@@ -31,7 +31,7 @@ import { MenuItem } from '@openng/optimus-ui/api';
                 <div class="w-12 h-12 flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-full mr-4 shrink-0">
                     <i class="pi pi-download text-xl! text-orange-500"></i>
                 </div>
-                <span class="text-surface-700 dark:text-surface-100 leading-normal">Se inició tu solicitud de retiro de <span class="text-primary font-bold">$2500.00</span>.</span>
+                <span class="text-surface-700 dark:text-surface-100 leading-normal">Se inició su solicitud de retiro de <span class="text-primary font-bold">$2500.00</span>.</span>
             </li>
         </ul>
 
@@ -52,7 +52,7 @@ import { MenuItem } from '@openng/optimus-ui/api';
                 </div>
                 <span class="text-surface-900 dark:text-surface-0 leading-normal"
                     >Jane Davis
-                    <span class="text-surface-700 dark:text-surface-100">hizo una nueva pregunta sobre tu producto.</span>
+                    <span class="text-surface-700 dark:text-surface-100">realizó una nueva consulta sobre su producto.</span>
                 </span>
             </li>
         </ul>
@@ -62,13 +62,13 @@ import { MenuItem } from '@openng/optimus-ui/api';
                 <div class="w-12 h-12 flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-full mr-4 shrink-0">
                     <i class="pi pi-arrow-up text-xl! text-green-500"></i>
                 </div>
-                <span class="text-surface-900 dark:text-surface-0 leading-normal">Tus ingresos aumentaron un <span class="text-primary font-bold">%25</span>.</span>
+                <span class="text-surface-900 dark:text-surface-0 leading-normal">Sus ingresos aumentaron un <span class="text-primary font-bold">%25</span>.</span>
             </li>
             <li class="flex items-center py-2 border-b border-surface">
                 <div class="w-12 h-12 flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-full mr-4 shrink-0">
                     <i class="pi pi-heart text-xl! text-purple-500"></i>
                 </div>
-                <span class="text-surface-900 dark:text-surface-0 leading-normal"><span class="text-primary font-bold">12</span> usuarios agregaron tus productos a su lista de deseos.</span>
+                <span class="text-surface-900 dark:text-surface-0 leading-normal"><span class="text-primary font-bold">12</span> usuarios agregaron sus productos a su lista de deseos.</span>
             </li>
         </ul>
     </div>`

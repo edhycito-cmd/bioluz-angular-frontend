@@ -34,7 +34,7 @@ export class Register {
     minLength(path.name, 2, { message: 'El nombre debe tener al menos 2 caracteres' });
 
     required(path.email, { message: 'El correo electrónico es obligatorio' });
-    email(path.email, { message: 'Ingresá un correo electrónico válido' });
+    email(path.email, { message: 'Introduzca un correo electrónico válido' });
 
     required(path.password, { message: 'La contraseña es obligatoria' });
     minLength(path.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
@@ -45,7 +45,7 @@ export class Register {
       message: 'Debe incluir al menos un carácter especial',
     });
 
-    required(path.confirmPassword, { message: 'Confirmá la contraseña' });
+    required(path.confirmPassword, { message: 'Confirme la contraseña' });
     validate(path.confirmPassword, (ctx) =>
       ctx.value() === ctx.valueOf(path.password)
         ? undefined
@@ -77,6 +77,6 @@ export class Register {
       if (Array.isArray(body?.message)) return body.message.join(', ');
       if (typeof body?.message === 'string') return body.message;
     }
-    return 'Ocurrió un error inesperado. Intentá de nuevo.';
+    return 'Se produjo un error inesperado. Intente nuevamente.';
   }
 }

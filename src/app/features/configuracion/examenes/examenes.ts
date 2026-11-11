@@ -204,10 +204,10 @@ export class ExamenesPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? `Examen ${guardado.nombre} creado`
-            : `Examen ${guardado.nombre} actualizado`,
+            ? `Se creó el examen ${guardado.nombre}.`
+            : `Se actualizó el examen ${guardado.nombre}.`,
           life: 3000,
         });
         this.examenes.reload();
@@ -216,7 +216,7 @@ export class ExamenesPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar el examen",
+          summary: "No fue posible guardar el examen",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -236,8 +236,8 @@ export class ExamenesPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Examen ${row.nombre} eliminado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se eliminó el examen ${row.nombre}.`,
               life: 3000,
             });
             this.examenes.reload();
@@ -245,7 +245,7 @@ export class ExamenesPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -266,10 +266,10 @@ export class ExamenesPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar exámenes.";
+        return "No tiene permiso para gestionar exámenes.";
       if (error.status === 409)
         return "No se puede eliminar el examen porque tiene registros asociados.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

@@ -176,7 +176,7 @@ export class ResultadosPage {
       !this.resultado.valorTexto.trim()
     ) {
       errores.valorTexto =
-        "Ingresá un valor numérico o un valor de texto para el resultado.";
+        "Introduzca un valor numérico o un valor de texto para el resultado.";
     }
 
     return errores;
@@ -243,10 +243,10 @@ export class ResultadosPage {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
+          summary: "Operación realizada correctamente",
           detail: this.esNuevo
-            ? "Resultado creado"
-            : "Resultado actualizado",
+            ? "Se creó el resultado."
+            : "Se actualizó el resultado.",
           life: 3000,
         });
         this.resultados.reload();
@@ -255,7 +255,7 @@ export class ResultadosPage {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "No se pudo guardar el resultado",
+          summary: "No fue posible guardar el resultado",
           detail: this.mensajeError(error),
           life: 5000,
         });
@@ -275,8 +275,8 @@ export class ResultadosPage {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: "Resultado eliminado",
+              summary: "Operación realizada correctamente",
+              detail: "Se eliminó el resultado.",
               life: 3000,
             });
             this.resultados.reload();
@@ -284,7 +284,7 @@ export class ResultadosPage {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.mensajeError(error),
               life: 5000,
             }),
@@ -318,10 +318,10 @@ export class ResultadosPage {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
       if (error.status === 403)
-        return "No tenés permiso para gestionar resultados.";
+        return "No tiene permiso para gestionar resultados.";
       if (error.status === 409)
         return "No se puede eliminar el resultado porque tiene registros asociados.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

@@ -209,8 +209,8 @@ export class RolesUsuarios {
             this.submitted = false;
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Rol asignado al usuario ${this.nombreDeUsuario(asignada.idUsuario)}`,
+              summary: "Operación realizada correctamente",
+              detail: `Se asignó el rol al usuario ${this.nombreDeUsuario(asignada.idUsuario)}.`,
               life: 3000,
             });
             this.asignacion = asignacionVacia();
@@ -220,7 +220,7 @@ export class RolesUsuarios {
             this.guardando = false;
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             });
@@ -241,8 +241,8 @@ export class RolesUsuarios {
         this.submitted = false;
         this.messageService.add({
           severity: "success",
-          summary: "Operación exitosa",
-          detail: `Asignación de rol actualizada para ${this.nombreDeUsuario(actualizada.idUsuario)}`,
+          summary: "Operación realizada correctamente",
+          detail: `Se actualizó la asignación de rol de ${this.nombreDeUsuario(actualizada.idUsuario)}.`,
           life: 3000,
         });
         this.asignacion = asignacionVacia();
@@ -252,7 +252,7 @@ export class RolesUsuarios {
         this.guardando = false;
         this.messageService.add({
           severity: "error",
-          summary: "Error",
+          summary: "Se produjo un error",
           detail: this.extractErrorMessage(error),
           life: 5000,
         });
@@ -274,8 +274,8 @@ export class RolesUsuarios {
             this.habilitandoId = null;
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Rol ${row.rol} habilitado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se habilitó el rol ${row.rol}.`,
               life: 3000,
             });
             this.asignaciones.reload();
@@ -284,7 +284,7 @@ export class RolesUsuarios {
             this.habilitandoId = null;
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             });
@@ -306,8 +306,8 @@ export class RolesUsuarios {
           next: () => {
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: `Rol ${row.rol} revocado`,
+              summary: "Operación realizada correctamente",
+              detail: `Se revocó el rol ${row.rol}.`,
               life: 3000,
             });
             this.asignacion = asignacionVacia();
@@ -316,7 +316,7 @@ export class RolesUsuarios {
           error: (error: unknown) =>
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             }),
@@ -331,7 +331,7 @@ export class RolesUsuarios {
       this.messageService.add({
         severity: "warn",
         summary: "Atención",
-        detail: "Solo hay asignaciones ya revocadas en la selección.",
+        detail: "Solo hay asignaciones revocadas en la selección.",
         life: 3000,
       });
       return;
@@ -353,8 +353,8 @@ export class RolesUsuarios {
             this.seleccionados = null;
             this.messageService.add({
               severity: "success",
-              summary: "Operación exitosa",
-              detail: "Roles revocados",
+              summary: "Operación realizada correctamente",
+              detail: "Se revocaron los roles seleccionados.",
               life: 3000,
             });
             this.asignaciones.reload();
@@ -363,7 +363,7 @@ export class RolesUsuarios {
             this.revocando = false;
             this.messageService.add({
               severity: "error",
-              summary: "Error",
+              summary: "Se produjo un error",
               detail: this.extractErrorMessage(error),
               life: 5000,
             });
@@ -385,10 +385,10 @@ export class RolesUsuarios {
       const body = error.error as { message?: string | string[] } | undefined;
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
-      if (error.status === 403) return "No tenés permiso para gestionar roles de usuarios.";
+      if (error.status === 403) return "No tiene permiso para gestionar roles de usuarios.";
       if (error.status === 409) return "La operación entra en conflicto con el estado actual de la asignación.";
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }
 

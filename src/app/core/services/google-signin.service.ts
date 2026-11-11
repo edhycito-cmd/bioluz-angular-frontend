@@ -185,7 +185,7 @@ export class GoogleSignInService {
         cleanup();
         this.scriptLoad = null;
         script.remove();
-        reject(new Error('No se pudo cargar el SDK de identidad de Google'));
+        reject(new Error('No fue posible cargar el SDK de identidad de Google'));
       };
 
       this.document.head.appendChild(script);

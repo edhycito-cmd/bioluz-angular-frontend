@@ -56,7 +56,7 @@
 >
   <ng-template #caption>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar Plantillas de Informes</h5>
+      <h5 class="m-0">Gestionar plantillas de informes</h5>
     </div>
   </ng-template>
   <ng-template #header>
@@ -118,7 +118,7 @@
 <p-dialog
   [(visible)]="dialogVisible"
   [style]="{ width: 'min(640px, calc(100vw - 2rem))' }"
-  [header]="esNuevo ? 'Nueva Plantilla' : 'Editar Plantilla'"
+  [header]="esNuevo ? 'Nueva plantilla' : 'Editar plantilla'"
   [modal]="true"
 >
   <div class="flex flex-col gap-5 pt-2">
@@ -150,7 +150,7 @@
         optionLabel="label"
         optionValue="value"
         [(ngModel)]="plantilla.formatoInformeId"
-        placeholder="Seleccioná un formato"
+        placeholder="Seleccione un formato"
         appendTo="body"
         fluid
       />
@@ -167,7 +167,7 @@
         pTextarea
         rows="12"
         [(ngModel)]="plantilla.plantilla"
-        placeholder="Escribí el contenido que se usará para generar el informe"
+        placeholder="Escriba el contenido que se usará para generar el informe"
         fluid
       ></textarea>
       @if (submitted && errores().plantilla) {

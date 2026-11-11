@@ -64,7 +64,7 @@ export class Login {
 
   protected readonly loginForm = form(this.model, (path) => {
     required(path.email, { message: "El correo electrónico es obligatorio" });
-    email(path.email, { message: "Ingresá un correo electrónico válido" });
+    email(path.email, { message: "Introduzca un correo electrónico válido" });
     required(path.password, { message: "La contraseña es obligatoria" });
   });
 
@@ -160,6 +160,6 @@ export class Login {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
     }
-    return "Ocurrió un error inesperado. Intentá de nuevo.";
+    return "Se produjo un error inesperado. Intente nuevamente.";
   }
 }

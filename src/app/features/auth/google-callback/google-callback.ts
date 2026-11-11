@@ -11,11 +11,11 @@ import { AuthService } from '../../../core/services/auth.service';
  */
 const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   google_auth_failed:
-    'No se pudo completar el inicio de sesión con Google. Intentá de nuevo.',
+    'No fue posible completar el inicio de sesión con Google. Intente nuevamente.',
   google_account_error:
-    'Tu cuenta de Google no está habilitada para iniciar sesión en esta aplicación.',
+    'Su cuenta de Google no está habilitada para iniciar sesión en esta aplicación.',
   google_login_failed:
-    'Ocurrió un error al iniciar sesión con Google. Intentá de nuevo.',
+    'Se produjo un error al iniciar sesión con Google. Intente nuevamente.',
 };
 
 /**
@@ -75,7 +75,7 @@ export class GoogleCallback implements OnInit {
     this.processing.set(false);
     this.error.set(
       ERROR_MESSAGES[code] ??
-        'No se pudo completar el inicio de sesión con Google. Intentá de nuevo.',
+        'No fue posible completar el inicio de sesión con Google. Intente nuevamente.',
     );
   }
 }

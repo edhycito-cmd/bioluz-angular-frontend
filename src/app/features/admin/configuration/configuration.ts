@@ -132,6 +132,6 @@ export class Configuration implements OnInit {
       if (Array.isArray(body?.message)) return body.message.join(", ");
       if (typeof body?.message === "string") return body.message;
     }
-    return "No se pudo guardar la configuración. Intentá de nuevo.";
+    return "No fue posible guardar la configuración. Intente nuevamente.";
   }
 }

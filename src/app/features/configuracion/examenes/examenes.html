@@ -56,7 +56,7 @@
 >
   <ng-template #caption>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar Exámenes</h5>
+      <h5 class="m-0">Gestionar exámenes</h5>
     </div>
   </ng-template>
   <ng-template #header>
@@ -118,7 +118,7 @@
 <p-dialog
   [(visible)]="dialogVisible"
   [style]="{ width: 'min(560px, calc(100vw - 2rem))' }"
-  [header]="esNuevo ? 'Nuevo Examen' : 'Editar Examen'"
+  [header]="esNuevo ? 'Nuevo examen' : 'Editar examen'"
   [modal]="true"
 >
   <div class="flex flex-col gap-5 pt-2">
@@ -132,7 +132,7 @@
         optionLabel="label"
         optionValue="value"
         [(ngModel)]="examen.idAreaAnalisis"
-        placeholder="Seleccioná un área"
+        placeholder="Seleccione un área"
         appendTo="body"
         fluid
       />
@@ -168,7 +168,7 @@
         optionLabel="label"
         optionValue="value"
         [(ngModel)]="examen.tipoResultado"
-        placeholder="Seleccioná el tipo"
+        placeholder="Seleccione el tipo"
         appendTo="body"
         fluid
       />
