@@ -74,6 +74,60 @@ export interface UsuarioListadoQuery {
   telefono?: string;
 }
 
+/** Detalle administrativo de un usuario para el dialog de edición (GET /usuario/:id). */
+export interface UsuarioDetalle {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    esActivo: boolean;
+    googleId: string | null;
+  };
+  persona: Persona | null;
+  rol: { id: string; nombre: string } | null;
+  medico: {
+    id: string;
+    idPersona: string;
+    especialidad: string;
+    esActivo: boolean;
+    fechaCreacion: string;
+    fechaModificacion: string | null;
+  } | null;
+  personal: {
+    id: string;
+    idPersona: string;
+    registro: string;
+    firma: string | null;
+    esActivo: boolean;
+    fechaCreacion: string;
+    fechaModificacion: string | null;
+  } | null;
+}
+
+/** Body de PATCH /usuario/:id (edición administrativa). */
+export interface ActualizarUsuarioPayload {
+  /** Correo de acceso del usuario; se puede modificar desde la edición. */
+  login: string;
+  /** Solo se envía para usuarios sin googleId y cuando se desea cambiarla. */
+  password?: string;
+  idRol?: string;
+  persona: {
+    nombres: string;
+    primerApellido: string;
+    segundoApellido?: string | null;
+    generoId: number;
+    tipoDocumentoIdentidadId?: number | null;
+    numeroDocumento?: string | null;
+    fechaNacimiento?: string | null;
+    telefono?: string | null;
+    email: string;
+    distincion?: string | null;
+    domicilio?: string | null;
+  };
+  medico?: { especialidad: string };
+  personal?: { registro: string; firma?: string | null };
+}
+
 /** Coincide con `RegistrarUsuarioConPersonaDto` del backend (POST /usuario/registrar-con-persona). */
 export interface RegistrarUsuarioConPersonaPayload {
   login: string;

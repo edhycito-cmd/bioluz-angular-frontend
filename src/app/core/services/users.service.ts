@@ -6,7 +6,9 @@ import { environment } from '../../../environments/environment';
 import { ApiEnvelope } from '../models/auth.model';
 import { PaginatedResult } from '../models/pagination.model';
 import {
+  ActualizarUsuarioPayload,
   RegistrarUsuarioConPersonaPayload,
+  UsuarioDetalle,
   UsuarioListado,
   UsuarioListadoQuery,
 } from '../models/user.model';
@@ -57,6 +59,26 @@ export class UsersService {
       `${this.baseUrl}/registrar-con-persona`,
       payload,
     );
+  }
+
+  /** Obtiene el detalle completo del usuario para editarlo (GET /usuario/detalle/:id). */
+  obtenerDetalle(id: string): Observable<UsuarioDetalle> {
+    return this.http
+      .get<ApiEnvelope<UsuarioDetalle>>(`${this.baseUrl}/detalle/${id}`)
+      .pipe(map((res) => res.data));
+  }
+
+  /** Edita los datos de persona y, según el rol, sus datos asociados (PATCH /usuario/:id). */
+  actualizar(
+    id: string,
+    payload: ActualizarUsuarioPayload,
+  ): Observable<{ id: string; email: string }> {
+    return this.http
+      .patch<ApiEnvelope<{ id: string; email: string }>>(
+        `${this.baseUrl}/${id}`,
+        payload,
+      )
+      .pipe(map((res) => res.data));
   }
 
   /** Cambia la contraseña del usuario autenticado (PATCH /usuario/perfil/contrasena). */

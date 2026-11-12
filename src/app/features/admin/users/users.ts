@@ -23,8 +23,9 @@ import { DetallesClasificadorService } from "../../../core/services/detalles-cla
 import { RolesService } from "../../../core/services/roles.service";
 import { HasPermission } from "../../../core/directives/has-permission.directive";
 import {
+  ActualizarUsuarioPayload,
   RegistrarUsuarioConPersonaPayload,
-  UsuarioListado,
+  UsuarioDetalle,
 } from "../../../core/models/user.model";
 
 interface UsuarioRow {
@@ -50,11 +51,16 @@ interface OpcionTipoDocumento {
 
 interface OpcionRol {
   id: string;
+  nombre: string;
   label: string;
 }
 
-/** Modelo del dialog "Nuevo usuario" (igual que sparked pages/crud). */
-interface NuevoUsuarioModel {
+const ROL_MEDICO = "MEDICO";
+const ROLES_PERSONAL = ["PROFESIONAL_BIOQUIMICO", "TECNICO_LABORATORIO"];
+const MAX_FIRMA_BYTES = 1024 * 1024;
+
+/** Modelo compartido por los dialogs de alta y edición de usuario. */
+interface UsuarioFormModel {
   login: string;
   password: string;
   confirmPassword: string;
@@ -69,6 +75,15 @@ interface NuevoUsuarioModel {
   fechaNacimiento: Date | null;
   idRol: string | null;
   domicilio: string;
+  /** Solo aplica al rol MEDICO. */
+  especialidad: string;
+  /** Solo aplica a PROFESIONAL_BIOQUIMICO / TECNICO_LABORATORIO. */
+  registro: string;
+  /** Data URL de la firma (solo personal de laboratorio). */
+  firma: string | null;
+  firmaNombre: string;
+  /** Permite distinguir "conservar la firma actual" de "limpiarla". */
+  firmaModificada: boolean;
 }
 
 @Component({
@@ -154,6 +169,7 @@ export class Users {
       )
       .map((rol) => ({
         id: rol.id,
+        nombre: rol.rol,
         label: `${rol.rol} — ${rol.descripcion}${rol.esActivo ? "" : " (inactivo)"}`,
       })),
   );
@@ -174,13 +190,17 @@ export class Users {
     }));
   });
 
-  /** Estado del CRUD y del dialog de alta (molde sparked pages/crud). */
+  /** Estado del CRUD y del dialog de alta/edición (molde sparked pages/crud). */
   protected usuarioDialog = false;
+  protected modoEdicion = false;
+  protected usuarioId: string | null = null;
+  protected googleId: string | null = null;
+  protected cargandoDetalle = false;
   protected submitted = false;
   protected guardando = false;
   protected cambiandoEstado = false;
   protected seleccionados: UsuarioRow[] | null = null;
-  protected usuario: NuevoUsuarioModel = usuarioVacio();
+  protected usuario: UsuarioFormModel = usuarioVacio();
   protected mostrarPassword = false;
   protected mostrarConfirmPassword = false;
 
@@ -193,6 +213,9 @@ export class Users {
   }
 
   protected openNew(): void {
+    this.modoEdicion = false;
+    this.usuarioId = null;
+    this.googleId = null;
     this.usuario = usuarioVacio();
     this.submitted = false;
     this.mostrarPassword = false;
@@ -200,6 +223,41 @@ export class Users {
     // Refresca el catálogo para no trabajar con una lista vieja o incompleta.
     this.roles.reload();
     this.usuarioDialog = true;
+  }
+
+  /** Abre el dialog inmediatamente y carga el detalle del usuario dentro. */
+  protected openEdit(row: UsuarioRow): void {
+    this.modoEdicion = true;
+    this.usuarioId = row.id;
+    this.googleId = null;
+    this.usuario = usuarioVacio();
+    this.submitted = false;
+    this.mostrarPassword = false;
+    this.mostrarConfirmPassword = false;
+    this.cargandoDetalle = true;
+    if (this.roles.value() === undefined) {
+      this.roles.reload();
+    }
+    this.usuarioDialog = true;
+
+    this.usersService.obtenerDetalle(row.id).subscribe({
+      next: (detalle) => {
+        this.cargandoDetalle = false;
+        this.usuarioId = detalle.user.id;
+        this.googleId = detalle.user.googleId;
+        this.usuario = usuarioDesdeDetalle(detalle);
+      },
+      error: (error: unknown) => {
+        this.cargandoDetalle = false;
+        this.usuarioDialog = false;
+        this.messageService.add({
+          severity: "error",
+          summary: "Se produjo un error",
+          detail: this.extractErrorMessage(error),
+          life: 5000,
+        });
+      },
+    });
   }
 
   protected hideDialog(): void {
@@ -217,13 +275,83 @@ export class Users {
     this.mostrarConfirmPassword = !this.mostrarConfirmPassword;
   }
 
+  /** En alta siempre se define contraseña; en edición solo si no usa Google. */
+  protected puedeCambiarPassword(): boolean {
+    return !this.modoEdicion || !this.googleId;
+  }
+
+  protected esRolMedico(): boolean {
+    return this.rolSeleccionado()?.nombre === ROL_MEDICO;
+  }
+
+  protected esRolPersonal(): boolean {
+    const nombre = this.rolSeleccionado()?.nombre;
+    return nombre !== undefined && ROLES_PERSONAL.includes(nombre);
+  }
+
+  private rolSeleccionado(): OpcionRol | null {
+    return (
+      this.rolOptions().find((opcion) => opcion.id === this.usuario.idRol) ??
+      null
+    );
+  }
+
+  protected onFirmaSeleccionada(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0];
+    input.value = "";
+    if (!archivo) return;
+
+    if (!archivo.type.startsWith("image/")) {
+      this.messageService.add({
+        severity: "error",
+        summary: "Archivo no válido",
+        detail: "La firma debe ser una imagen (PNG, JPG, GIF o WebP).",
+        life: 5000,
+      });
+      return;
+    }
+
+    if (archivo.size > MAX_FIRMA_BYTES) {
+      this.messageService.add({
+        severity: "error",
+        summary: "Archivo no válido",
+        detail: "La firma no debe superar 1 MB.",
+        life: 5000,
+      });
+      return;
+    }
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      this.usuario.firma =
+        typeof lector.result === "string" ? lector.result : null;
+      this.usuario.firmaNombre = archivo.name;
+      this.usuario.firmaModificada = true;
+    };
+    lector.readAsDataURL(archivo);
+  }
+
+  protected quitarFirma(): void {
+    this.usuario.firma = null;
+    this.usuario.firmaNombre = "";
+    this.usuario.firmaModificada = true;
+  }
+
   protected saveUsuario(): void {
+    if (this.cargandoDetalle) return;
     this.submitted = true;
 
     const errores = this.validar();
     if (errores.length) return;
 
     this.guardando = true;
+
+    if (this.modoEdicion && this.usuarioId) {
+      this.actualizarUsuario(this.usuarioId);
+      return;
+    }
+
     this.usersService
       .registrarConPersona({
         login: this.usuario.login.trim(),
@@ -257,6 +385,60 @@ export class Users {
           });
         },
       });
+  }
+
+  private actualizarUsuario(id: string): void {
+    const payload = this.payloadActualizacion();
+    this.usersService.actualizar(id, payload).subscribe({
+      next: (respuesta) => {
+        this.guardando = false;
+        this.usuarioDialog = false;
+        this.submitted = false;
+        this.mostrarPassword = false;
+        this.mostrarConfirmPassword = false;
+        this.messageService.add({
+          severity: "success",
+          summary: "Operación realizada correctamente",
+          detail: `Se actualizó el usuario ${respuesta.email}.`,
+          life: 3000,
+        });
+        this.usuarios.reload();
+      },
+      error: (error: unknown) => {
+        this.guardando = false;
+        this.messageService.add({
+          severity: "error",
+          summary: "Se produjo un error",
+          detail: this.extractErrorMessage(error),
+          life: 5000,
+        });
+      },
+    });
+  }
+
+  private payloadActualizacion(): ActualizarUsuarioPayload {
+    const payload: ActualizarUsuarioPayload = {
+      login: this.usuario.login.trim(),
+      idRol: this.usuario.idRol as string,
+      persona: personaParaActualizar(this.usuario),
+    };
+
+    if (this.puedeCambiarPassword() && this.usuario.password) {
+      payload.password = this.usuario.password;
+    }
+
+    if (this.esRolMedico()) {
+      payload.medico = { especialidad: this.usuario.especialidad.trim() };
+    }
+
+    if (this.esRolPersonal()) {
+      payload.personal = { registro: this.usuario.registro.trim() };
+      if (this.usuario.firmaModificada) {
+        payload.personal.firma = this.usuario.firma;
+      }
+    }
+
+    return payload;
   }
 
   protected cambiarEstado(row: UsuarioRow): void {
@@ -299,7 +481,7 @@ export class Users {
   }
 
   /**
-   * Validaciones espejo de `registrarUsuarioConPersonaSchema` (Zod) del backend.
+   * Validaciones espejo de los schemas Zod del backend.
    * Devuelve la lista de mensajes de error; vacío = todo OK.
    */
   private validar(): string[] {
@@ -307,15 +489,28 @@ export class Users {
     const u = this.usuario;
 
     if (!MAIL_OK(u.login.trim())) errores.push("login");
-    if (!PASSWORD_OK(u.password)) errores.push("password");
-    if (!u.confirmPassword || u.confirmPassword !== u.password) {
-      errores.push("confirmPassword");
+
+    if (this.puedeCambiarPassword()) {
+      const tienePassword = Boolean(u.password || u.confirmPassword);
+      if (!this.modoEdicion || tienePassword) {
+        if (!PASSWORD_OK(u.password)) errores.push("password");
+        if (!u.confirmPassword || u.confirmPassword !== u.password) {
+          errores.push("confirmPassword");
+        }
+      }
     }
+
     if (u.nombres.trim().length < 2) errores.push("nombres");
     if (u.primerApellido.trim().length < 2) errores.push("primerApellido");
     if (u.generoId === null) errores.push("generoId");
     if (!MAIL_OK(u.email.trim())) errores.push("personaEmail");
     if (!u.idRol) errores.push("idRol");
+    if (this.esRolMedico() && !u.especialidad.trim()) {
+      errores.push("especialidad");
+    }
+    if (this.esRolPersonal() && !u.registro.trim()) {
+      errores.push("registro");
+    }
 
     return errores;
   }
@@ -325,10 +520,26 @@ export class Users {
   }
 
   protected passwordInvalido(): boolean {
+    if (!this.puedeCambiarPassword()) return false;
+    if (
+      this.modoEdicion &&
+      !this.usuario.password &&
+      !this.usuario.confirmPassword
+    ) {
+      return false;
+    }
     return this.submitted && !PASSWORD_OK(this.usuario.password);
   }
 
   protected confirmPasswordInvalido(): boolean {
+    if (!this.puedeCambiarPassword()) return false;
+    if (
+      this.modoEdicion &&
+      !this.usuario.password &&
+      !this.usuario.confirmPassword
+    ) {
+      return false;
+    }
     return (
       this.submitted &&
       (!this.usuario.confirmPassword ||
@@ -354,6 +565,14 @@ export class Users {
 
   protected rolInvalido(): boolean {
     return this.submitted && !this.usuario.idRol;
+  }
+
+  protected especialidadInvalida(): boolean {
+    return this.submitted && this.esRolMedico() && !this.usuario.especialidad.trim();
+  }
+
+  protected registroInvalido(): boolean {
+    return this.submitted && this.esRolPersonal() && !this.usuario.registro.trim();
   }
 
   protected extractErrorMessage(error: unknown): string {
@@ -388,7 +607,7 @@ function PASSWORD_OK(password: string): boolean {
   );
 }
 
-function usuarioVacio(): NuevoUsuarioModel {
+function usuarioVacio(): UsuarioFormModel {
   return {
     login: "",
     password: "",
@@ -404,6 +623,39 @@ function usuarioVacio(): NuevoUsuarioModel {
     fechaNacimiento: null,
     idRol: null,
     domicilio: "",
+    especialidad: "",
+    registro: "",
+    firma: null,
+    firmaNombre: "",
+    firmaModificada: false,
+  };
+}
+
+function usuarioDesdeDetalle(detalle: UsuarioDetalle): UsuarioFormModel {
+  const persona = detalle.persona;
+
+  return {
+    login: detalle.user.email,
+    password: "",
+    confirmPassword: "",
+    nombres: persona?.nombres ?? "",
+    primerApellido: persona?.primerApellido ?? "",
+    segundoApellido: persona?.segundoApellido ?? "",
+    generoId: persona?.generoId ?? null,
+    tipoDocumentoIdentidadId: persona?.tipoDocumentoIdentidadId ?? null,
+    numeroDocumento: persona?.numeroDocumento ?? "",
+    telefono: persona?.telefono ?? "",
+    email: persona?.email ?? detalle.user.email,
+    fechaNacimiento: persona?.fechaNacimiento
+      ? new Date(persona.fechaNacimiento)
+      : null,
+    idRol: detalle.rol?.id ?? null,
+    domicilio: persona?.domicilio ?? "",
+    especialidad: detalle.medico?.especialidad ?? "",
+    registro: detalle.personal?.registro ?? "",
+    firma: detalle.personal?.firma ?? null,
+    firmaNombre: detalle.personal?.firma ? "Firma actual" : "",
+    firmaModificada: false,
   };
 }
 
@@ -426,7 +678,7 @@ function aOpcionesNumericas<T extends { orden: number; nombre: string | null }>(
  * campos texto: los vacíos deben omitirse, no enviarse como `null`.
  */
 function personaDesdeModelo(
-  u: NuevoUsuarioModel,
+  u: UsuarioFormModel,
 ): RegistrarUsuarioConPersonaPayload["persona"] {
   const persona: RegistrarUsuarioConPersonaPayload["persona"] = {
     nombres: u.nombres.trim(),
@@ -454,4 +706,22 @@ function personaDesdeModelo(
   if (domicilio) persona.domicilio = domicilio;
 
   return persona;
+}
+
+/** En edición se envían `null` explícitos para permitir limpiar campos. */
+function personaParaActualizar(
+  u: UsuarioFormModel,
+): ActualizarUsuarioPayload["persona"] {
+  return {
+    nombres: u.nombres.trim(),
+    primerApellido: u.primerApellido.trim(),
+    segundoApellido: u.segundoApellido?.trim() || null,
+    generoId: u.generoId as number,
+    tipoDocumentoIdentidadId: u.tipoDocumentoIdentidadId ?? null,
+    numeroDocumento: u.numeroDocumento?.trim() || null,
+    fechaNacimiento: u.fechaNacimiento ? u.fechaNacimiento.toISOString() : null,
+    telefono: u.telefono?.trim() || null,
+    email: u.email.trim(),
+    domicilio: u.domicilio?.trim() || null,
+  };
 }

@@ -76,15 +76,27 @@
         />
       </td>
       <td>
-        <p-button
-          [icon]="usuario.esActivo ? 'pi pi-ban' : 'pi pi-check'"
-          [severity]="usuario.esActivo ? 'danger' : 'success'"
-          [rounded]="true"
-          [outlined]="true"
-          [title]="usuario.esActivo ? 'Desactivar' : 'Activar'"
-          *appHasPermission="'update'"
-          (onClick)="cambiarEstado(usuario)"
-        />
+        <div class="flex items-center gap-1">
+          <p-button
+            icon="pi pi-pencil"
+            severity="info"
+            [rounded]="true"
+            [outlined]="true"
+            title="Editar"
+            [disabled]="cargandoDetalle"
+            *appHasPermission="'update'"
+            (onClick)="openEdit(usuario)"
+          />
+          <p-button
+            [icon]="usuario.esActivo ? 'pi pi-ban' : 'pi pi-check'"
+            [severity]="usuario.esActivo ? 'danger' : 'success'"
+            [rounded]="true"
+            [outlined]="true"
+            [title]="usuario.esActivo ? 'Desactivar' : 'Activar'"
+            *appHasPermission="'update'"
+            (onClick)="cambiarEstado(usuario)"
+          />
+        </div>
       </td>
     </tr>
   </ng-template>
@@ -93,10 +105,15 @@
 <p-dialog
   [(visible)]="usuarioDialog"
   [style]="{ width: 'min(960px, calc(100vw - 2rem))' }"
-  header="Nuevo usuario"
+  [header]="modoEdicion ? 'Editar usuario' : 'Nuevo usuario'"
   [modal]="true"
 >
   <div class="flex flex-col gap-3 pt-1">
+    @if (cargandoDetalle) {
+      <p-message severity="info" size="small" variant="simple">
+        Cargando los datos del usuario...
+      </p-message>
+    }
     <div class="grid grid-cols-12 gap-3">
       <div class="col-span-12 sm:col-span-4">
         <label for="login" class="block font-bold mb-1">Correo de acceso</label>
@@ -113,63 +130,67 @@
           <small class="text-red-500">Introduzca un correo electrónico válido.</small>
         }
       </div>
-      <div class="col-span-12 sm:col-span-4">
-        <label for="password" class="block font-bold mb-1">Contraseña</label>
-        <div class="relative">
-          <input
-            [type]="mostrarPassword ? 'text' : 'password'"
-            pInputText
-            id="password"
-            [(ngModel)]="usuario.password"
-            autocomplete="new-password"
-            class="w-full users-password-input"
-            fluid
-          />
-          <button
-            type="button"
-            class="users-password-toggle"
-            (click)="alternarPassword()"
-            [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-            [attr.aria-pressed]="mostrarPassword"
-            [title]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          >
-            <i class="pi" [class.pi-eye]="!mostrarPassword" [class.pi-eye-slash]="mostrarPassword"></i>
-          </button>
+      @if (puedeCambiarPassword()) {
+        <div class="col-span-12 sm:col-span-4">
+          <label for="password" class="block font-bold mb-1">
+            {{ modoEdicion ? 'Nueva contraseña (opcional)' : 'Contraseña' }}
+          </label>
+          <div class="relative">
+            <input
+              [type]="mostrarPassword ? 'text' : 'password'"
+              pInputText
+              id="password"
+              [(ngModel)]="usuario.password"
+              autocomplete="new-password"
+              class="w-full users-password-input"
+              fluid
+            />
+            <button
+              type="button"
+              class="users-password-toggle"
+              (click)="alternarPassword()"
+              [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="mostrarPassword"
+              [title]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <i class="pi" [class.pi-eye]="!mostrarPassword" [class.pi-eye-slash]="mostrarPassword"></i>
+            </button>
+          </div>
+          @if (passwordInvalido()) {
+            <small class="block text-red-500 mt-1">
+              8 a 64 caracteres, con mayúscula, minúscula, número, símbolo y sin espacios.
+            </small>
+          }
         </div>
-        @if (passwordInvalido()) {
-          <small class="block text-red-500 mt-1">
-            8 a 64 caracteres, con mayúscula, minúscula, número, símbolo y sin espacios.
-          </small>
-        }
-      </div>
 
-      <div class="col-span-12 sm:col-span-4">
-        <label for="confirmPassword" class="block font-bold mb-1">Confirmar contraseña</label>
-        <div class="relative">
-          <input
-            [type]="mostrarConfirmPassword ? 'text' : 'password'"
-            pInputText
-            id="confirmPassword"
-            [(ngModel)]="usuario.confirmPassword"
-            autocomplete="new-password"
-            class="w-full users-password-input"
-            fluid
-          />
-          <button
-            type="button"
-            class="users-password-toggle"
-            (click)="alternarConfirmPassword()"
-            [attr.aria-label]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
-            [attr.aria-pressed]="mostrarConfirmPassword"
-            [title]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
-          >
-            <i class="pi" [class.pi-eye]="!mostrarConfirmPassword" [class.pi-eye-slash]="mostrarConfirmPassword"></i>
-          </button>
+        <div class="col-span-12 sm:col-span-4">
+          <label for="confirmPassword" class="block font-bold mb-1">Confirmar contraseña</label>
+          <div class="relative">
+            <input
+              [type]="mostrarConfirmPassword ? 'text' : 'password'"
+              pInputText
+              id="confirmPassword"
+              [(ngModel)]="usuario.confirmPassword"
+              autocomplete="new-password"
+              class="w-full users-password-input"
+              fluid
+            />
+            <button
+              type="button"
+              class="users-password-toggle"
+              (click)="alternarConfirmPassword()"
+              [attr.aria-label]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
+              [attr.aria-pressed]="mostrarConfirmPassword"
+              [title]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
+            >
+              <i class="pi" [class.pi-eye]="!mostrarConfirmPassword" [class.pi-eye-slash]="mostrarConfirmPassword"></i>
+            </button>
+          </div>
+          @if (confirmPasswordInvalido()) {
+            <small class="block text-red-500 mt-1">Las contraseñas no coinciden.</small>
+          }
         </div>
-        @if (confirmPasswordInvalido()) {
-          <small class="block text-red-500 mt-1">Las contraseñas no coinciden.</small>
-        }
-      </div>
+      }
     </div>
 
     <span class="block font-bold">Datos de la persona</span>
@@ -252,6 +273,10 @@
           fluid
         />
       </div>
+      <div class="col-span-12 sm:col-span-8">
+        <label for="domicilio" class="block font-bold mb-1">Domicilio</label>
+        <input type="text" pInputText id="domicilio" [(ngModel)]="usuario.domicilio" fluid />
+      </div>
       <div class="col-span-12 sm:col-span-4">
         <label for="rol" class="block font-bold mb-1">Rol</label>
         <p-select
@@ -276,20 +301,66 @@
           <small class="text-red-500">No fue posible cargar los roles.</small>
         }
       </div>
-      <div class="col-span-12 sm:col-span-8">
-        <label for="domicilio" class="block font-bold mb-1">Domicilio</label>
-        <input type="text" pInputText id="domicilio" [(ngModel)]="usuario.domicilio" fluid />
-      </div>
+      @if (esRolMedico()) {
+        <div class="col-span-12 sm:col-span-4">
+          <label for="especialidad" class="block font-bold mb-1">Especialidad</label>
+          <input type="text" pInputText id="especialidad" [(ngModel)]="usuario.especialidad" fluid />
+          @if (especialidadInvalida()) {
+            <small class="text-red-500">La especialidad es obligatoria.</small>
+          }
+        </div>
+      }
+
+      @if (esRolPersonal()) {
+        <div class="col-span-12 sm:col-span-4">
+          <label for="registro" class="block font-bold mb-1">Registro</label>
+          <input type="text" pInputText id="registro" [(ngModel)]="usuario.registro" fluid />
+          @if (registroInvalido()) {
+            <small class="text-red-500">El registro es obligatorio.</small>
+          }
+        </div>
+        <div class="col-span-12 sm:col-span-8">
+          <label for="firma" class="block font-bold mb-1">Firma (imagen, máximo 1 MB)</label>
+          <input
+            id="firma"
+            type="file"
+            accept="image/*"
+            class="block w-full text-sm"
+            (change)="onFirmaSeleccionada($event)"
+          />
+          @if (usuario.firma) {
+            <div class="mt-2 flex items-center gap-3">
+              <img
+                [src]="usuario.firma"
+                alt="Vista previa de la firma"
+                class="h-16 max-w-64 rounded border border-surface-200 object-contain"
+              />
+              <p-button
+                label="Quitar"
+                icon="pi pi-times"
+                severity="danger"
+                text
+                (onClick)="quitarFirma()"
+              />
+            </div>
+            @if (usuario.firmaNombre) {
+              <small class="block text-color-secondary">{{ usuario.firmaNombre }}</small>
+            }
+          }
+        </div>
+      }
     </div>
 
-    <p-message severity="info" size="small" variant="simple">
-      El usuario se registra en estado inactivo; utilice el botón de activación del
-      listado para habilitarlo.
-    </p-message>
+    @if (!modoEdicion) {
+      <p-message severity="info" size="small" variant="simple">
+        El usuario se registra en estado inactivo; utilice el botón de activación del
+        listado para habilitarlo.
+      </p-message>
+    }
   </div>
 
   <ng-template #footer>
     <p-button label="Cancelar" icon="pi pi-times" text (onClick)="hideDialog()" [disabled]="guardando" />
-    <p-button label="Guardar" icon="pi pi-check" [loading]="guardando" (onClick)="saveUsuario()" />
+    <p-button label="Guardar" icon="pi pi-check" [loading]="guardando" [disabled]="cargandoDetalle" (onClick)="saveUsuario()" />
   </ng-template>
 </p-dialog>
