@@ -7,14 +7,15 @@
     left: 0;
     top: 0;
     width: 100%;
-    padding: 0 2rem;
+    padding: 0 1.5rem;
     background-color: var(--surface-card);
+    border-bottom: 1px solid var(--surface-border);
     transition: left var(--layout-section-transition-duration);
     display: flex;
     align-items: center;
 
     .layout-topbar-logo-container {
-        width: 20rem;
+        width: 15.5rem;
         display: flex;
         align-items: center;
     }
@@ -22,14 +23,15 @@
     .layout-topbar-logo {
         display: inline-flex;
         align-items: center;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+        letter-spacing: 0.04em;
         border-radius: var(--content-border-radius);
         color: var(--text-color);
-        font-weight: 500;
+        font-weight: 700;
         gap: 0.5rem;
 
         svg {
-            width: 3rem;
+            width: 2.5rem;
         }
 
         &:focus-visible {

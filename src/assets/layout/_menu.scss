@@ -2,19 +2,20 @@
 
 .layout-sidebar {
     position: fixed;
-    width: 20rem;
-    height: calc(100vh - 8rem);
+    width: 17rem;
+    height: calc(100vh - 4rem);
     z-index: 999;
     overflow-y: auto;
     user-select: none;
-    top: 6rem;
-    left: 2rem;
+    top: 4rem;
+    left: 0;
     transition:
         transform var(--layout-section-transition-duration),
         left var(--layout-section-transition-duration);
-    background-color: var(--surface-overlay);
-    border-radius: var(--content-border-radius);
-    padding: 0.5rem 1.5rem;
+    background-color: var(--surface-card);
+    border-right: 1px solid var(--surface-border);
+    border-radius: 0;
+    padding: 0.75rem 0.75rem 1.5rem;
 }
 
 .layout-menu {
@@ -24,11 +25,12 @@
 
     .layout-root-menuitem {
         > .layout-menuitem-root-text {
-            font-size: 0.857rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            font-weight: 700;
-            color: var(--text-color);
-            margin: 0.75rem 0;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            color: var(--text-color-secondary);
+            margin: 1rem 0.75rem 0.5rem;
         }
 
         > a {
@@ -66,13 +68,17 @@
             outline: 0 none;
             color: var(--text-color);
             cursor: pointer;
-            padding: 0.75rem 1rem;
+            padding: 0.625rem 0.75rem;
+            margin-bottom: 0.125rem;
             border-radius: var(--content-border-radius);
             transition:
+                background-color var(--element-transition-duration),
                 box-shadow var(--element-transition-duration);
 
             .layout-menuitem-icon {
-                margin-right: 0.5rem;
+                margin-right: 0.75rem;
+                font-size: 1.125rem;
+                color: var(--text-color-secondary);
             }
 
             .layout-submenu-toggler {
@@ -82,8 +88,13 @@
             }
 
             &.active-route {
-                font-weight: 700;
+                font-weight: 600;
                 color: var(--primary-color);
+                background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+
+                .layout-menuitem-icon {
+                    color: var(--primary-color);
+                }
             }
 
             &:hover {
@@ -156,4 +167,34 @@
 .layout-submenu-enter-active {
     overflow: hidden;
     transition: max-height 1s ease-in-out;
+}
+
+.p-submenu-enter {
+    animation: p-animate-submenu-expand 450ms cubic-bezier(0.86, 0, 0.07, 1) forwards;
+}
+
+.p-submenu-leave {
+    animation: p-animate-submenu-collapse 450ms cubic-bezier(0.86, 0, 0.07, 1) forwards;
+}
+
+@keyframes p-animate-submenu-expand {
+    from {
+        max-height: 0;
+        overflow: hidden;
+    }
+    to {
+        max-height: 1000px;
+        overflow: visible;
+    }
+}
+
+@keyframes p-animate-submenu-collapse {
+    from {
+        max-height: 1000px;
+        overflow: hidden;
+    }
+    to {
+        max-height: 0;
+        overflow: hidden;
+    }
 }

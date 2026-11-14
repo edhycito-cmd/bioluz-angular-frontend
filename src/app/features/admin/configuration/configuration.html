@@ -1,70 +1,62 @@
-<div class="card max-w-xl">
-  <div class="font-semibold text-xl mb-4">Configuración</div>
+<app-page-header
+  title="Configuración"
+  subtitle="Personalice la apariencia de la aplicación. Los cambios aplican a todos los usuarios."
+  icon="pi pi-cog"
+/>
 
-  @if (puedeEditar()) {
-    <form (submit)="onSubmit($event)" class="flex flex-col gap-5">
-      <div class="flex flex-col gap-3">
-        <div class="font-semibold">Tema</div>
+@if (puedeEditar()) {
+  <form (submit)="onSubmit($event)" class="flex max-w-4xl flex-col gap-4 lg:gap-6">
+    <section class="rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:p-6">
+      <app-form-section title="Apariencia" icon="pi pi-palette" description="Modo de color y disposición del menú lateral.">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div class="flex items-center justify-between gap-4 rounded-lg border border-surface p-4">
+            <label for="darkTheme" class="flex flex-col gap-0.5">
+              <span class="text-sm font-medium">Tema oscuro</span>
+              <span class="text-xs text-muted-color">Reduce el brillo en ambientes con poca luz.</span>
+            </label>
+            <p-checkbox inputId="darkTheme" [binary]="true" [formField]="configForm.darkTheme" />
+          </div>
 
-        <div class="flex items-center gap-3">
-          <p-checkbox
-            inputId="darkTheme"
-            [binary]="true"
-            [formField]="configForm.darkTheme"
-          />
-          <label for="darkTheme" class="text-sm font-medium">Tema oscuro</label>
+          <div class="flex flex-col gap-1.5">
+            <label for="menuMode" class="text-sm font-medium">Ubicación del menú</label>
+            <p-select
+              id="menuMode"
+              inputId="menuMode"
+              [ngModel]="model().menuMode"
+              (ngModelChange)="onMenuModeChange($event)"
+              [ngModelOptions]="{ standalone: true }"
+              [options]="opcionesMenu"
+              optionLabel="label"
+              optionValue="value"
+              [editable]="false"
+              fluid
+            />
+          </div>
         </div>
+      </app-form-section>
+    </section>
 
-        <div class="flex flex-col gap-2">
-          <label for="menuMode" class="text-sm font-medium">
-            Ubicación del menú
-          </label>
-          <p-select
-            id="menuMode"
-            inputId="menuMode"
-            [ngModel]="model().menuMode"
-            (ngModelChange)="onMenuModeChange($event)"
-            [ngModelOptions]="{ standalone: true }"
-            [options]="opcionesMenu"
-            optionLabel="label"
-            optionValue="value"
-            [editable]="false"
-            [style]="{ width: 'min(16rem, 100%)' }"
-          />
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-3 border-t border-surface pt-4">
-        <div class="font-semibold">Colores del tema</div>
-        <p class="text-sm text-muted-color m-0">
-          Estos valores se aplican a todos los usuarios de la aplicación.
-        </p>
+    <section class="rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:p-6">
+      <app-form-section title="Colores del tema" icon="pi pi-sliders-h" description="Color principal y superficie. Se previsualiza al instante.">
         <app-configurator />
-      </div>
+      </app-form-section>
+    </section>
 
-      @if (guardado()) {
-        <p-message severity="success" size="small" variant="simple">
-          Configuración guardada.
-        </p-message>
-      }
+    @if (guardado()) {
+      <p-message severity="success" size="small" variant="simple">Configuración guardada.</p-message>
+    }
+    @if (error()) {
+      <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
+    }
 
-      @if (error()) {
-        <p-message severity="error" size="small" variant="simple">
-          {{ error() }}
-        </p-message>
-      }
-
-      <button
-        pButton
-        type="submit"
-        label="Guardar"
-        class="w-fit"
-        [loading]="guardando()"
-      ></button>
-    </form>
-  } @else {
-    <p-message severity="warn" size="small" variant="simple">
-      No tiene permiso para modificar la configuración.
-    </p-message>
-  }
-</div>
+    <div class="flex justify-end">
+      <p-button type="submit" label="Guardar cambios" icon="pi pi-check" class="w-full sm:w-auto" [loading]="guardando()" />
+    </div>
+  </form>
+} @else {
+  <app-empty-state
+    icon="pi pi-lock"
+    title="Sin permiso para modificar"
+    description="No tiene permiso para modificar la configuración. Contacte al administrador."
+  />
+}

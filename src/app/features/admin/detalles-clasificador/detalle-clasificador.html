@@ -1,32 +1,36 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-<p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <p-button
-      label="Nuevo"
-      icon="pi pi-plus"
-      severity="secondary"
-      class="mr-2"
-      *appHasPermission="'create'"
-      (onClick)="openNew()"
+<app-page-header title="Detalles de clasificador" subtitle="Valores que componen cada clasificador del sistema." icon="pi pi-list">
+  <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCSV()" />
+  <p-button
+    severity="danger"
+    label="Eliminar"
+    icon="pi pi-trash"
+    outlined
+    [loading]="deleteSeleccionando"
+    [disabled]="!seleccionados || !seleccionados.length"
+    *appHasPermission="'delete'"
+    (onClick)="deleteSeleccionados()"
     />
-    <p-button
-      severity="secondary"
-      label="Eliminar"
-      icon="pi pi-trash"
-      outlined
-      [loading]="deleteSeleccionando"
-      [disabled]="!seleccionados || !seleccionados.length"
-      *appHasPermission="'delete'"
-      (onClick)="deleteSeleccionados()"
-    />
-  </ng-template>
+  <p-button label="Nuevo" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+</app-page-header>
 
-  <ng-template #end>
-    <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-  </ng-template>
-</p-toolbar>
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-80">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full"
+        aria-label="Buscar detalles"
+        placeholder="Buscar detalles..."
+        (input)="onGlobalFilter(dt, $event)"
+      />
+    </p-iconfield>
+  </div>
+
 
 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-4">
   <label for="filtroClasificador" class="font-bold">Clasificador</label>
@@ -64,15 +68,6 @@
   selectionMode="multiple"
   [(selection)]="seleccionados"
 >
-  <ng-template #caption>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar detalles de clasificador</h5>
-      <p-iconfield class="w-full sm:w-auto">
-        <p-inputicon styleClass="pi pi-search" />
-        <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
-      </p-iconfield>
-    </div>
-  </ng-template>
   <ng-template #header>
     <tr>
       <th style="width: 3rem">
@@ -104,24 +99,38 @@
       <td>
         <p-button
           icon="pi pi-pencil"
+          ariaLabel="Editar"
           class="mr-2"
           [rounded]="true"
-          [outlined]="true"
+          [text]="true"
           *appHasPermission="'update'"
           (onClick)="editDetalle(detalle)"
         />
         <p-button
           icon="pi pi-trash"
+          ariaLabel="Eliminar"
           severity="danger"
           [rounded]="true"
-          [outlined]="true"
+          [text]="true"
           *appHasPermission="'delete'"
           (onClick)="deleteDetalle(detalle)"
         />
       </td>
     </tr>
   </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="12">
+        <app-empty-state
+          icon="pi pi-list"
+          title="Sin resultados"
+          description="No hay detalles para mostrar. Ajuste la búsqueda o cree un nuevo registro."
+        />
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
+</div>
 
 <p-dialog
   [(visible)]="detalleDialog"

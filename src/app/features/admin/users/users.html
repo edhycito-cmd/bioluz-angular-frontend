@@ -1,22 +1,26 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-<p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <p-button
-      label="Nuevo"
-      icon="pi pi-plus"
-      severity="secondary"
-      class="mr-2"
-      *appHasPermission="'create'"
-      (onClick)="openNew()"
-    />
-  </ng-template>
+<app-page-header title="Usuarios" subtitle="Administre las cuentas de acceso, sus datos personales y su estado." icon="pi pi-users">
+  <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCSV()" />
+  <p-button label="Nuevo" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+</app-page-header>
 
-  <ng-template #end>
-    <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-  </ng-template>
-</p-toolbar>
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-80">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full"
+        aria-label="Buscar usuarios"
+        placeholder="Buscar usuarios..."
+        (input)="onGlobalFilter(dt, $event)"
+      />
+    </p-iconfield>
+  </div>
+
 
 <p-table
   #dt
@@ -36,15 +40,6 @@
   selectionMode="multiple"
   [(selection)]="seleccionados"
 >
-  <ng-template #caption>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar usuarios</h5>
-      <p-iconfield class="w-full sm:w-auto">
-        <p-inputicon styleClass="pi pi-search" />
-        <input pInputText type="text" class="w-full sm:w-auto" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
-      </p-iconfield>
-    </div>
-  </ng-template>
   <ng-template #header>
     <tr>
       <th style="width: 3rem">
@@ -79,9 +74,10 @@
         <div class="flex items-center gap-1">
           <p-button
             icon="pi pi-pencil"
+          ariaLabel="Editar"
             severity="info"
             [rounded]="true"
-            [outlined]="true"
+            [text]="true"
             title="Editar"
             [disabled]="cargandoDetalle"
             *appHasPermission="'update'"
@@ -100,7 +96,19 @@
       </td>
     </tr>
   </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="12">
+        <app-empty-state
+          icon="pi pi-users"
+          title="Sin resultados"
+          description="No hay usuarios para mostrar. Ajuste la búsqueda o cree un nuevo registro."
+        />
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
+</div>
 
 <p-dialog
   [(visible)]="usuarioDialog"
@@ -108,15 +116,16 @@
   [header]="modoEdicion ? 'Editar usuario' : 'Nuevo usuario'"
   [modal]="true"
 >
-  <div class="flex flex-col gap-3 pt-1">
+  <div class="flex flex-col gap-6 pt-1">
     @if (cargandoDetalle) {
       <p-message severity="info" size="small" variant="simple">
         Cargando los datos del usuario...
       </p-message>
     }
+    <app-form-section title="Cuenta de acceso" icon="pi pi-lock" description="Credenciales con las que el usuario inicia sesión.">
     <div class="grid grid-cols-12 gap-3">
       <div class="col-span-12 sm:col-span-4">
-        <label for="login" class="block font-bold mb-1">Correo de acceso</label>
+        <label for="login" class="mb-1.5 block text-sm font-medium">Correo de acceso</label>
         <input
           type="text"
           pInputText
@@ -132,7 +141,7 @@
       </div>
       @if (puedeCambiarPassword()) {
         <div class="col-span-12 sm:col-span-4">
-          <label for="password" class="block font-bold mb-1">
+          <label for="password" class="mb-1.5 block text-sm font-medium">
             {{ modoEdicion ? 'Nueva contraseña (opcional)' : 'Contraseña' }}
           </label>
           <div class="relative">
@@ -142,12 +151,12 @@
               id="password"
               [(ngModel)]="usuario.password"
               autocomplete="new-password"
-              class="w-full users-password-input"
+              class="w-full pr-12"
               fluid
             />
             <button
               type="button"
-              class="users-password-toggle"
+              class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
               (click)="alternarPassword()"
               [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               [attr.aria-pressed]="mostrarPassword"
@@ -164,7 +173,7 @@
         </div>
 
         <div class="col-span-12 sm:col-span-4">
-          <label for="confirmPassword" class="block font-bold mb-1">Confirmar contraseña</label>
+          <label for="confirmPassword" class="mb-1.5 block text-sm font-medium">Confirmar contraseña</label>
           <div class="relative">
             <input
               [type]="mostrarConfirmPassword ? 'text' : 'password'"
@@ -172,12 +181,12 @@
               id="confirmPassword"
               [(ngModel)]="usuario.confirmPassword"
               autocomplete="new-password"
-              class="w-full users-password-input"
+              class="w-full pr-12"
               fluid
             />
             <button
               type="button"
-              class="users-password-toggle"
+              class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
               (click)="alternarConfirmPassword()"
               [attr.aria-label]="mostrarConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
               [attr.aria-pressed]="mostrarConfirmPassword"
@@ -192,30 +201,31 @@
         </div>
       }
     </div>
+    </app-form-section>
 
-    <span class="block font-bold">Datos de la persona</span>
 
+    <app-form-section title="Datos de la persona y rol" icon="pi pi-user" description="Información personal, rol asignado y datos profesionales.">
     <div class="grid grid-cols-12 gap-3">
       <div class="col-span-12 sm:col-span-4">
-        <label for="nombres" class="block font-bold mb-1">Nombres</label>
+        <label for="nombres" class="mb-1.5 block text-sm font-medium">Nombres</label>
         <input type="text" pInputText id="nombres" [(ngModel)]="usuario.nombres" fluid />
         @if (nombresInvalido()) {
           <small class="text-red-500">Al menos 2 caracteres.</small>
         }
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="primerApellido" class="block font-bold mb-1">Primer apellido</label>
+        <label for="primerApellido" class="mb-1.5 block text-sm font-medium">Primer apellido</label>
         <input type="text" pInputText id="primerApellido" [(ngModel)]="usuario.primerApellido" fluid />
         @if (primerApellidoInvalido()) {
           <small class="text-red-500">Al menos 2 caracteres.</small>
         }
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="segundoApellido" class="block font-bold mb-1">Segundo apellido</label>
+        <label for="segundoApellido" class="mb-1.5 block text-sm font-medium">Segundo apellido</label>
         <input type="text" pInputText id="segundoApellido" [(ngModel)]="usuario.segundoApellido" fluid />
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="genero" class="block font-bold mb-1">Género</label>
+        <label for="genero" class="mb-1.5 block text-sm font-medium">Género</label>
         <p-select
           id="genero"
           inputId="genero"
@@ -232,7 +242,7 @@
         }
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="tipoDocumento" class="block font-bold mb-1">Tipo de documento</label>
+        <label for="tipoDocumento" class="mb-1.5 block text-sm font-medium">Tipo de documento</label>
         <p-select
           id="tipoDocumento"
           inputId="tipoDocumento"
@@ -247,22 +257,22 @@
         />
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="numeroDocumento" class="block font-bold mb-1">N.° de documento</label>
+        <label for="numeroDocumento" class="mb-1.5 block text-sm font-medium">N.° de documento</label>
         <input type="text" pInputText id="numeroDocumento" [(ngModel)]="usuario.numeroDocumento" fluid />
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="telefono" class="block font-bold mb-1">Teléfono</label>
+        <label for="telefono" class="mb-1.5 block text-sm font-medium">Teléfono</label>
         <input type="text" pInputText id="telefono" [(ngModel)]="usuario.telefono" fluid />
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="emailPersona" class="block font-bold mb-1">Correo de contacto</label>
+        <label for="emailPersona" class="mb-1.5 block text-sm font-medium">Correo de contacto</label>
         <input type="text" pInputText id="emailPersona" [(ngModel)]="usuario.email" fluid />
         @if (personaEmailInvalido()) {
           <small class="text-red-500">Introduzca un correo electrónico válido.</small>
         }
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="fechaNacimiento" class="block font-bold mb-1">Fecha de nacimiento</label>
+        <label for="fechaNacimiento" class="mb-1.5 block text-sm font-medium">Fecha de nacimiento</label>
         <p-datepicker
           id="fechaNacimiento"
           [(ngModel)]="usuario.fechaNacimiento"
@@ -274,11 +284,11 @@
         />
       </div>
       <div class="col-span-12 sm:col-span-8">
-        <label for="domicilio" class="block font-bold mb-1">Domicilio</label>
+        <label for="domicilio" class="mb-1.5 block text-sm font-medium">Domicilio</label>
         <input type="text" pInputText id="domicilio" [(ngModel)]="usuario.domicilio" fluid />
       </div>
       <div class="col-span-12 sm:col-span-4">
-        <label for="rol" class="block font-bold mb-1">Rol</label>
+        <label for="rol" class="mb-1.5 block text-sm font-medium">Rol</label>
         <p-select
           id="rol"
           inputId="rol"
@@ -303,7 +313,7 @@
       </div>
       @if (esRolMedico()) {
         <div class="col-span-12 sm:col-span-4">
-          <label for="especialidad" class="block font-bold mb-1">Especialidad</label>
+          <label for="especialidad" class="mb-1.5 block text-sm font-medium">Especialidad</label>
           <input type="text" pInputText id="especialidad" [(ngModel)]="usuario.especialidad" fluid />
           @if (especialidadInvalida()) {
             <small class="text-red-500">La especialidad es obligatoria.</small>
@@ -313,14 +323,14 @@
 
       @if (esRolPersonal()) {
         <div class="col-span-12 sm:col-span-4">
-          <label for="registro" class="block font-bold mb-1">Registro</label>
+          <label for="registro" class="mb-1.5 block text-sm font-medium">Registro</label>
           <input type="text" pInputText id="registro" [(ngModel)]="usuario.registro" fluid />
           @if (registroInvalido()) {
             <small class="text-red-500">El registro es obligatorio.</small>
           }
         </div>
         <div class="col-span-12 sm:col-span-8">
-          <label for="firma" class="block font-bold mb-1">Firma (imagen, máximo 1 MB)</label>
+          <label for="firma" class="mb-1.5 block text-sm font-medium">Firma (imagen, máximo 1 MB)</label>
           <input
             id="firma"
             type="file"
@@ -350,6 +360,7 @@
         </div>
       }
     </div>
+    </app-form-section>
 
     @if (!modoEdicion) {
       <p-message severity="info" size="small" variant="simple">

@@ -1,81 +1,57 @@
-<div class="grid grid-cols-12 gap-4 sm:gap-6">
-  <div class="col-span-12">
-    <div class="card">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-4">
-          <span
-            class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-contrast"
-          >
-            <i class="pi pi-user text-2xl"></i>
-          </span>
-          <div>
-            <h2 class="m-0 text-2xl font-semibold">
-              Bienvenido(a){{ persona() ? ", " + persona()?.nombres : "" }}
-            </h2>
-            <p class="mt-1 mb-0 text-muted-color">
-              Este es su espacio personal en BioLuz.
-            </p>
-          </div>
+<section class="mb-6 flex flex-col gap-4 rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+  <div class="flex min-w-0 items-center gap-4">
+    <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-contrast" aria-hidden="true">
+      <i class="pi pi-user text-2xl"></i>
+    </span>
+    <div class="min-w-0">
+      <h1 class="m-0! text-xl! font-semibold! sm:text-2xl! break-words">Bienvenido(a){{ persona() ? ", " + persona()?.nombres : "" }}</h1>
+      <div class="mt-1 text-sm text-muted-color">Este es su espacio personal en BioLuz.</div>
+    </div>
+  </div>
+  <a pButton routerLink="/perfil" icon="pi pi-user-edit" label="Mi perfil" class="w-full sm:w-auto"></a>
+</section>
+
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+  <section class="rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:p-6">
+    <app-form-section title="Datos de contacto" icon="pi pi-phone">
+      <dl class="m-0 divide-y divide-surface">
+        <div class="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <dt class="text-sm text-muted-color">Correo</dt>
+          <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ user()?.email || "—" }}</dd>
         </div>
-        <a pButton routerLink="/perfil" icon="pi pi-user-edit" label="Mi perfil"></a>
-      </div>
-    </div>
-  </div>
+        <div class="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <dt class="text-sm text-muted-color">Teléfono</dt>
+          <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ persona()?.telefono || "—" }}</dd>
+        </div>
+        <div class="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <dt class="text-sm text-muted-color">Documento</dt>
+          <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ persona()?.numeroDocumento || "—" }}</dd>
+        </div>
+      </dl>
+    </app-form-section>
+  </section>
 
-  <div class="col-span-12 lg:col-span-6">
-    <div class="card">
-      <h3 class="mt-0 text-xl font-semibold">Datos de contacto</h3>
-      <ul class="m-0 list-none p-0">
-        <li class="flex justify-between gap-4 border-b border-surface-200 py-3">
-          <span class="text-muted-color">Correo</span>
-          <span class="text-right font-medium">{{ user()?.email || "—" }}</span>
-        </li>
-        <li class="flex justify-between gap-4 border-b border-surface-200 py-3">
-          <span class="text-muted-color">Teléfono</span>
-          <span class="text-right font-medium">{{ persona()?.telefono || "—" }}</span>
-        </li>
-        <li class="flex justify-between gap-4 py-3">
-          <span class="text-muted-color">Documento</span>
-          <span class="text-right font-medium">
-            {{ persona()?.numeroDocumento || "—" }}
-          </span>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="col-span-12 lg:col-span-6">
-    <div class="card">
-      <h3 class="mt-0 text-xl font-semibold">Información personal</h3>
-      <ul class="m-0 list-none p-0">
-        <li class="flex justify-between gap-4 border-b border-surface-200 py-3">
-          <span class="text-muted-color">Nombre completo</span>
-          <span class="text-right font-medium">
-            {{ persona()?.nombres }} {{ persona()?.primerApellido }}
-            {{ persona()?.segundoApellido }}
-          </span>
-        </li>
-        <li class="flex justify-between gap-4 border-b border-surface-200 py-3">
-          <span class="text-muted-color">Fecha de nacimiento</span>
-          <span class="text-right font-medium">
-            {{ persona()?.fechaNacimiento ? (persona()?.fechaNacimiento | date: "dd/MM/yyyy") : "—" }}
-          </span>
-        </li>
-        <li class="flex justify-between gap-4 py-3">
-          <span class="text-muted-color">Domicilio</span>
-          <span class="text-right font-medium">{{ persona()?.domicilio || "—" }}</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="col-span-12">
-    <div class="card">
-      <h3 class="mt-0 text-xl font-semibold">¿Cómo consultar sus resultados?</h3>
-      <p class="mb-0 text-muted-color">
-        Comuníquese con el laboratorio para conocer el estado de sus órdenes y
-        resultados. El personal autorizado podrá informarle sobre sus estudios.
-      </p>
-    </div>
-  </div>
+  <section class="rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:p-6">
+    <app-form-section title="Información personal" icon="pi pi-id-card">
+      <dl class="m-0 divide-y divide-surface">
+        <div class="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <dt class="text-sm text-muted-color">Nombre completo</dt>
+          <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ persona()?.nombres }} {{ persona()?.primerApellido }} {{ persona()?.segundoApellido }}</dd>
+        </div>
+        <div class="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <dt class="text-sm text-muted-color">Fecha de nacimiento</dt>
+          <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ persona()?.fechaNacimiento ? (persona()?.fechaNacimiento | date: "dd/MM/yyyy") : "—" }}</dd>
+        </div>
+        <div class="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <dt class="text-sm text-muted-color">Domicilio</dt>
+          <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ persona()?.domicilio || "—" }}</dd>
+        </div>
+      </dl>
+    </app-form-section>
+  </section>
 </div>
+
+<p-message severity="info" size="small" variant="simple" class="mt-6 block">
+  <strong>¿Cómo consultar sus resultados?</strong> Comuníquese con el laboratorio para conocer el estado de sus órdenes
+  y resultados. El personal autorizado podrá informarle sobre sus estudios.
+</p-message>

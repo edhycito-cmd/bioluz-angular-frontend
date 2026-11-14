@@ -13,7 +13,6 @@ import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
 import { ToastModule } from "@openng/optimus-ui/toast";
-import { ToolbarModule } from "@openng/optimus-ui/toolbar";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { TagModule } from "@openng/optimus-ui/tag";
 import { DialogModule } from "@openng/optimus-ui/dialog";
@@ -30,16 +29,21 @@ interface InstitucionRow {
   estado: "ACTIVA" | "INACTIVA";
 }
 
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-institucion-convenio",
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: "block" },
   imports: [
+    AppPageHeader,
+    AppEmptyState,
     FormsModule,
     TableModule,
     ButtonModule,
     RippleModule,
     ToastModule,
-    ToolbarModule,
     InputTextModule,
     TagModule,
     DialogModule,
@@ -49,7 +53,6 @@ interface InstitucionRow {
     HasPermission,
   ],
   templateUrl: "./institucion-convenio.html",
-  styleUrl: "./institucion-convenio.scss",
   providers: [MessageService, ConfirmationService],
 })
 export class InstitucionConvenioPage {

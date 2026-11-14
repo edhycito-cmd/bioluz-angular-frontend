@@ -2,6 +2,11 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FormField, form, required, submit } from '@angular/forms/signals';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { AppPageHeader } from '../../../layout/component/app.page-header';
+import { AppFormSection } from '../../../layout/component/app.form-section';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { HasPermission } from '../../../core/directives/has-permission.directive';
@@ -33,9 +38,9 @@ const ETIQUETAS_APP: Readonly<Record<PermissionApp, string>> = {
 
 @Component({
   selector: 'app-authorization',
-  imports: [FormField, HasPermission],
+  imports: [FormField, HasPermission, ButtonModule, InputTextModule, MessageModule, AppPageHeader, AppFormSection],
+  host: { class: 'block' },
   templateUrl: './authorization.html',
-  styleUrl: './authorization.scss',
 })
 export class Authorization {
   private readonly authorizationService = inject(AuthorizationService);

@@ -7,9 +7,10 @@
 
 .card {
     background: var(--surface-card);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border-radius: var(--content-border-radius);
+    border: 1px solid var(--surface-border);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: calc(var(--content-border-radius) + 0.25rem);
 
     &:last-child {
         margin-bottom: 0;
@@ -20,6 +21,6 @@
     &.p-toast-top-right,
     &.p-toast-top-left,
     &.p-toast-top-center {
-        top: 100px;
+        top: 5rem;
     }
 }

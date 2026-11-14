@@ -21,6 +21,11 @@ import { ButtonModule } from "@openng/optimus-ui/button";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { MessageModule } from "@openng/optimus-ui/message";
 import { AuthService } from "../../../core/services/auth.service";
+import { AvatarModule } from "@openng/optimus-ui/avatar";
+import { TagModule } from "@openng/optimus-ui/tag";
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppFormSection } from "../../../layout/component/app.form-section";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
 import { UsersService } from "../../../core/services/users.service";
 
 interface CambiarContrasenaModel {
@@ -38,9 +43,14 @@ interface CambiarContrasenaModel {
     ButtonModule,
     InputTextModule,
     MessageModule,
+    AvatarModule,
+    TagModule,
+    AppPageHeader,
+    AppFormSection,
+    AppEmptyState,
   ],
+  host: { class: "block" },
   templateUrl: "./perfil-usuario.html",
-  styleUrl: "./perfil-usuario.scss",
 })
 export class PerfilUsuario {
   private readonly authService = inject(AuthService);

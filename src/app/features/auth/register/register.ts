@@ -3,7 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormField, email, form, minLength, pattern, required, submit, validate } from '@angular/forms/signals';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
 import { AuthService } from '../../../core/services/auth.service';
+import { AppAuthShell } from '../../../layout/component/app.auth-shell';
 
 interface RegisterModel {
   name: string;
@@ -14,9 +18,8 @@ interface RegisterModel {
 
 @Component({
   selector: 'app-register',
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, ButtonModule, InputTextModule, MessageModule, AppAuthShell],
   templateUrl: './register.html',
-  styleUrl: './register.scss',
 })
 export class Register {
   private readonly authService = inject(AuthService);
@@ -54,6 +57,16 @@ export class Register {
   });
 
   protected readonly serverError = signal<string | null>(null);
+  protected readonly mostrarPassword = signal(false);
+  protected readonly mostrarConfirmacion = signal(false);
+
+  protected alternarPassword(): void {
+    this.mostrarPassword.update((v) => !v);
+  }
+
+  protected alternarConfirmacion(): void {
+    this.mostrarConfirmacion.update((v) => !v);
+  }
 
   onSubmit(event: Event): void {
     event.preventDefault();

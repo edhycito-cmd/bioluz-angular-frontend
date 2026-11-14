@@ -1,40 +1,26 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-<p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="font-semibold text-xl mr-2">Resultados</span>
-      <p-button
-        label="Nuevo"
-        icon="pi pi-plus"
-        severity="secondary"
-        *appHasPermission="'create'"
-        (onClick)="openNew()"
+<app-page-header title="Resultados" subtitle="Resultados de exámenes asociados a cada informe." icon="pi pi-check-circle">
+  <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCSV()" />
+  <p-button label="Nuevo" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+</app-page-header>
+
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-80">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full"
+        aria-label="Buscar resultados"
+        placeholder="Buscar resultados..."
+        (input)="onGlobalFilter(dt, $event)"
       />
-    </div>
-  </ng-template>
-  <ng-template #end>
-    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-      <p-iconfield class="w-full sm:w-auto">
-        <p-inputicon styleClass="pi pi-search" />
-        <input
-          pInputText
-          type="text"
-          class="w-full sm:w-64"
-          (input)="onGlobalFilter(dt, $event)"
-          placeholder="Buscar..."
-        />
-      </p-iconfield>
-      <p-button
-        label="Exportar"
-        icon="pi pi-upload"
-        severity="secondary"
-        (onClick)="exportCSV()"
-      />
-    </div>
-  </ng-template>
-</p-toolbar>
+    </p-iconfield>
+  </div>
+
 
 <p-table
   #dt
@@ -60,11 +46,6 @@
   selectionMode="multiple"
   [(selection)]="seleccionados"
 >
-  <ng-template #caption>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar resultados</h5>
-    </div>
-  </ng-template>
   <ng-template #header>
     <tr>
       <th style="width: 3rem">
@@ -110,24 +91,38 @@
       <td>
         <p-button
           icon="pi pi-pencil"
+          ariaLabel="Editar"
           class="mr-2"
           [rounded]="true"
-          [outlined]="true"
+          [text]="true"
           *appHasPermission="'update'"
           (onClick)="editResultado(resultado)"
         />
         <p-button
           icon="pi pi-trash"
+          ariaLabel="Eliminar"
           severity="danger"
           [rounded]="true"
-          [outlined]="true"
+          [text]="true"
           *appHasPermission="'delete'"
           (onClick)="eliminar(resultado)"
         />
       </td>
     </tr>
   </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="12">
+        <app-empty-state
+          icon="pi pi-check-circle"
+          title="Sin resultados"
+          description="No hay resultados para mostrar. Ajuste la búsqueda o cree un nuevo registro."
+        />
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
+</div>
 
 <p-dialog
   [(visible)]="dialogVisible"
@@ -137,7 +132,7 @@
 >
   <div class="flex flex-col gap-5 pt-2">
     <div>
-      <label for="idExamen" class="block font-bold mb-2">
+      <label for="idExamen" class="mb-1.5 block text-sm font-medium">
         Examen <span class="text-red-500">*</span>
       </label>
       <p-select
@@ -155,7 +150,7 @@
       }
     </div>
     <div>
-      <label for="idInforme" class="block font-bold mb-2">
+      <label for="idInforme" class="mb-1.5 block text-sm font-medium">
         Informe <span class="text-red-500">*</span>
       </label>
       <p-select
@@ -174,7 +169,7 @@
     </div>
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
       <div>
-        <label for="valorNumerico" class="block font-bold mb-2">
+        <label for="valorNumerico" class="mb-1.5 block text-sm font-medium">
           Valor numérico
         </label>
         <p-inputnumber
@@ -185,7 +180,7 @@
         />
       </div>
       <div>
-        <label for="valorTexto" class="block font-bold mb-2">Valor texto</label>
+        <label for="valorTexto" class="mb-1.5 block text-sm font-medium">Valor texto</label>
         <input
           type="text"
           pInputText
@@ -201,7 +196,7 @@
       <small class="text-red-500">{{ errores().valorTexto }}</small>
     }
     <div>
-      <label for="interpretacion" class="block font-bold mb-2">
+      <label for="interpretacion" class="mb-1.5 block text-sm font-medium">
         Interpretación
       </label>
       <textarea
@@ -213,7 +208,7 @@
       ></textarea>
     </div>
     <div>
-      <label for="documento" class="block font-bold mb-2">
+      <label for="documento" class="mb-1.5 block text-sm font-medium">
         Documento / referencia
       </label>
       <textarea

@@ -320,6 +320,20 @@ con autenticación.
 - El alta administrativa crea usuarios inactivos: recordar activarlos antes de probar el login.
 - `Dashboard` es una etiqueta heredada del backend; en la UI se muestra como **Panel**.
 
+## Guía de diseño UI/UX (Optimus UI + Tailwind + Sparked)
+
+- Solo Tailwind en componentes: **no crear `.scss` por componente** ni `styles:`/`styleUrl`. Los estilos de la
+  plantilla Sparked viven en `src/assets/layout/*.scss` (sidebar anclada, topbar, tarjetas, tabla en tarjeta móvil).
+- Los estilos globales sin capa ganan a las utilidades de Tailwind (por ejemplo `h1`, `p`). En títulos y párrafos
+  propios use el modificador importante: `m-0!`, `text-xl!`.
+- Componentes de presentación en `layout/component/`: `app-page-header` (título, descripción, icono y acciones),
+  `app-form-section` (secciones de formularios y diálogos), `app-empty-state` y `app-auth-shell` (login/registro).
+- Patrón de listados CRUD: `app-page-header` con Exportar/Nuevo → tarjeta con barra de búsqueda → `p-table`
+  (`mobile-card-table`) → `app-empty-state` en `#emptymessage`. Botones de fila con `ariaLabel`.
+- Formularios con Signal Forms: Optimus marca `p-invalid` aunque el campo no se haya tocado. Se evita con
+  `group` + `[class.is-touched]` en el contenedor y la variante `[.group:not(.is-touched)_&]:` (ver login).
+- Todo el diseño es responsivo (móvil primero): grids `grid-cols-1 sm:... lg:...`, botones `w-full sm:w-auto`.
+
 ## Hitos recientes
 
 - Traducción completa de la interfaz al español (Angular y Optimus).

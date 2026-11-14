@@ -12,7 +12,8 @@
         &.layout-overlay {
             .layout-main-container {
                 margin-left: 0;
-                padding-left: 2rem;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
             }
 
             .layout-sidebar {
@@ -41,7 +42,9 @@
 
         &.layout-static {
             .layout-main-container {
-                margin-left: 22rem;
+                margin-left: 17rem;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
             }
 
             &.layout-static-inactive {
@@ -52,7 +55,7 @@
 
                 .layout-main-container {
                     margin-left: 0;
-                    padding-left: 2rem;
+                    padding-left: 1.5rem;
                 }
             }
         }
@@ -71,7 +74,7 @@
     .layout-wrapper {
         .layout-main-container {
             margin-left: 0;
-            padding: 6rem 1rem 0;
+            padding: 5.5rem 1rem 0;
         }
 
         .layout-sidebar {

@@ -22,7 +22,6 @@ import { SelectModule } from "@openng/optimus-ui/select";
 import { TableModule } from "@openng/optimus-ui/table";
 import { TagModule } from "@openng/optimus-ui/tag";
 import { ToastModule } from "@openng/optimus-ui/toast";
-import { ToolbarModule } from "@openng/optimus-ui/toolbar";
 import { TooltipModule } from "@openng/optimus-ui/tooltip";
 import { HasPermission } from "../../../core/directives/has-permission.directive";
 import { DetallesClasificadorService } from "../../../core/services/detalles-clasificador.service";
@@ -75,10 +74,24 @@ const ordenVacia = (nroFolio = 1): OrdenFormModel => ({
   edadDias: 0,
 });
 
+import { MessageModule } from "@openng/optimus-ui/message";
+import { IconFieldModule } from "@openng/optimus-ui/iconfield";
+import { InputIconModule } from "@openng/optimus-ui/inputicon";
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppFormSection } from "../../../layout/component/app.form-section";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-orden-laboratorio",
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: "block" },
   imports: [
+    MessageModule,
+    IconFieldModule,
+    InputIconModule,
+    AppPageHeader,
+    AppFormSection,
+    AppEmptyState,
     FormsModule,
     ButtonModule,
     ConfirmDialogModule,
@@ -91,13 +104,11 @@ const ordenVacia = (nroFolio = 1): OrdenFormModel => ({
     TableModule,
     TagModule,
     ToastModule,
-    ToolbarModule,
     TooltipModule,
     HasPermission,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: "./ordenes.html",
-  styleUrl: "./ordenes.scss",
 })
 export class OrdenesLaboratorioPage {
   private readonly ordenesService = inject(OrdenesLaboratorioService);

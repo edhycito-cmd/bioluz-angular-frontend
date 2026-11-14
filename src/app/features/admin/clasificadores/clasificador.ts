@@ -8,7 +8,6 @@ import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
 import { ToastModule } from "@openng/optimus-ui/toast";
-import { ToolbarModule } from "@openng/optimus-ui/toolbar";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { InputNumberModule } from "@openng/optimus-ui/inputnumber";
 import { TextareaModule } from "@openng/optimus-ui/textarea";
@@ -42,16 +41,21 @@ interface ClasificadorFormModel {
   orden: number;
 }
 
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-clasificador",
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: "block" },
   imports: [
+    AppPageHeader,
+    AppEmptyState,
     FormsModule,
     TableModule,
     ButtonModule,
     RippleModule,
     ToastModule,
-    ToolbarModule,
     InputTextModule,
     InputNumberModule,
     TextareaModule,
@@ -63,7 +67,6 @@ interface ClasificadorFormModel {
     HasPermission,
   ],
   templateUrl: "./clasificador.html",
-  styleUrl: "./clasificador.scss",
   providers: [MessageService, ConfirmationService],
 })
 export class Clasificador {

@@ -1,55 +1,46 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-<p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="font-semibold text-xl mr-2">Órdenes de laboratorio</span>
-      <p-button
-        label="Nueva orden"
-        icon="pi pi-plus"
-        severity="secondary"
-        *appHasPermission="'create'"
-        (onClick)="openNew()"
-      />
-    </div>
-  </ng-template>
+<app-page-header
+  title="Órdenes de laboratorio"
+  subtitle="Registre solicitudes, asigne paciente y médico, y siga su estado."
+  icon="pi pi-file-edit"
+>
+  <p-button
+    icon="pi pi-refresh"
+    severity="secondary"
+    [outlined]="true"
+    ariaLabel="Recargar órdenes"
+    pTooltip="Recargar"
+    tooltipPosition="bottom"
+    (onClick)="recargar()"
+  />
+  <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportar()" />
+  <p-button label="Nueva orden" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+</app-page-header>
 
-  <ng-template #end>
-    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+@if (errorCarga()) {
+  <p-message severity="error" size="small" variant="simple" class="mb-3 block">
+    No fue posible cargar las órdenes. Intente recargar la página.
+  </p-message>
+}
+
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-96">
+      <p-inputicon styleClass="pi pi-search" />
       <input
         pInputText
         type="text"
-        class="w-full sm:w-72"
+        class="w-full"
+        aria-label="Buscar órdenes"
         [ngModel]="filtro()"
         (ngModelChange)="filtro.set($event)"
         placeholder="Buscar folio, paciente, médico..."
       />
-      <div class="flex gap-2">
-        <p-button
-          icon="pi pi-refresh"
-          severity="secondary"
-          [outlined]="true"
-          pTooltip="Recargar"
-          tooltipPosition="bottom"
-          (onClick)="recargar()"
-        />
-        <p-button
-          label="Exportar"
-          icon="pi pi-upload"
-          severity="secondary"
-          (onClick)="exportar()"
-        />
-      </div>
-    </div>
-  </ng-template>
-</p-toolbar>
-
-@if (errorCarga()) {
-  <small class="mb-3 block text-red-500">
-    No fue posible cargar las órdenes. Intente recargar la página.
-  </small>
-}
+    </p-iconfield>
+    <span class="text-sm text-muted-color">{{ filasFiltradas().length }} órdenes · el folio sugerido se calcula por sucursal</span>
+  </div>
 
 <p-table
   styleClass="mobile-card-table"
@@ -63,18 +54,8 @@
   [rowsPerPageOptions]="[10, 20, 50]"
   currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
   [showCurrentPageReport]="true"
-  [tableStyle]="{ 'min-width': '78rem' }"
+  [tableStyle]="{ 'min-width': '62rem' }"
 >
-  <ng-template #caption>
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <span class="text-muted-color">
-        Total de órdenes: {{ filasFiltradas().length }}
-      </span>
-      <span class="text-muted-color text-sm">
-        El folio sugerido se calcula por sucursal.
-      </span>
-    </div>
-  </ng-template>
 
   <ng-template #header>
     <tr>
@@ -84,12 +65,12 @@
       <th pSortableColumn="fechaSolicitud" style="min-width: 8rem">
         Fecha <p-sortIcon field="fechaSolicitud" />
       </th>
-      <th style="min-width: 14rem">Paciente</th>
-      <th style="min-width: 14rem">Médico</th>
-      <th style="min-width: 12rem">Sucursal</th>
-      <th style="min-width: 12rem">Institución</th>
-      <th style="min-width: 7rem">Edad</th>
-      <th style="min-width: 8rem">Género</th>
+      <th style="min-width: 11rem">Paciente</th>
+      <th style="min-width: 11rem">Médico</th>
+      <th style="min-width: 8rem">Sucursal</th>
+      <th style="min-width: 9rem">Institución</th>
+      <th style="min-width: 5rem">Edad</th>
+      <th style="min-width: 6rem">Género</th>
       <th pSortableColumn="estado" style="min-width: 8rem">
         Estado <p-sortIcon field="estado" />
       </th>
@@ -125,8 +106,9 @@
         <div class="flex gap-2">
           <p-button
             icon="pi pi-pencil"
+            ariaLabel="Editar"
             [rounded]="true"
-            [outlined]="true"
+            [text]="true"
             pTooltip="Editar"
             tooltipPosition="top"
             *appHasPermission="'update'"
@@ -134,9 +116,10 @@
           />
           <p-button
             icon="pi pi-trash"
+            ariaLabel="Eliminar"
             severity="danger"
             [rounded]="true"
-            [outlined]="true"
+            [text]="true"
             pTooltip="Eliminar"
             tooltipPosition="top"
             *appHasPermission="'delete'"
@@ -149,12 +132,15 @@
 
   <ng-template #emptymessage>
     <tr>
-      <td colspan="10" class="py-8 text-center text-muted-color">
-        No hay órdenes registradas. Utilice «Nueva orden» para crear la primera.
+      <td colspan="10">
+        <app-empty-state icon="pi pi-file-edit" title="No hay órdenes registradas" description="Cree la primera orden para comenzar a registrar solicitudes.">
+          <p-button label="Nueva orden" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+        </app-empty-state>
       </td>
     </tr>
   </ng-template>
 </p-table>
+</div>
 
 <p-dialog
   [visible]="dialogVisible()"
@@ -166,27 +152,16 @@
   [draggable]="false"
   [resizable]="false"
 >
-  <div class="order-dialog">
-    <div class="order-dialog__intro">
-      <i class="pi pi-file-edit" aria-hidden="true"></i>
-      <div>
-        <p class="order-dialog__intro-title">
-          Datos de la solicitud de laboratorio
-        </p>
-        <small class="text-muted-color">
-          Al elegir el paciente se completan automáticamente el género y la
-          edad. Si modifica la fecha de solicitud, la edad se recalculará.
-        </small>
-      </div>
-    </div>
+  <div class="flex flex-col gap-6">
+    <p-message severity="info" size="small" variant="simple">
+      Al elegir el paciente se completan automáticamente el género y la edad. Si modifica la fecha de
+      solicitud, la edad se recalculará.
+    </p-message>
 
-    <div class="grid grid-cols-12 gap-4 pt-2">
-      <div class="col-span-12">
-        <span class="order-section-title">Orden</span>
-      </div>
-
+    <app-form-section title="Orden" icon="pi pi-hashtag" description="Folio, fecha, sucursal e institución.">
+      <div class="grid grid-cols-12 gap-4">
       <div class="col-span-12 md:col-span-6">
-        <label for="nroFolio" class="mb-2 block font-bold">
+        <label for="nroFolio" class="mb-1.5 block text-sm font-medium">
           N.° de folio <span class="text-red-500">*</span>
         </label>
         <p-inputnumber
@@ -211,7 +186,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="fechaSolicitud" class="mb-2 block font-bold">
+        <label for="fechaSolicitud" class="mb-1.5 block text-sm font-medium">
           Fecha de solicitud <span class="text-red-500">*</span>
         </label>
         <p-datepicker
@@ -231,7 +206,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="idSucursal" class="mb-2 block font-bold">
+        <label for="idSucursal" class="mb-1.5 block text-sm font-medium">
           Sucursal <span class="text-red-500">*</span>
         </label>
         <p-select
@@ -254,7 +229,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="idInstitucion" class="mb-2 block font-bold">
+        <label for="idInstitucion" class="mb-1.5 block text-sm font-medium">
           Institución <span class="text-red-500">*</span>
         </label>
         <p-select
@@ -275,13 +250,13 @@
           </small>
         }
       </div>
-
-      <div class="col-span-12">
-        <span class="order-section-title">Paciente y profesional</span>
       </div>
+    </app-form-section>
 
+    <app-form-section title="Paciente y profesional" icon="pi pi-user" description="Quién se atiende y quién solicita.">
+      <div class="grid grid-cols-12 gap-4">
       <div class="col-span-12 md:col-span-6">
-        <label for="idPaciente" class="mb-2 block font-bold">
+        <label for="idPaciente" class="mb-1.5 block text-sm font-medium">
           Paciente <span class="text-red-500">*</span>
         </label>
         <p-select
@@ -304,7 +279,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="idMedico" class="mb-2 block font-bold">
+        <label for="idMedico" class="mb-1.5 block text-sm font-medium">
           Médico solicitante <span class="text-red-500">*</span>
         </label>
         <p-select
@@ -327,7 +302,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="generoId" class="mb-2 block font-bold">
+        <label for="generoId" class="mb-1.5 block text-sm font-medium">
           Género <span class="text-red-500">*</span>
         </label>
         <p-select
@@ -353,7 +328,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="estado" class="mb-2 block font-bold">
+        <label for="estado" class="mb-1.5 block text-sm font-medium">
           Estado <span class="text-red-500">*</span>
         </label>
         <p-select
@@ -373,13 +348,13 @@
           </small>
         }
       </div>
-
-      <div class="col-span-12">
-        <span class="order-section-title">Edad al momento de la solicitud</span>
       </div>
+    </app-form-section>
 
+    <app-form-section title="Edad al momento de la solicitud" icon="pi pi-calendar" description="Se calcula con la fecha de nacimiento; puede ajustarla.">
+      <div class="grid grid-cols-12 gap-4">
       <div class="col-span-12 md:col-span-4">
-        <label for="edadAnios" class="mb-2 block font-bold">Años</label>
+        <label for="edadAnios" class="mb-1.5 block text-sm font-medium">Años</label>
         <p-inputnumber
           inputId="edadAnios"
           [ngModel]="orden().edadAnios"
@@ -397,7 +372,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-4">
-        <label for="edadMeses" class="mb-2 block font-bold">Meses</label>
+        <label for="edadMeses" class="mb-1.5 block text-sm font-medium">Meses</label>
         <p-inputnumber
           inputId="edadMeses"
           [ngModel]="orden().edadMeses"
@@ -415,7 +390,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-4">
-        <label for="edadDias" class="mb-2 block font-bold">Días</label>
+        <label for="edadDias" class="mb-1.5 block text-sm font-medium">Días</label>
         <p-inputnumber
           inputId="edadDias"
           [ngModel]="orden().edadDias"
@@ -431,10 +406,11 @@
           </small>
         }
       </div>
-    </div>
+      </div>
+    </app-form-section>
 
     @if (formError()) {
-      <small class="mt-4 block text-red-500">{{ formError() }}</small>
+      <p-message severity="error" size="small" variant="simple">{{ formError() }}</p-message>
     }
   </div>
 

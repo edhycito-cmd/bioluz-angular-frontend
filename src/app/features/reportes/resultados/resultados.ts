@@ -9,7 +9,6 @@ import { rxResource } from "@angular/core/rxjs-interop";
 import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
-import { ToolbarModule } from "@openng/optimus-ui/toolbar";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { InputIconModule } from "@openng/optimus-ui/inputicon";
 import { IconFieldModule } from "@openng/optimus-ui/iconfield";
@@ -27,20 +26,24 @@ interface ResultadoReporteRow {
   documento: string;
 }
 
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-reporte-resultados",
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: "block" },
   imports: [
+    AppPageHeader,
+    AppEmptyState,
     TableModule,
     ButtonModule,
     RippleModule,
-    ToolbarModule,
     InputTextModule,
     InputIconModule,
     IconFieldModule,
   ],
   templateUrl: "./resultados.html",
-  styleUrl: "./resultados.scss",
 })
 export class ReporteResultadosPage {
   private readonly resultadosService = inject(ResultadosService);

@@ -13,7 +13,6 @@ import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
 import { ToastModule } from "@openng/optimus-ui/toast";
-import { ToolbarModule } from "@openng/optimus-ui/toolbar";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { TagModule } from "@openng/optimus-ui/tag";
 import { DialogModule } from "@openng/optimus-ui/dialog";
@@ -38,16 +37,21 @@ interface CondicionFormModel {
 
 const condicionVacia = (): CondicionFormModel => ({ codigo: "", nombre: "" });
 
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-condicion-fisiologica",
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: "block" },
   imports: [
+    AppPageHeader,
+    AppEmptyState,
     FormsModule,
     TableModule,
     ButtonModule,
     RippleModule,
     ToastModule,
-    ToolbarModule,
     InputTextModule,
     TagModule,
     DialogModule,
@@ -57,7 +61,6 @@ const condicionVacia = (): CondicionFormModel => ({ codigo: "", nombre: "" });
     HasPermission,
   ],
   templateUrl: "./condicion-fisiologica.html",
-  styleUrl: "./condicion-fisiologica.scss",
   providers: [MessageService, ConfirmationService],
 })
 export class CondicionFisiologicaPage {

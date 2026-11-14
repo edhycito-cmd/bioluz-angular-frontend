@@ -9,7 +9,6 @@ import { rxResource } from "@angular/core/rxjs-interop";
 import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
-import { ToolbarModule } from "@openng/optimus-ui/toolbar";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { TagModule } from "@openng/optimus-ui/tag";
 import { InputIconModule } from "@openng/optimus-ui/inputicon";
@@ -32,21 +31,25 @@ interface OrdenReporteRow {
   estado: string;
 }
 
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-reporte-ordenes",
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: "block" },
   imports: [
+    AppPageHeader,
+    AppEmptyState,
     TableModule,
     ButtonModule,
     RippleModule,
-    ToolbarModule,
     InputTextModule,
     TagModule,
     InputIconModule,
     IconFieldModule,
   ],
   templateUrl: "./ordenes.html",
-  styleUrl: "./ordenes.scss",
 })
 export class ReporteOrdenesPage {
   private readonly ordenesService = inject(OrdenesLaboratorioService);

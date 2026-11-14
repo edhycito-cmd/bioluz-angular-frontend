@@ -1,30 +1,22 @@
-<p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="font-semibold text-xl mr-2">Reporte de resultados</span>
-    </div>
-  </ng-template>
-  <ng-template #end>
-    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-      <p-iconfield class="w-full sm:w-auto">
-        <p-inputicon styleClass="pi pi-search" />
-        <input
-          pInputText
-          type="text"
-          class="w-full sm:w-64"
-          (input)="onGlobalFilter(dt, $event)"
-          placeholder="Buscar..."
-        />
-      </p-iconfield>
-      <p-button
-        label="Exportar"
-        icon="pi pi-upload"
-        severity="secondary"
-        (onClick)="exportCSV()"
+<app-page-header title="Reporte de resultados" subtitle="Consulta y exportación de los resultados registrados." icon="pi pi-chart-bar">
+  <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCSV()" />
+</app-page-header>
+
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-80">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full"
+        aria-label="Buscar resultados"
+        placeholder="Buscar resultados..."
+        (input)="onGlobalFilter(dt, $event)"
       />
-    </div>
-  </ng-template>
-</p-toolbar>
+    </p-iconfield>
+  </div>
+
 
 <p-table
   #dt
@@ -48,11 +40,6 @@
   [showCurrentPageReport]="true"
   [tableStyle]="{ 'min-width': '70rem' }"
 >
-  <ng-template #caption>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Resultados de laboratorio</h5>
-    </div>
-  </ng-template>
   <ng-template #header>
     <tr>
       <th pSortableColumn="examen" style="min-width: 18rem">
@@ -87,9 +74,10 @@
   </ng-template>
   <ng-template #emptymessage>
     <tr>
-      <td colspan="6" class="text-center py-6">
-        No hay resultados registrados.
+      <td colspan="6">
+        <app-empty-state icon="pi pi-chart-bar" title="No hay resultados registrados" description="Cuando existan registros aparecerán aquí." />
       </td>
     </tr>
   </ng-template>
 </p-table>
+</div>

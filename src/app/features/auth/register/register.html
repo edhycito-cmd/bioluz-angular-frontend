@@ -1,73 +1,82 @@
-<div class="auth-card">
-  <h1>Crear cuenta</h1>
+<app-auth-shell>
+  <div class="rounded-2xl border border-surface bg-surface-0 p-6 shadow-sm dark:bg-surface-900 sm:p-8">
+    <div class="mb-6">
+      <h1 class="m-0! text-2xl! font-semibold! text-surface-900 dark:text-surface-0">Crear cuenta</h1>
+      <div class="mt-1 text-sm text-muted-color">Complete sus datos para registrarse en el sistema.</div>
+    </div>
 
-  <form (submit)="onSubmit($event)" novalidate>
-    <label for="name">Nombre</label>
-    <input id="name" type="text" [formField]="registerForm.name" autocomplete="name" />
-    @let nameField = registerForm.name();
-    @if (nameField.touched() && nameField.invalid()) {
-      <ul class="field-errors">
-        @for (error of nameField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
+    <form novalidate (submit)="onSubmit($event)" class="flex w-full flex-col gap-5">
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="registerForm.name().touched()">
+          <label for="name" class="text-sm font-medium text-surface-900 dark:text-surface-0">Nombre</label>
+          <input pInputText type="text" id="name" placeholder="Su nombre completo" autocomplete="name" [formField]="registerForm.name"
+            class="h-11 w-full text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+          @if (registerForm.name().invalid() && registerForm.name().touched()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of registerForm.name().errors(); track error.kind) { {{ error.message }} }
+          </p-message>
+          }
+        </div>
+
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="registerForm.email().touched()">
+          <label for="email" class="text-sm font-medium text-surface-900 dark:text-surface-0">Correo electrónico</label>
+          <input pInputText type="email" id="email" placeholder="nombre@correo.com" autocomplete="email" [formField]="registerForm.email"
+            class="h-11 w-full text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+          @if (registerForm.email().invalid() && registerForm.email().touched()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of registerForm.email().errors(); track error.kind) { {{ error.message }} }
+          </p-message>
+          }
+        </div>
+
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="registerForm.password().touched()">
+          <label for="password" class="text-sm font-medium text-surface-900 dark:text-surface-0">Contraseña</label>
+          <div class="relative">
+            <input pInputText [type]="mostrarPassword() ? 'text' : 'password'" id="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" [formField]="registerForm.password"
+              class="h-11 w-full pr-12 text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+            <button type="button" class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary" (click)="alternarPassword()"
+              [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="mostrarPassword()"
+              [title]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="pi" [class.pi-eye]="!mostrarPassword()" [class.pi-eye-slash]="mostrarPassword()"></i>
+            </button>
+          </div>
+          <div class="text-xs text-muted-color">Use mayúsculas, minúsculas, números y un carácter especial.</div>
+          @if (registerForm.password().invalid() && registerForm.password().touched()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of registerForm.password().errors(); track error.kind) { {{ error.message }} }
+          </p-message>
+          }
+        </div>
+
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="registerForm.confirmPassword().touched()">
+          <label for="confirmPassword" class="text-sm font-medium text-surface-900 dark:text-surface-0">Confirmar contraseña</label>
+          <div class="relative">
+            <input pInputText [type]="mostrarConfirmacion() ? 'text' : 'password'" id="confirmPassword" placeholder="Repita la contraseña" autocomplete="new-password" [formField]="registerForm.confirmPassword"
+              class="h-11 w-full pr-12 text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+            <button type="button" class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary" (click)="alternarConfirmacion()"
+              [attr.aria-label]="mostrarConfirmacion() ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="mostrarConfirmacion()"
+              [title]="mostrarConfirmacion() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="pi" [class.pi-eye]="!mostrarConfirmacion()" [class.pi-eye-slash]="mostrarConfirmacion()"></i>
+            </button>
+          </div>
+          @if (registerForm.confirmPassword().invalid() && registerForm.confirmPassword().touched()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of registerForm.confirmPassword().errors(); track error.kind) { {{ error.message }} }
+          </p-message>
+          }
+        </div>
+
+        @if (serverError()) {
+        <p-message severity="error" size="small" variant="simple" role="alert">{{ serverError() }}</p-message>
         }
-      </ul>
-    }
 
-    <label for="email">Correo electrónico</label>
-    <input id="email" type="email" [formField]="registerForm.email" autocomplete="email" />
-    @let emailField = registerForm.email();
-    @if (emailField.touched() && emailField.invalid()) {
-      <ul class="field-errors">
-        @for (error of emailField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
-        }
-      </ul>
-    }
+        <button pButton type="submit" class="h-11 w-full" [disabled]="registerForm().invalid() || registerForm().submitting()">
+          <span pButtonLabel>{{ registerForm().submitting() ? 'Creando cuenta…' : 'Crear cuenta' }}</span>
+        </button>
+      </form>
 
-    <label for="password">Contraseña</label>
-    <input
-      id="password"
-      type="password"
-      [formField]="registerForm.password"
-      autocomplete="new-password"
-    />
-    @let passwordField = registerForm.password();
-    @if (passwordField.touched() && passwordField.invalid()) {
-      <ul class="field-errors">
-        @for (error of passwordField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
-        }
-      </ul>
-    }
-
-    <label for="confirmPassword">Confirmar contraseña</label>
-    <input
-      id="confirmPassword"
-      type="password"
-      [formField]="registerForm.confirmPassword"
-      autocomplete="new-password"
-    />
-    @let confirmField = registerForm.confirmPassword();
-    @if (confirmField.touched() && confirmField.invalid()) {
-      <ul class="field-errors">
-        @for (error of confirmField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
-        }
-      </ul>
-    }
-
-    @if (serverError()) {
-      <p class="server-error">{{ serverError() }}</p>
-    }
-
-    <button type="submit" [disabled]="registerForm().invalid() || registerForm().submitting()">
-      @if (registerForm().submitting()) {
-        Creando cuenta…
-      } @else {
-        Crear cuenta
-      }
-    </button>
-  </form>
-
-  <p class="switch-link">¿Ya tiene una cuenta? <a routerLink="/login">Inicie sesión</a></p>
-</div>
+    <div class="mt-6 text-center text-sm text-muted-color">
+      ¿Ya tiene una cuenta?
+      <a routerLink="/login" class="font-medium text-primary hover:underline">Inicie sesión</a>
+    </div>
+  </div>
+</app-auth-shell>

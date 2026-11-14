@@ -1,40 +1,26 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-<p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="font-semibold text-xl mr-2">Valores de referencia</span>
-      <p-button
-        label="Nuevo"
-        icon="pi pi-plus"
-        severity="secondary"
-        *appHasPermission="'create'"
-        (onClick)="openNew()"
+<app-page-header title="Valores de referencia" subtitle="Rangos normales por examen, género y condición fisiológica." icon="pi pi-sliders-h">
+  <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCSV()" />
+  <p-button label="Nuevo" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+</app-page-header>
+
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-80">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full"
+        aria-label="Buscar valores"
+        placeholder="Buscar valores..."
+        (input)="onGlobalFilter(dt, $event)"
       />
-    </div>
-  </ng-template>
-  <ng-template #end>
-    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-      <p-iconfield class="w-full sm:w-auto">
-        <p-inputicon styleClass="pi pi-search" />
-        <input
-          pInputText
-          type="text"
-          class="w-full sm:w-64"
-          (input)="onGlobalFilter(dt, $event)"
-          placeholder="Buscar..."
-        />
-      </p-iconfield>
-      <p-button
-        label="Exportar"
-        icon="pi pi-upload"
-        severity="secondary"
-        (onClick)="exportCSV()"
-      />
-    </div>
-  </ng-template>
-</p-toolbar>
+    </p-iconfield>
+  </div>
+
 
 <p-table
   #dt
@@ -61,11 +47,6 @@
   selectionMode="multiple"
   [(selection)]="seleccionados"
 >
-  <ng-template #caption>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h5 class="m-0">Gestionar valores de referencia</h5>
-    </div>
-  </ng-template>
   <ng-template #header>
     <tr>
       <th style="width: 3rem">
@@ -115,24 +96,38 @@
       <td>
         <p-button
           icon="pi pi-pencil"
+          ariaLabel="Editar"
           class="mr-2"
           [rounded]="true"
-          [outlined]="true"
+          [text]="true"
           *appHasPermission="'update'"
           (onClick)="editValor(valor)"
         />
         <p-button
           icon="pi pi-trash"
+          ariaLabel="Eliminar"
           severity="danger"
           [rounded]="true"
-          [outlined]="true"
+          [text]="true"
           *appHasPermission="'delete'"
           (onClick)="eliminar(valor)"
         />
       </td>
     </tr>
   </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="12">
+        <app-empty-state
+          icon="pi pi-sliders-h"
+          title="Sin resultados"
+          description="No hay valores para mostrar. Ajuste la búsqueda o cree un nuevo registro."
+        />
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
+</div>
 
 <p-dialog
   [(visible)]="dialogVisible"
@@ -142,7 +137,7 @@
 >
   <div class="grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2">
     <div>
-      <label for="tipoDato" class="block font-bold mb-2">
+      <label for="tipoDato" class="mb-1.5 block text-sm font-medium">
         Tipo de dato <span class="text-red-500">*</span>
       </label>
       <input
@@ -160,7 +155,7 @@
       }
     </div>
     <div>
-      <label for="tipos" class="block font-bold mb-2">Tipos</label>
+      <label for="tipos" class="mb-1.5 block text-sm font-medium">Tipos</label>
       <input
         type="text"
         pInputText
@@ -176,7 +171,7 @@
       }
     </div>
     <div>
-      <label for="valorMinimo" class="block font-bold mb-2">Valor mínimo</label>
+      <label for="valorMinimo" class="mb-1.5 block text-sm font-medium">Valor mínimo</label>
       <p-inputnumber
         inputId="valorMinimo"
         [(ngModel)]="valor.valorMinimo"
@@ -185,7 +180,7 @@
       />
     </div>
     <div>
-      <label for="valorMaximo" class="block font-bold mb-2">Valor máximo</label>
+      <label for="valorMaximo" class="mb-1.5 block text-sm font-medium">Valor máximo</label>
       <p-inputnumber
         inputId="valorMaximo"
         [(ngModel)]="valor.valorMaximo"
@@ -197,7 +192,7 @@
       }
     </div>
     <div class="sm:col-span-2">
-      <label for="texto" class="block font-bold mb-2">Texto</label>
+      <label for="texto" class="mb-1.5 block text-sm font-medium">Texto</label>
       <input
         type="text"
         pInputText
@@ -213,7 +208,7 @@
       }
     </div>
     <div>
-      <label for="idCondicion" class="block font-bold mb-2">
+      <label for="idCondicion" class="mb-1.5 block text-sm font-medium">
         Condición fisiológica
       </label>
       <p-select
@@ -229,7 +224,7 @@
       />
     </div>
     <div>
-      <label for="idUnidadMedida" class="block font-bold mb-2">
+      <label for="idUnidadMedida" class="mb-1.5 block text-sm font-medium">
         Unidad de medida
       </label>
       <p-select
@@ -245,7 +240,7 @@
       />
     </div>
     <div class="sm:col-span-2">
-      <label for="descripcion" class="block font-bold mb-2">Descripción</label>
+      <label for="descripcion" class="mb-1.5 block text-sm font-medium">Descripción</label>
       <textarea
         id="descripcion"
         pTextarea

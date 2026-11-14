@@ -1,164 +1,131 @@
-<h1>Autorización</h1>
-<p class="page-hint">
-  Requiere el rol <code>ADMINISTRADOR</code> (o cualquier rol con permiso para administrar
-  <code>/api/authorization</code>). El servidor no expone un listado de usuarios todavía, así que
-  el Identificador de usuario debe ingresarse manualmente; puede copiarlo desde el Panel.
-</p>
+<app-page-header
+  title="Autorización"
+  subtitle="Asigne roles a usuarios y administre las políticas de acceso (Casbin)."
+  icon="pi pi-shield"
+/>
 
-@if (permisosPagina().length) {
-  <p class="page-hint">
-    Acciones de su rol sobre esta página:
-    <strong>{{ permisosPaginaVisibles().join(' | ') }}</strong>
-  </p>
-}
+<p-message severity="info" size="small" variant="simple" class="mb-4 block">
+  Requiere el rol <code class="rounded bg-emphasis px-1.5 py-0.5">ADMINISTRADOR</code> o un rol con permiso sobre
+  <code class="rounded bg-emphasis px-1.5 py-0.5">/api/authorization</code>. El servidor aún no lista usuarios:
+  ingrese el identificador manualmente (puede copiarlo desde el Panel).
+  @if (permisosPagina().length) {
+    <span class="mt-1 block">Acciones de su rol en esta página: <strong>{{ permisosPaginaVisibles().join(' | ') }}</strong></span>
+  }
+</p-message>
 
-<section class="panel">
-  <h2>Roles</h2>
-
-  <form novalidate>
-    <label for="userId">Identificador de usuario</label>
-    <input id="userId" type="text" [formField]="roleForm.userId" placeholder="Identificador del usuario (UUID)" />
-    @let userIdField = roleForm.userId();
-    @if (userIdField.touched() && userIdField.invalid()) {
-      <ul class="field-errors">
-        @for (error of userIdField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
+<div class="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+  <section class="rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:p-6">
+    <app-form-section title="Roles de usuario" icon="pi pi-users" description="Asigne o revoque un rol a un usuario.">
+    <form novalidate class="flex flex-col gap-4">
+      <div class="group flex flex-col gap-1.5" [class.is-touched]="roleForm.userId().touched()">
+        <label for="userId" class="text-sm font-medium">Identificador de usuario</label>
+        <input pInputText id="userId" type="text" [formField]="roleForm.userId" placeholder="UUID del usuario" autocomplete="off" class="h-11 w-full text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+        @let userIdField = roleForm.userId();
+        @if (userIdField.touched() && userIdField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of userIdField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+          </p-message>
         }
-      </ul>
-    }
-
-    <label for="role">Rol</label>
-    <input id="role" type="text" [formField]="roleForm.role" placeholder="ADMINISTRADOR, PACIENTE, ..." />
-    @let roleField = roleForm.role();
-    @if (roleField.touched() && roleField.invalid()) {
-      <ul class="field-errors">
-        @for (error of roleField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
+      </div>
+      <div class="group flex flex-col gap-1.5" [class.is-touched]="roleForm.role().touched()">
+        <label for="role" class="text-sm font-medium">Rol</label>
+        <input pInputText id="role" type="text" [formField]="roleForm.role" placeholder="ADMINISTRADOR, PACIENTE, ..." autocomplete="off" class="h-11 w-full text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+        @let roleField = roleForm.role();
+        @if (roleField.touched() && roleField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of roleField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+          </p-message>
         }
-      </ul>
-    }
-
-    @if (roleMessage()) {
-      <p class="success">{{ roleMessage() }}</p>
-    }
-    @if (roleError()) {
-      <p class="error">{{ roleError() }}</p>
-    }
-
-    <div class="actions">
-      <!-- Asignar rol = acción `create` en Casbin (POST /api/authorization/roles). -->
-      <button
-        *appHasPermission="'create'"
-        type="button"
-        class="primary"
-        [disabled]="roleForm().invalid() || roleForm().submitting()"
-        (click)="assignRole($event)"
-      >
-        Asignar rol
-      </button>
-      <!-- Revocar rol = acción `delete` en Casbin (DELETE /api/authorization/roles). -->
-      <button
-        *appHasPermission="'delete'"
-        type="button"
-        class="secondary"
-        [disabled]="roleForm().invalid() || roleForm().submitting()"
-        (click)="revokeRole($event)"
-      >
-        Revocar rol
-      </button>
-    </div>
-  </form>
-</section>
-
-<section class="panel">
-  <h2>Políticas</h2>
-
-  <form novalidate>
-    <label for="policyRole">Rol</label>
-    <input id="policyRole" type="text" [formField]="policyForm.role" placeholder="ADMINISTRADOR, PACIENTE, ..." />
-    @let policyRoleField = policyForm.role();
-    @if (policyRoleField.touched() && policyRoleField.invalid()) {
-      <ul class="field-errors">
-        @for (error of policyRoleField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
-        }
-      </ul>
-    }
-
-    <label for="resource">Recurso</label>
-    <input
-      id="resource"
-      type="text"
-      [formField]="policyForm.resource"
-      placeholder="/api/ordenes o /api/ordenes/:id"
-    />
-    @let resourceField = policyForm.resource();
-    @if (resourceField.touched() && resourceField.invalid()) {
-      <ul class="field-errors">
-        @for (error of resourceField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
-        }
-      </ul>
-    }
-
-    <label for="action">Acción</label>
-    <select id="action" [formField]="policyForm.action">
-      @for (accion of accionesDisponibles; track accion) {
-        <option [value]="accion">{{ etiquetaAccion(accion) }}</option>
+      </div>
+      @if (roleMessage()) {
+        <p-message severity="success" size="small" variant="simple">{{ roleMessage() }}</p-message>
       }
-    </select>
-    @let actionField = policyForm.action();
-    @if (actionField.touched() && actionField.invalid()) {
-      <ul class="field-errors">
-        @for (error of actionField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
-        }
-      </ul>
-    }
-
-    <label for="app">Ámbito de la aplicación</label>
-    <select id="app" [formField]="policyForm.app">
-      @for (app of appsDisponibles; track app) {
-        <option [value]="app">{{ etiquetaApp(app) }}</option>
+      @if (roleError()) {
+        <p-message severity="error" size="small" variant="simple">{{ roleError() }}</p-message>
       }
-    </select>
-    @let appField = policyForm.app();
-    @if (appField.touched() && appField.invalid()) {
-      <ul class="field-errors">
-        @for (error of appField.errors(); track error.kind) {
-          <li>{{ error.message }}</li>
+
+      <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <!-- Revocar rol = acción `delete` en Casbin (DELETE /api/authorization/roles). -->
+        <p-button *appHasPermission="'delete'" label="Revocar rol" icon="pi pi-times" severity="danger" [outlined]="true"
+          [disabled]="roleForm().invalid() || roleForm().submitting()" (onClick)="revokeRole($event)" />
+        <!-- Asignar rol = acción `create` en Casbin (POST /api/authorization/roles). -->
+        <p-button *appHasPermission="'create'" label="Asignar rol" icon="pi pi-check"
+          [disabled]="roleForm().invalid() || roleForm().submitting()" (onClick)="assignRole($event)" />
+      </div>
+    </form>
+    </app-form-section>
+  </section>
+
+  <section class="rounded-xl border border-surface bg-surface-0 p-5 dark:bg-surface-900 sm:p-6">
+    <app-form-section title="Políticas de acceso" icon="pi pi-lock" description="Defina qué acción puede realizar un rol sobre un recurso.">
+    <form novalidate class="flex flex-col gap-4">
+      <div class="group flex flex-col gap-1.5" [class.is-touched]="policyForm.role().touched()">
+        <label for="policyRole" class="text-sm font-medium">Rol</label>
+        <input pInputText id="policyRole" type="text" [formField]="policyForm.role" placeholder="ADMINISTRADOR, PACIENTE, ..." autocomplete="off" class="h-11 w-full text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+        @let policyRoleField = policyForm.role();
+        @if (policyRoleField.touched() && policyRoleField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of policyRoleField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+          </p-message>
         }
-      </ul>
-    }
+      </div>
+      <div class="group flex flex-col gap-1.5" [class.is-touched]="policyForm.resource().touched()">
+        <label for="resource" class="text-sm font-medium">Recurso</label>
+        <input pInputText id="resource" type="text" [formField]="policyForm.resource" placeholder="/api/ordenes o /api/ordenes/:id" autocomplete="off" class="h-11 w-full text-base sm:text-sm [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+        @let resourceField = policyForm.resource();
+        @if (resourceField.touched() && resourceField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of resourceField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+          </p-message>
+        }
+      </div>
 
-    @if (policyMessage()) {
-      <p class="success">{{ policyMessage() }}</p>
-    }
-    @if (policyError()) {
-      <p class="error">{{ policyError() }}</p>
-    }
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label for="action" class="text-sm font-medium">Acción</label>
+        <select id="action" [formField]="policyForm.action" class="h-11 w-full rounded-md border border-surface-300 bg-surface-0 px-3 text-base text-color focus:border-primary focus:outline-none dark:border-surface-700 dark:bg-surface-950 sm:text-sm">
+          @for (accion of accionesDisponibles; track accion) {
+            <option [value]="accion">{{ etiquetaAccion(accion) }}</option>
+          }
+        </select>
+        @let actionField = policyForm.action();
+        @if (actionField.touched() && actionField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of actionField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+          </p-message>
+        }
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label for="app" class="text-sm font-medium">Ámbito de la aplicación</label>
+        <select id="app" [formField]="policyForm.app" class="h-11 w-full rounded-md border border-surface-300 bg-surface-0 px-3 text-base text-color focus:border-primary focus:outline-none dark:border-surface-700 dark:bg-surface-950 sm:text-sm">
+          @for (app of appsDisponibles; track app) {
+            <option [value]="app">{{ etiquetaApp(app) }}</option>
+          }
+        </select>
+        @let appField = policyForm.app();
+        @if (appField.touched() && appField.invalid()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of appField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+          </p-message>
+        }
+      </div>
+      </div>
+      @if (policyMessage()) {
+        <p-message severity="success" size="small" variant="simple">{{ policyMessage() }}</p-message>
+      }
+      @if (policyError()) {
+        <p-message severity="error" size="small" variant="simple">{{ policyError() }}</p-message>
+      }
 
-    <div class="actions">
-      <!-- Agregar policy = acción `create` en Casbin (POST /api/authorization/policies). -->
-      <button
-        *appHasPermission="'create'"
-        type="button"
-        class="primary"
-        [disabled]="policyForm().invalid() || policyForm().submitting()"
-        (click)="addPolicy($event)"
-      >
-        Agregar política
-      </button>
-      <!-- Quitar policy = acción `delete` en Casbin (DELETE /api/authorization/policies). -->
-      <button
-        *appHasPermission="'delete'"
-        type="button"
-        class="secondary"
-        [disabled]="policyForm().invalid() || policyForm().submitting()"
-        (click)="removePolicy($event)"
-      >
-        Quitar política
-      </button>
-    </div>
-  </form>
-</section>
+      <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <!-- Quitar policy = acción `delete` en Casbin (DELETE /api/authorization/policies). -->
+        <p-button *appHasPermission="'delete'" label="Quitar política" icon="pi pi-times" severity="danger" [outlined]="true"
+          [disabled]="policyForm().invalid() || policyForm().submitting()" (onClick)="removePolicy($event)" />
+        <!-- Agregar policy = acción `create` en Casbin (POST /api/authorization/policies). -->
+        <p-button *appHasPermission="'create'" label="Agregar política" icon="pi pi-check"
+          [disabled]="policyForm().invalid() || policyForm().submitting()" (onClick)="addPolicy($event)" />
+      </div>
+    </form>
+    </app-form-section>
+  </section>
+</div>

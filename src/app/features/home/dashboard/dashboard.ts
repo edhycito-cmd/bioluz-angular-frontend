@@ -16,6 +16,6 @@ import { NotificationsWidget } from "./components/notificationswidget";
     NotificationsWidget,
   ],
   templateUrl: "./dashboard.html",
-  styleUrl: "./dashboard.scss",
+  host: { class: "block" },
 })
 export class Dashboard {}

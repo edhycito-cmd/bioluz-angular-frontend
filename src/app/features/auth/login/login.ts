@@ -23,7 +23,7 @@ import { ToastModule } from "@openng/optimus-ui/toast";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { MessageModule } from "@openng/optimus-ui/message";
-import { AppFloatingConfigurator } from "../../../layout/component/app.floatingconfigurator";
+import { AppAuthShell } from "../../../layout/component/app.auth-shell";
 import { CheckboxModule } from "@openng/optimus-ui/checkbox";
 import { RippleModule } from "@openng/optimus-ui/ripple";
 import { ProgressSpinnerModule } from "@openng/optimus-ui/progressspinner";
@@ -45,11 +45,10 @@ interface LoginModel {
     InputTextModule,
     RippleModule,
     ProgressSpinnerModule,
-    AppFloatingConfigurator,
+    AppAuthShell,
   ],
   providers: [MessageService],
   templateUrl: "./login.html",
-  styleUrl: "./login.scss",
 })
 export class Login {
   private readonly authService = inject(AuthService);

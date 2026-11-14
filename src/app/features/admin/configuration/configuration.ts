@@ -31,6 +31,10 @@ interface OpcionMenuMode {
   value: MenuMode;
 }
 
+import { AppPageHeader } from "../../../layout/component/app.page-header";
+import { AppFormSection } from "../../../layout/component/app.form-section";
+import { AppEmptyState } from "../../../layout/component/app.empty-state";
+
 @Component({
   selector: "app-configuration",
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -42,9 +46,12 @@ interface OpcionMenuMode {
     SelectModule,
     ButtonModule,
     MessageModule,
+    AppPageHeader,
+    AppFormSection,
+    AppEmptyState,
   ],
+  host: { class: "block" },
   templateUrl: "./configuration.html",
-  styleUrl: "./configuration.scss",
 })
 export class Configuration implements OnInit {
   private readonly layoutService = inject(LayoutService);

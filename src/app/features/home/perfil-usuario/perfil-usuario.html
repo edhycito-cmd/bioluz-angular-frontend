@@ -1,232 +1,171 @@
 @if (user(); as usuario) {
-  <div class="card max-w-2xl">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
-      <div class="min-w-0">
-        <div class="font-semibold text-xl break-words">Bienvenido(a), {{ usuario.name }}</div>
-        <div class="text-muted-color text-sm break-words">{{ usuario.email }}</div>
-      </div>
-      <button
-        pButton
-        type="button"
-        severity="secondary"
-        size="small"
-        label="Recargar"
-        [loading]="cargando()"
-        (click)="recargar()"
-      ></button>
-    </div>
+  <app-page-header
+    title="Mi perfil"
+    subtitle="Consulte sus datos de acceso y actualice su contraseña."
+    icon="pi pi-user"
+  >
+    <p-button
+      label="Recargar"
+      icon="pi pi-refresh"
+      severity="secondary"
+      [outlined]="true"
+      [loading]="cargando()"
+      (onClick)="recargar()"
+    />
+  </app-page-header>
 
-    @if (error()) {
-      <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
-    }
-
-    <dl class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-4 gap-y-3 text-sm">
-      <dt class="text-muted-color">Identificador de usuario</dt>
-      <dd class="font-mono break-all">{{ usuario.id }}</dd>
-
-      <dt class="text-muted-color">Estado</dt>
-      <dd>
-        <span
-          class="px-2 py-1 rounded-full text-xs font-semibold"
-          [class]="usuario.esActivo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-        >
-          {{ usuario.esActivo ? 'Activo' : 'Inactivo' }}
-        </span>
-      </dd>
-
-      <dt class="text-muted-color">Creado</dt>
-      <dd>{{ usuario.fechaCreacion | date: 'medium' }}</dd>
-
-      <dt class="text-muted-color">Modificado</dt>
-      <dd>{{ usuario.fechaModificacion ? (usuario.fechaModificacion | date: 'medium') : '—' }}</dd>
-    </dl>
-  </div>
-
-  @if (persona(); as datosPersona) {
-    <div class="card max-w-2xl mt-6">
-      <div class="font-semibold text-xl mb-6">Datos de la persona</div>
-
-      <dl class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-4 gap-y-3 text-sm">
-        <dt class="text-muted-color">Nombres</dt>
-        <dd>{{ datosPersona.nombres }}</dd>
-
-        <dt class="text-muted-color">Apellidos</dt>
-        <dd>{{ datosPersona.primerApellido }} {{ datosPersona.segundoApellido }}</dd>
-
-        <dt class="text-muted-color">Documento</dt>
-        <dd>{{ datosPersona.numeroDocumento || '—' }}</dd>
-
-        <dt class="text-muted-color">Teléfono</dt>
-        <dd>{{ datosPersona.telefono || '—' }}</dd>
-
-        <dt class="text-muted-color">Correo electrónico</dt>
-        <dd>{{ datosPersona.email || '—' }}</dd>
-
-        <dt class="text-muted-color">Domicilio</dt>
-        <dd>{{ datosPersona.domicilio || '—' }}</dd>
-      </dl>
-    </div>
+  @if (error()) {
+    <p-message severity="error" size="small" variant="simple" class="mb-4 block">{{ error() }}</p-message>
   }
 
-  <div class="card max-w-2xl mt-6">
-    <div class="font-semibold text-xl mb-6">Cambiar contraseña</div>
-
-    <form
-      (submit)="onSubmitPassword($event)"
-      novalidate
-      class="flex flex-col gap-5"
-    >
-      <div class="flex flex-col gap-2">
-        <label for="currentPassword" class="text-sm font-medium">
-          Contraseña actual
-        </label>
-        <div class="password-field relative">
-          <input
-            pInputText
-            id="currentPassword"
-            [type]="mostrarActual() ? 'text' : 'password'"
-            autocomplete="current-password"
-            [formField]="passwordForm.currentPassword"
-            class="w-full password-input"
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="alternarActual()"
-            [attr.aria-label]="mostrarActual() ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'"
-            [attr.aria-pressed]="mostrarActual()"
-            [title]="mostrarActual() ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'"
-          >
-            <i
-              class="pi"
-              [class.pi-eye]="!mostrarActual()"
-              [class.pi-eye-slash]="mostrarActual()"
-            ></i>
-          </button>
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+    <!-- Identidad -->
+    <section class="h-fit rounded-xl border border-surface bg-surface-0 p-6 dark:bg-surface-900">
+      <div class="flex flex-col items-center gap-3 text-center">
+        <p-avatar [label]="usuario.name.charAt(0).toUpperCase()" shape="circle" size="xlarge" />
+        <div class="min-w-0">
+          <div class="text-lg font-semibold break-words">{{ usuario.name }}</div>
+          <div class="text-sm text-muted-color break-all">{{ usuario.email }}</div>
         </div>
-        @let currentField = passwordForm.currentPassword();
-        @if (currentField.touched() && currentField.invalid()) {
-          <p-message severity="error" size="small" variant="simple">
-            <ul class="m-0 pl-4">
-              @for (error of currentField.errors(); track error.kind) {
-                <li>{{ error.message }}</li>
-              }
-            </ul>
-          </p-message>
-        }
-        <p class="text-sm text-muted-color m-0">
-          ¿Olvidó su contraseña? Contacte al administrador para restablecerla.
-        </p>
+        <p-tag [value]="usuario.esActivo ? 'Activo' : 'Inactivo'" [severity]="usuario.esActivo ? 'success' : 'danger'" />
       </div>
+      <dl class="m-0 mt-5 divide-y divide-surface border-t border-surface">
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Creado</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ usuario.fechaCreacion | date: 'medium' }}</dd>
+          </div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Modificado</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ usuario.fechaModificacion ? (usuario.fechaModificacion | date: 'medium') : '—' }}</dd>
+          </div>
+      </dl>
+    </section>
 
-      <div class="flex flex-col gap-2">
-        <label for="newPassword" class="text-sm font-medium">
-          Nueva contraseña
-        </label>
-        <div class="password-field relative">
-          <input
-            pInputText
-            id="newPassword"
-            [type]="mostrarNueva() ? 'text' : 'password'"
-            autocomplete="new-password"
-            [formField]="passwordForm.newPassword"
-            class="w-full password-input"
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="alternarNueva()"
-            [attr.aria-label]="mostrarNueva() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
-            [attr.aria-pressed]="mostrarNueva()"
-            [title]="mostrarNueva() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
-          >
-            <i
-              class="pi"
-              [class.pi-eye]="!mostrarNueva()"
-              [class.pi-eye-slash]="mostrarNueva()"
-            ></i>
-          </button>
-        </div>
-        @let newField = passwordForm.newPassword();
-        @if (newField.touched() && newField.invalid()) {
-          <p-message severity="error" size="small" variant="simple">
-            <ul class="m-0 pl-4">
-              @for (error of newField.errors(); track error.kind) {
-                <li>{{ error.message }}</li>
-              }
-            </ul>
-          </p-message>
-        }
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="verifyPassword" class="text-sm font-medium">
-          Verificar contraseña
-        </label>
-        <div class="password-field relative">
-          <input
-            pInputText
-            id="verifyPassword"
-            [type]="mostrarVerificacion() ? 'text' : 'password'"
-            autocomplete="new-password"
-            [formField]="passwordForm.verifyPassword"
-            class="w-full password-input"
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="alternarVerificacion()"
-            [attr.aria-label]="mostrarVerificacion() ? 'Ocultar verificación de contraseña' : 'Mostrar verificación de contraseña'"
-            [attr.aria-pressed]="mostrarVerificacion()"
-            [title]="mostrarVerificacion() ? 'Ocultar verificación de contraseña' : 'Mostrar verificación de contraseña'"
-          >
-            <i
-              class="pi"
-              [class.pi-eye]="!mostrarVerificacion()"
-              [class.pi-eye-slash]="mostrarVerificacion()"
-            ></i>
-          </button>
-        </div>
-        @let verifyField = passwordForm.verifyPassword();
-        @if (verifyField.touched() && verifyField.invalid()) {
-          <p-message severity="error" size="small" variant="simple">
-            <ul class="m-0 pl-4">
-              @for (error of verifyField.errors(); track error.kind) {
-                <li>{{ error.message }}</li>
-              }
-            </ul>
-          </p-message>
-        }
-      </div>
-
-      @if (passwordGuardada()) {
-        <p-message severity="success" size="small" variant="simple">
-          Contraseña actualizada correctamente.
-        </p-message>
+    <div class="flex flex-col gap-4 lg:col-span-2 lg:gap-6">
+      @if (persona(); as datosPersona) {
+        <section class="rounded-xl border border-surface bg-surface-0 p-6 dark:bg-surface-900">
+          <app-form-section title="Datos personales" icon="pi pi-id-card" description="Información registrada en el sistema.">
+            <dl class="m-0 grid grid-cols-1 gap-x-8 divide-y divide-surface sm:grid-cols-2 sm:divide-y-0">
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Nombres</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ datosPersona.nombres }}</dd>
+          </div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Apellidos</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ datosPersona.primerApellido }} {{ datosPersona.segundoApellido }}</dd>
+          </div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Documento</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ datosPersona.numeroDocumento || '—' }}</dd>
+          </div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Teléfono</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ datosPersona.telefono || '—' }}</dd>
+          </div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Correo electrónico</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ datosPersona.email || '—' }}</dd>
+          </div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 py-3">
+            <dt class="text-sm text-muted-color">Domicilio</dt>
+            <dd class="m-0 text-sm font-medium break-words sm:text-right">{{ datosPersona.domicilio || '—' }}</dd>
+          </div>
+            </dl>
+          </app-form-section>
+        </section>
       }
 
-      @if (passwordError()) {
-        <p-message severity="error" size="small" variant="simple">
-          {{ passwordError() }}
-        </p-message>
-      }
+      <section class="rounded-xl border border-surface bg-surface-0 p-6 dark:bg-surface-900">
+        <app-form-section title="Cambiar contraseña" icon="pi pi-lock" description="Use una contraseña segura que no emplee en otros sitios.">
+          <form (submit)="onSubmitPassword($event)" novalidate class="flex flex-col gap-5">
+        @let currentPasswordField = passwordForm.currentPassword();
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="currentPasswordField.touched()">
+          <label for="currentPassword" class="text-sm font-medium">Contraseña actual</label>
+          <div class="relative">
+            <input pInputText id="currentPassword" [type]="mostrarActual() ? 'text' : 'password'" autocomplete="current-password"
+              [formField]="passwordForm.currentPassword" class="w-full pr-12 [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+            <button type="button" class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary" (click)="alternarActual()"
+              [attr.aria-label]="mostrarActual() ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'"
+              [attr.aria-pressed]="mostrarActual()"
+              [title]="mostrarActual() ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'">
+              <i class="pi" [class.pi-eye]="!mostrarActual()" [class.pi-eye-slash]="mostrarActual()"></i>
+            </button>
+          </div>
+          <div class="text-xs text-muted-color">¿Olvidó su contraseña? Contacte al administrador para restablecerla.</div>
+          @if (currentPasswordField.touched() && currentPasswordField.invalid()) {
+            <p-message severity="error" size="small" variant="simple">
+              @for (error of currentPasswordField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+            </p-message>
+          }
+        </div>
 
-      <button
-        pButton
-        type="submit"
-        label="Guardar cambios"
-        class="w-fit"
-        [loading]="guardandoPassword()"
-        [disabled]="passwordForm().invalid() || guardandoPassword()"
-      ></button>
-    </form>
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        @let newPasswordField = passwordForm.newPassword();
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="newPasswordField.touched()">
+          <label for="newPassword" class="text-sm font-medium">Nueva contraseña</label>
+          <div class="relative">
+            <input pInputText id="newPassword" [type]="mostrarNueva() ? 'text' : 'password'" autocomplete="new-password"
+              [formField]="passwordForm.newPassword" class="w-full pr-12 [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+            <button type="button" class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary" (click)="alternarNueva()"
+              [attr.aria-label]="mostrarNueva() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
+              [attr.aria-pressed]="mostrarNueva()"
+              [title]="mostrarNueva() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'">
+              <i class="pi" [class.pi-eye]="!mostrarNueva()" [class.pi-eye-slash]="mostrarNueva()"></i>
+            </button>
+          </div>
+          @if (newPasswordField.touched() && newPasswordField.invalid()) {
+            <p-message severity="error" size="small" variant="simple">
+              @for (error of newPasswordField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+            </p-message>
+          }
+        </div>
+        @let verifyPasswordField = passwordForm.verifyPassword();
+        <div class="group flex flex-col gap-1.5" [class.is-touched]="verifyPasswordField.touched()">
+          <label for="verifyPassword" class="text-sm font-medium">Verificar contraseña</label>
+          <div class="relative">
+            <input pInputText id="verifyPassword" [type]="mostrarVerificacion() ? 'text' : 'password'" autocomplete="new-password"
+              [formField]="passwordForm.verifyPassword" class="w-full pr-12 [.group:not(.is-touched)_&]:border-[var(--p-inputtext-border-color)]! [.group:not(.is-touched)_&]:placeholder:text-[var(--p-inputtext-placeholder-color)]!" />
+            <button type="button" class="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-color transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary" (click)="alternarVerificacion()"
+              [attr.aria-label]="mostrarVerificacion() ? 'Ocultar verificación de contraseña' : 'Mostrar verificación de contraseña'"
+              [attr.aria-pressed]="mostrarVerificacion()"
+              [title]="mostrarVerificacion() ? 'Ocultar verificación de contraseña' : 'Mostrar verificación de contraseña'">
+              <i class="pi" [class.pi-eye]="!mostrarVerificacion()" [class.pi-eye-slash]="mostrarVerificacion()"></i>
+            </button>
+          </div>
+          @if (verifyPasswordField.touched() && verifyPasswordField.invalid()) {
+            <p-message severity="error" size="small" variant="simple">
+              @for (error of verifyPasswordField.errors(); track error.kind) { <div>{{ error.message }}</div> }
+            </p-message>
+          }
+        </div>
+            </div>
+
+            @if (passwordGuardada()) {
+              <p-message severity="success" size="small" variant="simple">Contraseña actualizada correctamente.</p-message>
+            }
+            @if (passwordError()) {
+              <p-message severity="error" size="small" variant="simple">{{ passwordError() }}</p-message>
+            }
+
+            <div class="flex justify-end">
+              <p-button
+                type="submit"
+                label="Guardar cambios"
+                icon="pi pi-check"
+                class="w-full sm:w-auto"
+                [loading]="guardandoPassword()"
+                [disabled]="passwordForm().invalid() || guardandoPassword()"
+              />
+            </div>
+          </form>
+        </app-form-section>
+      </section>
+    </div>
   </div>
 } @else {
-  <div class="card max-w-2xl">
-    @if (error()) {
-      <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
-    } @else {
-      <p class="text-muted-color">No se encontró un perfil cargado.</p>
-    }
-  </div>
+  <app-empty-state
+    icon="pi pi-user"
+    title="No se encontró un perfil cargado"
+    [description]="error() ?? 'Vuelva a iniciar sesión para cargar su perfil.'"
+  />
 }
