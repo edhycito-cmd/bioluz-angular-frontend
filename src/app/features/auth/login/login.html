@@ -42,7 +42,11 @@
             <p-checkbox inputId="remember" [binary]="true" [formField]="loginForm.rememberMe" />
             <label for="remember" class="text-sm text-surface-700 dark:text-surface-300">Recordar mi sesión</label>
           </div>
-          <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-sm font-medium text-primary hover:underline">
+          <button
+            type="button"
+            class="cursor-pointer border-0 bg-transparent p-0 text-sm font-medium text-primary hover:underline"
+            (click)="abrirDesbloqueo()"
+          >
             ¿Olvidó su contraseña?
           </button>
         </div>
@@ -89,3 +93,86 @@
       </form>
   </div>
 </app-auth-shell>
+
+<!-- Diálogo de desbloqueo de cuenta bloqueada por intentos fallidos -->
+<p-dialog
+  [(visible)]="desbloqueoVisible"
+  [modal]="true"
+  [style]="{ width: 'min(460px, calc(100vw - 2rem))' }"
+  header="Desbloquear cuenta"
+  [closable]="!desbloqueoEnCurso()"
+>
+  <form (submit)="pasoDesbloqueo() === 'solicitar' ? solicitarCodigo($event) : confirmarDesbloqueo($event)" novalidate class="flex flex-col gap-5 pt-2">
+    <p-message severity="info" size="small" variant="simple">
+      Si la cuenta está bloqueada por intentos fallidos, recibirá un código de
+      desbloqueo para restablecer el acceso.
+    </p-message>
+
+    @if (pasoDesbloqueo() === 'solicitar') {
+      <div class="group flex flex-col gap-1.5" [class.is-touched]="desbloqueoForm.email().touched()">
+        <label for="unlock-email" class="text-sm font-medium">Correo electrónico</label>
+        <input
+          pInputText
+          type="email"
+          id="unlock-email"
+          autocomplete="email"
+          [formField]="desbloqueoForm.email"
+          class="h-11 w-full text-base sm:text-sm"
+        />
+        @if (desbloqueoForm.email().invalid() && desbloqueoForm.email().touched()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of desbloqueoForm.email().errors(); track error.kind) { {{ error.message }} }
+          </p-message>
+        }
+      </div>
+    }
+
+    @if (pasoDesbloqueo() === 'codigo') {
+      @if (desbloqueoMessage()) {
+        <p-message severity="success" size="small" variant="simple">{{ desbloqueoMessage() }}</p-message>
+      }
+      <div class="text-sm">
+        <span class="text-muted-color">Cuenta: </span>
+        <span class="font-medium">{{ desbloqueoModel().email }}</span>
+      </div>
+      <div class="group flex flex-col gap-1.5" [class.is-touched]="desbloqueoForm.unlockCode().touched()">
+        <label for="unlock-code" class="text-sm font-medium">Código de desbloqueo</label>
+        <input
+          pInputText
+          type="text"
+          id="unlock-code"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          placeholder="000000"
+          [formField]="desbloqueoForm.unlockCode"
+          class="h-11 w-full text-center text-lg tracking-[0.4em]"
+        />
+        @if (desbloqueoForm.unlockCode().invalid() && desbloqueoForm.unlockCode().touched()) {
+          <p-message severity="error" size="small" variant="simple">
+            @for (error of desbloqueoForm.unlockCode().errors(); track error.kind) { {{ error.message }} }
+          </p-message>
+        }
+      </div>
+    }
+
+    @if (desbloqueoError()) {
+      <p-message severity="error" size="small" variant="simple" role="alert">{{ desbloqueoError() }}</p-message>
+    }
+
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        text
+        type="button"
+        (onClick)="cerrarDesbloqueo()"
+        [disabled]="desbloqueoEnCurso()"
+      />
+      @if (pasoDesbloqueo() === 'solicitar') {
+        <p-button label="Solicitar código" icon="pi pi-key" type="submit" [loading]="desbloqueoEnCurso()" />
+      } @else {
+        <p-button label="Desbloquear" icon="pi pi-unlock" type="submit" [loading]="desbloqueoEnCurso()" />
+      }
+    </div>
+  </form>
+</p-dialog>

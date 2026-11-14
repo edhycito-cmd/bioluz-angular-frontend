@@ -13,6 +13,7 @@ import {
   email,
   form,
   FormField,
+  pattern,
   required,
   submit,
 } from "@angular/forms/signals";
@@ -23,6 +24,7 @@ import { ToastModule } from "@openng/optimus-ui/toast";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
 import { MessageModule } from "@openng/optimus-ui/message";
+import { DialogModule } from "@openng/optimus-ui/dialog";
 import { AppAuthShell } from "../../../layout/component/app.auth-shell";
 import { CheckboxModule } from "@openng/optimus-ui/checkbox";
 import { RippleModule } from "@openng/optimus-ui/ripple";
@@ -34,6 +36,14 @@ interface LoginModel {
   rememberMe: boolean;
 }
 
+/** Paso actual del flujo de desbloqueo de cuenta. */
+type PasoDesbloqueo = "solicitar" | "codigo";
+
+interface DesbloqueoModel {
+  email: string;
+  unlockCode: string;
+}
+
 @Component({
   selector: "app-login",
   imports: [
@@ -43,6 +53,7 @@ interface LoginModel {
     ButtonModule,
     CheckboxModule,
     InputTextModule,
+    DialogModule,
     RippleModule,
     ProgressSpinnerModule,
     AppAuthShell,
@@ -54,6 +65,7 @@ export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly googleSignIn = inject(GoogleSignInService);
+  private readonly messageService = inject(MessageService);
 
   protected readonly model = signal<LoginModel>({
     email: "",
@@ -69,6 +81,32 @@ export class Login {
 
   protected readonly serverError = signal<string | null>(null);
   protected readonly mostrarPassword = signal(false);
+
+  /** Estado del flujo de desbloqueo de cuenta bloqueada. */
+  protected readonly desbloqueoVisible = signal(false);
+  protected readonly pasoDesbloqueo = signal<PasoDesbloqueo>("solicitar");
+  protected readonly desbloqueoModel = signal<DesbloqueoModel>({
+    email: "",
+    unlockCode: "",
+  });
+  protected readonly desbloqueoEnCurso = signal(false);
+  protected readonly desbloqueoError = signal<string | null>(null);
+  protected readonly desbloqueoMessage = signal<string | null>(null);
+
+  protected readonly desbloqueoForm = form(this.desbloqueoModel, (path) => {
+    required(path.email, {
+      message: "El correo electrónico es obligatorio",
+    });
+    email(path.email, {
+      message: "Introduzca un correo electrónico válido",
+    });
+    required(path.unlockCode, {
+      message: "El código de desbloqueo es obligatorio",
+    });
+    pattern(path.unlockCode, /^\d{6}$/, {
+      message: "El código debe tener 6 dígitos",
+    });
+  });
 
   protected alternarPassword(): void {
     this.mostrarPassword.update((visible) => !visible);
@@ -148,6 +186,87 @@ export class Login {
         await this.router.navigate(["/perfil"]);
       } catch (error) {
         this.serverError.set(this.extractErrorMessage(error));
+      }
+      return undefined;
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // Desbloqueo de cuenta (POST /auth/request-unlock + POST /auth/unlock)
+  // ------------------------------------------------------------------
+
+  /** Abre el diálogo de desbloqueo con el email del formulario de login. */
+  protected abrirDesbloqueo(): void {
+    this.desbloqueoError.set(null);
+    this.desbloqueoMessage.set(null);
+    this.pasoDesbloqueo.set("solicitar");
+    this.desbloqueoModel.set({
+      email: this.model().email,
+      unlockCode: "",
+    });
+    this.desbloqueoVisible.set(true);
+  }
+
+  protected cerrarDesbloqueo(): void {
+    this.desbloqueoVisible.set(false);
+    this.desbloqueoError.set(null);
+    this.desbloqueoMessage.set(null);
+    this.desbloqueoModel.set({ email: "", unlockCode: "" });
+  }
+
+  /** Paso 1: solicita el código de desbloqueo. */
+  protected solicitarCodigo(event: Event): void {
+    event.preventDefault();
+    this.desbloqueoError.set(null);
+    this.desbloqueoMessage.set(null);
+
+    submit(this.desbloqueoForm, async () => {
+      this.desbloqueoEnCurso.set(true);
+      try {
+        const respuesta = await firstValueFrom(
+          this.authService.requestUnlockCode(this.desbloqueoModel().email),
+        );
+        this.pasoDesbloqueo.set("codigo");
+        this.desbloqueoMessage.set(respuesta.message);
+        // En desarrollo el backend devuelve el código en la respuesta para
+        // agilizar las pruebas; se precarga el campo si viene.
+        if (respuesta.unlockCode) {
+          const codigo = respuesta.unlockCode;
+          this.desbloqueoModel.update((m) => ({ ...m, unlockCode: codigo }));
+        }
+      } catch (error) {
+        this.desbloqueoError.set(this.extractErrorMessage(error));
+      } finally {
+        this.desbloqueoEnCurso.set(false);
+      }
+      return undefined;
+    });
+  }
+
+  /** Paso 2: valida el código y desbloquea la cuenta. */
+  protected confirmarDesbloqueo(event: Event): void {
+    event.preventDefault();
+    this.desbloqueoError.set(null);
+
+    submit(this.desbloqueoForm, async () => {
+      const { email: correo, unlockCode } = this.desbloqueoModel();
+      this.desbloqueoEnCurso.set(true);
+      try {
+        const respuesta = await firstValueFrom(
+          this.authService.unlockAccount(correo, unlockCode),
+        );
+        this.desbloqueoVisible.set(false);
+        this.model.update((m) => ({ ...m, email: correo }));
+        this.messageService.add({
+          severity: "success",
+          summary: "Cuenta desbloqueada",
+          detail: `${respuesta.message} Ya puede iniciar sesión.`,
+          life: 5000,
+        });
+      } catch (error) {
+        this.desbloqueoError.set(this.extractErrorMessage(error));
+      } finally {
+        this.desbloqueoEnCurso.set(false);
       }
       return undefined;
     });

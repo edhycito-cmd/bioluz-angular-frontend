@@ -6,6 +6,7 @@ import {
   viewChild,
 } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
+import { Observable, forkJoin, map, of, switchMap } from "rxjs";
 import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
@@ -15,6 +16,7 @@ import { IconFieldModule } from "@openng/optimus-ui/iconfield";
 import { ExamenesService } from "../../../core/services/examenes.service";
 import { InformesService } from "../../../core/services/informes.service";
 import { ResultadosService } from "../../../core/services/resultados.service";
+import { PaginatedResult } from "../../../core/models/pagination.model";
 
 interface ResultadoReporteRow {
   id: string;
@@ -62,21 +64,21 @@ export class ReporteResultadosPage {
   ];
 
   private readonly resultados = rxResource({
-    stream: () => this.resultadosService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.resultadosService.listar(query)),
   });
 
   private readonly examenes = rxResource({
-    stream: () => this.examenesService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.examenesService.listar(query)),
   });
 
   private readonly informes = rxResource({
-    stream: () => this.informesService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.informesService.listar(query)),
   });
 
   protected readonly filas = computed<ResultadoReporteRow[] | undefined>(() => {
-    const resultado = this.resultados.value();
-    if (resultado === undefined) return undefined;
-    return resultado.items.map((item) => ({
+    const items = this.resultados.value();
+    if (items === undefined) return undefined;
+    return items.map((item) => ({
       id: item.id,
       examen: this.examenLabel(item.idExamen),
       informe: this.informeLabel(item.idInforme),
@@ -95,14 +97,37 @@ export class ReporteResultadosPage {
     this.dt().exportCSV();
   }
 
+  /**
+   * Descarga todas las páginas del listado (el backend limita cada página a
+   * 100 registros). Sin esto, el reporte y la exportación CSV verían solo la
+   * primera página cuando el catálogo supera ese tope.
+   */
+  private listarTodo<T>(
+    listar: (query: { limite: number; pagina: number }) => Observable<PaginatedResult<T>>,
+  ): Observable<T[]> {
+    return listar({ limite: 100, pagina: 1 }).pipe(
+      switchMap((primera) => {
+        const totalPaginas = Math.max(1, primera.totalPaginas);
+        if (totalPaginas === 1) return of(primera.items);
+
+        const restantes = Array.from({ length: totalPaginas - 1 }, (_, i) =>
+          listar({ limite: 100, pagina: i + 2 }).pipe(map((p) => p.items)),
+        );
+        return forkJoin(restantes).pipe(
+          map((paginas) => [...primera.items, ...paginas.flat()]),
+        );
+      }),
+    );
+  }
+
   private examenLabel(id: string): string {
     return (
-      this.examenes.value()?.items.find((item) => item.id === id)?.nombre ?? id
+      this.examenes.value()?.find((item) => item.id === id)?.nombre ?? id
     );
   }
 
   private informeLabel(id: string): string {
-    const informe = this.informes.value()?.items.find((item) => item.id === id);
+    const informe = this.informes.value()?.find((item) => item.id === id);
     return informe
       ? `${informe.id.slice(0, 8)} · ${new Date(
           informe.fechaInforme,

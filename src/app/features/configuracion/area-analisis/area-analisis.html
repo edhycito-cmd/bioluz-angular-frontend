@@ -144,9 +144,13 @@
         appendTo="body"
         fluid
       />
-      <small class="text-surface-500">
-        Opcional. No se puede seleccionar el área que se está editando.
-      </small>
+      @if (errorIdArea(); as mensajeError) {
+        <small class="text-red-500">{{ mensajeError }}</small>
+      } @else {
+        <small class="text-surface-500">
+          Opcional. No se puede seleccionar el área que se está editando.
+        </small>
+      }
     </div>
   </div>
 

@@ -6,6 +6,7 @@ import {
   viewChild,
 } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
+import { Observable, forkJoin, map, of, switchMap } from "rxjs";
 import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
@@ -17,7 +18,10 @@ import { InstitucionesService } from "../../../core/services/instituciones.servi
 import { MedicosService } from "../../../core/services/medicos.service";
 import { OrdenesLaboratorioService } from "../../../core/services/ordenes-laboratorio.service";
 import { PacientesService } from "../../../core/services/pacientes.service";
+import { PersonasService } from "../../../core/services/personas.service";
 import { SucursalesService } from "../../../core/services/sucursales.service";
+import { PaginatedResult } from "../../../core/models/pagination.model";
+import { Persona } from "../../../core/models/user.model";
 
 interface OrdenReporteRow {
   id: string;
@@ -55,6 +59,7 @@ export class ReporteOrdenesPage {
   private readonly ordenesService = inject(OrdenesLaboratorioService);
   private readonly sucursalesService = inject(SucursalesService);
   private readonly pacientesService = inject(PacientesService);
+  private readonly personasService = inject(PersonasService);
   private readonly medicosService = inject(MedicosService);
   private readonly institucionesService = inject(InstitucionesService);
 
@@ -71,29 +76,33 @@ export class ReporteOrdenesPage {
   ];
 
   private readonly ordenes = rxResource({
-    stream: () => this.ordenesService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.ordenesService.listar(query)),
   });
 
   private readonly sucursales = rxResource({
-    stream: () => this.sucursalesService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.sucursalesService.listar(query)),
   });
 
   private readonly pacientes = rxResource({
-    stream: () => this.pacientesService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.pacientesService.listar(query)),
+  });
+
+  private readonly personas = rxResource({
+    stream: () => this.listarTodo((query) => this.personasService.listar(query)),
   });
 
   private readonly medicos = rxResource({
-    stream: () => this.medicosService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.medicosService.listar(query)),
   });
 
   private readonly instituciones = rxResource({
-    stream: () => this.institucionesService.listar({ limite: 100, pagina: 1 }),
+    stream: () => this.listarTodo((query) => this.institucionesService.listar(query)),
   });
 
   protected readonly filas = computed<OrdenReporteRow[] | undefined>(() => {
-    const resultado = this.ordenes.value();
-    if (resultado === undefined) return undefined;
-    return resultado.items.map((item) => ({
+    const items = this.ordenes.value();
+    if (items === undefined) return undefined;
+    return items.map((item) => ({
       id: item.id,
       nroFolio: item.nroFolio,
       fechaSolicitud: item.fechaSolicitud,
@@ -116,30 +125,74 @@ export class ReporteOrdenesPage {
     this.dt().exportCSV();
   }
 
-  private pacienteLabel(id: string): string {
-    return (
-      this.pacientes.value()?.items.find((item) => item.id === id)?.codigo ?? id
+  /**
+   * Descarga todas las páginas del listado (el backend limita cada página a
+   * 100 registros). Sin esto, el reporte y la exportación CSV verían solo la
+   * primera página cuando el catálogo supera ese tope.
+   */
+  private listarTodo<T>(
+    listar: (query: { limite: number; pagina: number }) => Observable<PaginatedResult<T>>,
+  ): Observable<T[]> {
+    return listar({ limite: 100, pagina: 1 }).pipe(
+      switchMap((primera) => {
+        const totalPaginas = Math.max(1, primera.totalPaginas);
+        if (totalPaginas === 1) return of(primera.items);
+
+        const restantes = Array.from({ length: totalPaginas - 1 }, (_, i) =>
+          listar({ limite: 100, pagina: i + 2 }).pipe(map((p) => p.items)),
+        );
+        return forkJoin(restantes).pipe(
+          map((paginas) => [...primera.items, ...paginas.flat()]),
+        );
+      }),
     );
   }
 
+  private pacienteLabel(id: string): string {
+    const paciente = this.pacientes.value()?.find((item) => item.id === id);
+    if (!paciente) return id;
+
+    const persona = this.personaDe(paciente.idPersona);
+    return [paciente.codigo, persona ? this.nombrePersona(persona) : null]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
   private medicoLabel(id: string): string {
-    const medico = this.medicos.value()?.items.find((item) => item.id === id);
-    return medico
-      ? `${medico.especialidad} · ${medico.idPersona.slice(0, 8)}`
-      : id;
+    const medico = this.medicos.value()?.find((item) => item.id === id);
+    if (!medico) return id;
+
+    const persona = this.personaDe(medico.idPersona);
+    return [
+      medico.especialidad,
+      persona ? this.nombrePersona(persona) : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
   }
 
   private sucursalLabel(id: string): string {
-    const sucursal = this.sucursales
-      .value()
-      ?.items.find((item) => item.id === id);
+    const sucursal = this.sucursales.value()?.find((item) => item.id === id);
     return sucursal ? `${sucursal.codigo} · ${sucursal.municipio}` : id;
   }
 
   private institucionLabel(id: string): string {
     return (
-      this.instituciones.value()?.items.find((item) => item.id === id)
-        ?.nombre ?? id
+      this.instituciones.value()?.find((item) => item.id === id)?.nombre ?? id
     );
+  }
+
+  private personaDe(idPersona: string): Persona | undefined {
+    return this.personas.value()?.find((persona) => persona.id === idPersona);
+  }
+
+  private nombrePersona(persona: Persona): string {
+    return [
+      persona.nombres,
+      persona.primerApellido,
+      persona.segundoApellido,
+    ]
+      .filter(Boolean)
+      .join(" ");
   }
 }

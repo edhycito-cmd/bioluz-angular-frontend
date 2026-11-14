@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  signal,
   viewChild,
 } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
@@ -112,6 +113,7 @@ export class AreaAnalisisPage {
   protected idArea: string | null = null;
   protected esNuevo = false;
   protected idEditando: string | null = null;
+  protected errorIdArea = signal<string | null>(null);
 
   protected errorNombre(): string | null {
     const nombre = this.nombre.trim();
@@ -135,6 +137,7 @@ export class AreaAnalisisPage {
     this.idEditando = null;
     this.esNuevo = true;
     this.submitted = false;
+    this.errorIdArea.set(null);
     this.dialogVisible = true;
   }
 
@@ -144,18 +147,24 @@ export class AreaAnalisisPage {
     this.idArea = row.idArea;
     this.esNuevo = false;
     this.submitted = false;
+    this.errorIdArea.set(null);
     this.dialogVisible = true;
   }
 
   protected hideDialog(): void {
     this.dialogVisible = false;
     this.submitted = false;
+    this.errorIdArea.set(null);
   }
 
   protected guardar(): void {
     this.submitted = true;
     if (this.errorNombre()) return;
-    if (this.idEditando && this.idArea === this.idEditando) return;
+    if (this.idEditando && this.idArea === this.idEditando) {
+      this.errorIdArea.set("El área no puede ser su propio área padre.");
+      return;
+    }
+    this.errorIdArea.set(null);
 
     const payload = {
       nombre: this.nombre.trim(),

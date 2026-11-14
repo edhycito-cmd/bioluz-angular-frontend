@@ -99,6 +99,32 @@ export class AuthService {
     return this.refreshTokens().pipe(switchMap(() => this.loadProfile()));
   }
 
+  /**
+   * Pide un código de desbloqueo para una cuenta bloqueada por intentos
+   * fallidos. El backend responde de forma idéntica (mismo mensaje) exista o
+   * no la cuenta, para no revelar qué correos están registrados.
+   */
+  requestUnlockCode(email: string): Observable<{ message: string; unlockCode?: string }> {
+    return this.http
+      .post<ApiEnvelope<{ message: string; unlockCode?: string }>>(
+        `${environment.apiUrl}/auth/request-unlock`,
+        { email },
+        { withCredentials: true },
+      )
+      .pipe(map((res) => res.data));
+  }
+
+  /** Desbloquea la cuenta con el código de 6 dígitos recibido. */
+  unlockAccount(email: string, unlockCode: string): Observable<{ message: string }> {
+    return this.http
+      .post<ApiEnvelope<{ message: string }>>(
+        `${environment.apiUrl}/auth/unlock`,
+        { email, unlockCode },
+        { withCredentials: true },
+      )
+      .pipe(map((res) => res.data));
+  }
+
   /** Deja el estado de sesión anterior limpio antes de cargar uno nuevo. */
   private startSession(tokens: AuthTokens): void {
     this._profile.set(null);

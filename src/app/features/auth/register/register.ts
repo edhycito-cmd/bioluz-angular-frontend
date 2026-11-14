@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { FormField, email, form, minLength, pattern, required, submit, validate } from '@angular/forms/signals';
+import { FormField, email, form, maxLength, minLength, pattern, required, submit, validate } from '@angular/forms/signals';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -35,18 +35,28 @@ export class Register {
   protected readonly registerForm = form(this.model, (path) => {
     required(path.name, { message: 'El nombre es obligatorio' });
     minLength(path.name, 2, { message: 'El nombre debe tener al menos 2 caracteres' });
+    maxLength(path.name, 100, { message: 'El nombre no puede exceder 100 caracteres' });
 
     required(path.email, { message: 'El correo electrónico es obligatorio' });
     email(path.email, { message: 'Introduzca un correo electrónico válido' });
 
     required(path.password, { message: 'La contraseña es obligatoria' });
     minLength(path.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
-    pattern(path.password, /[A-Z]/, { message: 'Debe incluir al menos una mayúscula' });
-    pattern(path.password, /[a-z]/, { message: 'Debe incluir al menos una minúscula' });
+    maxLength(path.password, 64, { message: 'La contraseña no puede tener más de 64 caracteres' });
+    pattern(path.password, /[A-Z]/, { message: 'Debe incluir al menos una letra mayúscula' });
+    pattern(path.password, /[a-z]/, { message: 'Debe incluir al menos una letra minúscula' });
     pattern(path.password, /[0-9]/, { message: 'Debe incluir al menos un número' });
-    pattern(path.password, /[^A-Za-z0-9]/, {
+    pattern(path.password, /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, {
       message: 'Debe incluir al menos un carácter especial',
     });
+    validate(path.password, (ctx) =>
+      /\s/.test(ctx.value())
+        ? {
+            kind: 'sinEspacios',
+            message: 'La contraseña no puede contener espacios',
+          }
+        : undefined,
+    );
 
     required(path.confirmPassword, { message: 'Confirme la contraseña' });
     validate(path.confirmPassword, (ctx) =>

@@ -63,11 +63,13 @@ export interface CrearDetalleClasificadorPayload {
   idClasificador?: string | null;
 }
 
-/** Payload de PATCH /clasificadores/detalle/:id. */
+/**
+ * Payload de PATCH /clasificadores/detalle/:id. El padre (idClasificador) no
+ * es editable: el backend lo rechaza con 400 (z.strictObject).
+ */
 export interface ActualizarDetalleClasificadorPayload {
   codigo?: string | null;
   nombre?: string | null;
   descripcion?: string | null;
   orden?: number;
-  idClasificador?: string | null;
 }
