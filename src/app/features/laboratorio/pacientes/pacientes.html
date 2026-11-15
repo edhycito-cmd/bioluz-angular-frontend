@@ -3,7 +3,7 @@
 
 <app-page-header title="Pacientes" subtitle="Registro de pacientes vinculados a una persona." icon="pi pi-user">
   <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCSV()" />
-  <p-button label="Nuevo" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
+  <p-button label="Nuevo paciente" icon="pi pi-plus" *appHasPermission="'create'" (onClick)="openNew()" />
 </app-page-header>
 
 <div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
@@ -33,44 +33,88 @@
   dataKey="id"
   [rowHover]="true"
   [rowsPerPageOptions]="[10, 20, 50]"
-  [globalFilterFields]="['codigo', 'persona', 'estado']"
+  [globalFilterFields]="['nombreCompleto', 'documento', 'codigo', 'telefono', 'email', 'domicilio']"
   currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pacientes"
   [showCurrentPageReport]="true"
-  [tableStyle]="{ 'min-width': '44rem' }"
-  selectionMode="multiple"
-  [(selection)]="seleccionados"
+  [tableStyle]="{ 'min-width': '110rem' }"
 >
   <ng-template #header>
     <tr>
-      <th style="width: 3rem">
-        <p-tableHeaderCheckbox />
+      <th pSortableColumn="nombreCompleto" style="min-width: 20rem">
+        Paciente <p-sortIcon field="nombreCompleto" />
       </th>
-      <th pSortableColumn="codigo" style="min-width: 10rem">
-        Código <p-sortIcon field="codigo" />
+      <th pSortableColumn="documento" style="min-width: 10rem">
+        Documento <p-sortIcon field="documento" />
       </th>
-      <th pSortableColumn="persona" style="min-width: 24rem">
-        Persona <p-sortIcon field="persona" />
+      <th pSortableColumn="codigo" style="min-width: 9rem">
+        HC <p-sortIcon field="codigo" />
       </th>
-      <th pSortableColumn="estado" style="min-width: 8rem">
-        Estado <p-sortIcon field="estado" />
+      <th pSortableColumn="edadSexo" style="min-width: 9rem">
+        Edad / Sexo <p-sortIcon field="edadSexo" />
       </th>
-      <th style="min-width: 8rem"></th>
+      <th pSortableColumn="telefono" style="min-width: 10rem">
+        Teléfono <p-sortIcon field="telefono" />
+      </th>
+      <th pSortableColumn="email" style="min-width: 14rem">
+        Correo <p-sortIcon field="email" />
+      </th>
+      <th pSortableColumn="domicilio" style="min-width: 16rem">
+        Dirección <p-sortIcon field="domicilio" />
+      </th>
+      <th pSortableColumn="usuarioActivo" style="min-width: 8rem">
+        Usuario <p-sortIcon field="usuarioActivo" />
+      </th>
+      <th style="min-width: 13rem"></th>
     </tr>
   </ng-template>
   <ng-template #body let-paciente>
     <tr>
-      <td style="width: 3rem">
-        <p-tableCheckbox [value]="paciente" />
+      <td data-label="Paciente">
+        <div class="flex items-center gap-3">
+          <span
+            class="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white {{ paciente.colorClass }}"
+            aria-hidden="true"
+          >
+            {{ paciente.iniciales }}
+          </span>
+          <span class="font-medium text-surface-900 dark:text-surface-0">
+            {{ paciente.nombreCompleto }}
+          </span>
+        </div>
       </td>
-      <td data-label="Código">{{ paciente.codigo }}</td>
-      <td data-label="Persona">{{ paciente.persona }}</td>
-      <td data-label="Estado">
-        <p-tag
-          [value]="paciente.estado"
-          [severity]="paciente.esActivo ? 'success' : 'secondary'"
-        />
+      <td data-label="Documento">{{ paciente.documento }}</td>
+      <td data-label="HC">{{ paciente.codigo }}</td>
+      <td data-label="Edad / Sexo">
+        @if (paciente.edadSexo !== "—") {
+          <span class="rounded-full border border-surface-200 bg-surface-100 px-2.5 py-1 text-xs font-medium text-surface-700 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200">
+            {{ paciente.edadSexo }}
+          </span>
+        } @else {
+          <span class="text-muted-color">—</span>
+        }
+      </td>
+      <td data-label="Teléfono">{{ paciente.telefono }}</td>
+      <td data-label="Correo">{{ paciente.email ?? "—" }}</td>
+      <td data-label="Dirección">{{ paciente.domicilio ?? "—" }}</td>
+      <td data-label="Usuario">
+        @if (paciente.usuarioActivo === true) {
+          <p-tag value="Activo" severity="success" />
+        } @else if (paciente.usuarioActivo === false) {
+          <p-tag value="Inactivo" severity="warn" />
+        } @else {
+          <span class="text-muted-color">—</span>
+        }
       </td>
       <td>
+        <p-button
+          icon="pi pi-plus"
+          label="Nueva orden"
+          ariaLabel="Nueva orden"
+          size="small"
+          [outlined]="true"
+          *appHasPermission="'create'"
+          (onClick)="nuevaOrden(paciente)"
+        />
         <p-button
           icon="pi pi-pencil"
           ariaLabel="Editar"
@@ -108,49 +152,225 @@
 
 <p-dialog
   [(visible)]="dialogVisible"
-  [style]="{ width: 'min(540px, calc(100vw - 2rem))' }"
+  [style]="{ width: 'min(680px, calc(100vw - 2rem))' }"
   [header]="esNuevo ? 'Nuevo paciente' : 'Editar paciente'"
   [modal]="true"
 >
   <div class="flex flex-col gap-5 pt-2">
-    <div>
-      <label for="idPersona" class="mb-1.5 block text-sm font-medium">
-        Persona <span class="text-red-500">*</span>
-      </label>
-      <p-select
-        inputId="idPersona"
-        [options]="personaOptions()"
-        optionLabel="label"
-        optionValue="value"
-        [(ngModel)]="paciente.idPersona"
-        placeholder="Seleccione una persona"
-        appendTo="body"
-        fluid
-      />
-      <small class="text-surface-500">
-        El paciente se vincula a una persona ya registrada.
-      </small>
-      @if (submitted && errores().idPersona) {
-        <small class="text-red-500">{{ errores().idPersona }}</small>
-      }
-    </div>
-    <div>
-      <label for="codigo" class="mb-1.5 block text-sm font-medium">
-        Código de paciente <span class="text-red-500">*</span>
-      </label>
-      <input
-        type="text"
-        pInputText
-        id="codigo"
-        [(ngModel)]="paciente.codigo"
-        autocomplete="off"
-        maxlength="50"
-        placeholder="Ej. PAC-0001"
-        fluid
-      />
-      @if (submitted && errores().codigo) {
-        <small class="text-red-500">{{ errores().codigo }}</small>
-      }
+    @if (esNuevo) {
+      <p-message severity="info" size="small" variant="simple">
+        El código de historia clínica (HC-XXXXXX) se genera automáticamente al guardar.
+      </p-message>
+    } @else {
+      <div class="text-sm">
+        <span class="text-muted-color">Historia clínica: </span>
+        <span class="font-medium">{{ codigoEditando }}</span>
+      </div>
+    }
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        <label for="nombres" class="mb-1.5 block text-sm font-medium">
+          Nombres <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="nombres"
+          [(ngModel)]="paciente.nombres"
+          autocomplete="off"
+          placeholder="Ej. María Fernanda"
+          fluid
+        />
+        @if (submitted && errores().nombres) {
+          <small class="text-red-500">{{ errores().nombres }}</small>
+        }
+      </div>
+
+      <div>
+        <label for="primerApellido" class="mb-1.5 block text-sm font-medium">
+          Primer apellido <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="primerApellido"
+          [(ngModel)]="paciente.primerApellido"
+          autocomplete="off"
+          placeholder="Ej. Torres"
+          fluid
+        />
+        @if (submitted && errores().primerApellido) {
+          <small class="text-red-500">{{ errores().primerApellido }}</small>
+        }
+      </div>
+
+      <div>
+        <label for="segundoApellido" class="mb-1.5 block text-sm font-medium">
+          Segundo apellido
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="segundoApellido"
+          [(ngModel)]="paciente.segundoApellido"
+          autocomplete="off"
+          placeholder="Ej. Vega"
+          fluid
+        />
+        @if (submitted && errores().segundoApellido) {
+          <small class="text-red-500">{{ errores().segundoApellido }}</small>
+        }
+      </div>
+
+      <div>
+        <label for="generoId" class="mb-1.5 block text-sm font-medium">
+          Género <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="generoId"
+          [options]="generoOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="paciente.generoId"
+          placeholder="Seleccione el género"
+          appendTo="body"
+          fluid
+        />
+        @if (submitted && errores().generoId) {
+          <small class="text-red-500">{{ errores().generoId }}</small>
+        }
+      </div>
+
+      <div>
+        <label for="distincion" class="mb-1.5 block text-sm font-medium">
+          Tratamiento
+        </label>
+        <p-select
+          inputId="distincion"
+          [options]="distincionOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="paciente.distincion"
+          placeholder="Sin tratamiento"
+          [showClear]="true"
+          appendTo="body"
+          fluid
+        />
+      </div>
+
+      <div>
+        <label for="tipoDocumentoIdentidadId" class="mb-1.5 block text-sm font-medium">
+          Tipo de documento
+        </label>
+        <p-select
+          inputId="tipoDocumentoIdentidadId"
+          [options]="tipoDocumentoOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="paciente.tipoDocumentoIdentidadId"
+          placeholder="Seleccione el tipo"
+          [showClear]="true"
+          appendTo="body"
+          fluid
+        />
+      </div>
+
+      <div>
+        <label for="numeroDocumento" class="mb-1.5 block text-sm font-medium">
+          Número de documento
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="numeroDocumento"
+          [(ngModel)]="paciente.numeroDocumento"
+          autocomplete="off"
+          maxlength="15"
+          placeholder="Ej. 12345678-XY"
+          fluid
+        />
+        @if (submitted && errores().numeroDocumento) {
+          <small class="text-red-500">{{ errores().numeroDocumento }}</small>
+        }
+      </div>
+
+      <div>
+        <label for="fechaNacimiento" class="mb-1.5 block text-sm font-medium">
+          Fecha de nacimiento
+        </label>
+        <p-datepicker
+          inputId="fechaNacimiento"
+          [(ngModel)]="paciente.fechaNacimiento"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [maxDate]="today"
+          appendTo="body"
+          fluid
+        />
+      </div>
+
+      <div>
+        <label for="telefono" class="mb-1.5 block text-sm font-medium">
+          Teléfono
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="telefono"
+          [(ngModel)]="paciente.telefono"
+          autocomplete="off"
+          maxlength="8"
+          inputmode="numeric"
+          placeholder="Ej. 61234567"
+          fluid
+        />
+        @if (submitted && errores().telefono) {
+          <small class="text-red-500">{{ errores().telefono }}</small>
+        }
+        @if (!submitted) {
+          <small class="text-surface-500">
+            8 dígitos, inicia con 5, 6 o 7.
+          </small>
+        }
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="email" class="mb-1.5 block text-sm font-medium">
+          Correo electrónico
+        </label>
+        <input
+          type="email"
+          pInputText
+          id="email"
+          [(ngModel)]="paciente.email"
+          autocomplete="off"
+          placeholder="Ej. maria.torres@gmail.com"
+          fluid
+        />
+        @if (submitted && errores().email) {
+          <small class="text-red-500">{{ errores().email }}</small>
+        }
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="domicilio" class="mb-1.5 block text-sm font-medium">
+          Domicilio
+        </label>
+        <input
+          type="text"
+          pInputText
+          id="domicilio"
+          [(ngModel)]="paciente.domicilio"
+          autocomplete="off"
+          placeholder="Dirección de residencia"
+          fluid
+        />
+        @if (submitted && errores().domicilio) {
+          <small class="text-red-500">{{ errores().domicilio }}</small>
+        }
+      </div>
     </div>
   </div>
 

@@ -18,7 +18,7 @@ export interface UserProfile {
   fechaModificacion: string | null;
 }
 
-/** Coincide con `Persona.toPublicObject()` del backend. */
+/** Coincide con `Persona.toPublicObject()` + enriquecimiento del listado. */
 export interface Persona {
   id: string;
   nombres: string;
@@ -33,6 +33,8 @@ export interface Persona {
   distincion: string | null;
   domicilio: string | null;
   usuarioId: string | null;
+  /** Estado del usuario vinculado (GET /personas): true/false o null si no tiene usuario. */
+  usuarioActivo?: boolean | null;
   esActivo: boolean;
   fechaCreacion: string;
   fechaModificacion: string | null;

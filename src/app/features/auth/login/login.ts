@@ -131,6 +131,7 @@ export class Login {
     });
   }
 
+
   private async renderGoogleButton(): Promise<void> {
     this.googleLoading.set(true);
     this.googleReady.set(false);

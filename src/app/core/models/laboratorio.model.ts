@@ -1,4 +1,5 @@
 /** Entidades operativas del laboratorio. */
+import type { Persona } from "./user.model";
 
 export interface Paciente {
   id: string;
@@ -11,10 +12,34 @@ export interface Paciente {
 
 export interface CrearPacientePayload {
   idPersona: string;
-  codigo: string;
+  /** Opcional: si se omite, el backend genera un código aleatorio HC-XXXXXX. */
+  codigo?: string;
 }
 
 export type ActualizarPacientePayload = Partial<CrearPacientePayload>;
+
+/** Datos de la persona para el alta completa de un paciente. */
+export interface RegistrarPacienteConPersonaPayload {
+  persona: {
+    nombres: string;
+    primerApellido: string;
+    segundoApellido?: string | null;
+    generoId: number;
+    tipoDocumentoIdentidadId?: number | null;
+    numeroDocumento?: string | null;
+    fechaNacimiento?: string | null;
+    telefono?: string | null;
+    email?: string | null;
+    distincion?: string | null;
+    domicilio?: string | null;
+  };
+}
+
+/** Respuesta de POST /pacientes/registrar-con-persona. */
+export interface RegistrarPacienteConPersonaResult {
+  persona: Persona;
+  paciente: Paciente;
+}
 
 export interface OrdenLaboratorio {
   id: string;

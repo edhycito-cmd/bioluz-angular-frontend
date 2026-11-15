@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
 } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
 import {
   ConfirmationService,
   MessageService,
@@ -120,6 +122,7 @@ export class OrdenesLaboratorioPage {
   private readonly detallesService = inject(DetallesClasificadorService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly ordenesRes = rxResource({
     stream: () => this.ordenesService.listar({ limite: 100, pagina: 1 }),
@@ -142,6 +145,34 @@ export class OrdenesLaboratorioPage {
   private readonly generosRes = rxResource({
     stream: () => this.detallesService.listarPorCodigoClasificador("GENERO"),
   });
+
+  /**
+   * Paciente preseleccionado con ?paciente=<id> (desde el botón "Nueva orden"
+   * del listado de pacientes). Cuando llegan los catálogos, se abre el diálogo
+   * de nueva orden con el paciente, la edad y el género ya calculados.
+   */
+  private readonly pacienteDesdeQuery: string | null =
+    this.route.snapshot.queryParamMap.get("paciente") ?? null;
+  private preseleccionAplicada = false;
+
+  constructor() {
+    if (!this.pacienteDesdeQuery) return;
+
+    effect(() => {
+      if (this.preseleccionAplicada) return;
+      const sucursales = this.sucursalesRes.value();
+      const ordenes = this.ordenesRes.value();
+      const pacientes = this.pacientesRes.value();
+      const personas = this.personasRes.value();
+      if (!sucursales || !ordenes || !pacientes || !personas) return;
+
+      this.openNew();
+      const idPaciente = this.pacienteDesdeQuery;
+      this.orden.update((actual) => ({ ...actual, idPaciente }));
+      this.recalcularDesdePaciente(true);
+      this.preseleccionAplicada = true;
+    });
+  }
 
   protected readonly ordenes = computed<OrdenLaboratorio[]>(
     () => this.ordenesRes.value()?.items ?? [],
@@ -236,7 +267,6 @@ export class OrdenesLaboratorioPage {
     });
     this.dialogVisible.set(true);
   }
-
   protected openEdit(orden: OrdenLaboratorio): void {
     this.esNuevo.set(false);
     this.idEditando.set(orden.id);
