@@ -3,34 +3,34 @@ import {
   Component,
   computed,
   inject,
+  signal,
   viewChild,
 } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
-import { Observable, forkJoin, map, of, switchMap } from "rxjs";
 import { FormsModule } from "@angular/forms";
-import { HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
+import { HttpErrorResponse } from "@angular/common/http";
 import { MessageService, ConfirmationService } from "@openng/optimus-ui/api";
 import { Table, TableModule } from "@openng/optimus-ui/table";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { RippleModule } from "@openng/optimus-ui/ripple";
 import { ToastModule } from "@openng/optimus-ui/toast";
 import { InputTextModule } from "@openng/optimus-ui/inputtext";
-import { SelectModule } from "@openng/optimus-ui/select";
 import { TagModule } from "@openng/optimus-ui/tag";
 import { DialogModule } from "@openng/optimus-ui/dialog";
-import { DatePickerModule } from "@openng/optimus-ui/datepicker";
-import { MessageModule } from "@openng/optimus-ui/message";
-import { InputIconModule } from "@openng/optimus-ui/inputicon";
-import { IconFieldModule } from "@openng/optimus-ui/iconfield";
 import { ConfirmDialogModule } from "@openng/optimus-ui/confirmdialog";
+import { IconFieldModule } from "@openng/optimus-ui/iconfield";
+import { InputIconModule } from "@openng/optimus-ui/inputicon";
 import { PacientesService } from "../../../core/services/pacientes.service";
 import { PersonasService } from "../../../core/services/personas.service";
 import { DetallesClasificadorService } from "../../../core/services/detalles-clasificador.service";
 import { HasPermission } from "../../../core/directives/has-permission.directive";
-import { PaginatedResult } from "../../../core/models/pagination.model";
 import { Persona } from "../../../core/models/user.model";
-import type { DetalleClasificador } from "../../../core/models/clasificador.model";
+import { listarTodo } from "../../../core/utils/listar-todo";
+import {
+  PacienteFormulario,
+  type PacienteGuardado,
+} from "./paciente-formulario";
 
 interface PacienteFila {
   id: string;
@@ -50,40 +50,6 @@ interface PacienteFila {
   usuarioActivo: boolean | null;
 }
 
-/** Datos de persona que se registran/editan en el diálogo. */
-interface PacienteFormModel {
-  nombres: string;
-  primerApellido: string;
-  segundoApellido: string;
-  generoId: number | null;
-  tipoDocumentoIdentidadId: number | null;
-  numeroDocumento: string;
-  fechaNacimiento: Date | null;
-  telefono: string;
-  email: string;
-  distincion: string | null;
-  domicilio: string;
-}
-
-interface Opcion {
-  label: string;
-  value: number | string;
-}
-
-const pacienteVacio = (): PacienteFormModel => ({
-  nombres: "",
-  primerApellido: "",
-  segundoApellido: "",
-  generoId: null,
-  tipoDocumentoIdentidadId: null,
-  numeroDocumento: "",
-  fechaNacimiento: null,
-  telefono: "",
-  email: "",
-  distincion: null,
-  domicilio: "",
-});
-
 /** Paleta para los avatares con iniciales (se elige por hash del código HC). */
 const COLORES_AVATAR = [
   "bg-pink-500",
@@ -95,15 +61,6 @@ const COLORES_AVATAR = [
   "bg-emerald-600",
   "bg-indigo-500",
 ];
-
-/** Teléfono: 8 dígitos que inician con 5, 6 o 7 (los espacios se ignoran). */
-const TELEFONO_PATTERN = /^[567][0-9]{7}$/;
-
-/**
- * Documento de identidad: hasta 12 dígitos, opcionalmente seguidos de un
- * guion y dos letras mayúsculas (Ej. 12345678 o 12345678-XY).
- */
-const DOCUMENTO_PATTERN = /^\d{1,12}(-[A-Z]{2})?$/;
 
 import { AppPageHeader } from "../../../layout/component/app.page-header";
 import { AppEmptyState } from "../../../layout/component/app.empty-state";
@@ -121,15 +78,13 @@ import { AppEmptyState } from "../../../layout/component/app.empty-state";
     RippleModule,
     ToastModule,
     InputTextModule,
-    SelectModule,
     TagModule,
     DialogModule,
-    DatePickerModule,
-    MessageModule,
-    InputIconModule,
-    IconFieldModule,
     ConfirmDialogModule,
+    IconFieldModule,
+    InputIconModule,
     HasPermission,
+    PacienteFormulario,
   ],
   templateUrl: "./pacientes.html",
   providers: [MessageService, ConfirmationService],
@@ -144,9 +99,6 @@ export class PacientesPage {
 
   protected readonly dt = viewChild.required<Table>("dt");
 
-  /** Fecha actual para limitar la selección de nacimiento en el diálogo. */
-  protected readonly today = new Date();
-
   protected readonly cols = [
     { field: "nombreCompleto", header: "Paciente" },
     { field: "documento", header: "Documento" },
@@ -158,46 +110,18 @@ export class PacientesPage {
     { field: "usuarioActivo", header: "Usuario" },
   ];
 
-  /** Catálogos para el diálogo: género, tipo de documento y distinción. */
+  /** Catálogo de géneros para la columna Edad / Sexo. */
   private readonly generos = rxResource({
     stream: () => this.detallesService.listarPorCodigoClasificador("GENERO"),
   });
-  private readonly tiposDocumento = rxResource({
-    stream: () =>
-      this.detallesService.listarPorCodigoClasificador("TIPO_DOCUMENTO"),
-  });
-  private readonly distinciones = rxResource({
-    stream: () => this.detallesService.listarPorCodigoClasificador("DISTINCION"),
-  });
 
   private readonly pacientes = rxResource({
-    stream: () => this.listarTodo((q) => this.pacientesService.listar(q)),
+    stream: () => listarTodo((q) => this.pacientesService.listar(q)),
   });
 
   private readonly personas = rxResource({
-    stream: () => this.listarTodo((q) => this.personasService.listar(q)),
+    stream: () => listarTodo((q) => this.personasService.listar(q)),
   });
-
-  protected readonly generoOptions = computed<Opcion[]>(() =>
-    (this.generos.value() ?? []).map((detalle) => ({
-      label: detalle.nombre ?? detalle.codigo ?? `Opción ${detalle.orden}`,
-      value: detalle.orden,
-    })),
-  );
-
-  protected readonly tipoDocumentoOptions = computed<Opcion[]>(() =>
-    (this.tiposDocumento.value() ?? []).map((detalle) => ({
-      label: detalle.nombre ?? detalle.codigo ?? `Opción ${detalle.orden}`,
-      value: detalle.orden,
-    })),
-  );
-
-  protected readonly distincionOptions = computed<Opcion[]>(() =>
-    (this.distinciones.value() ?? []).map((detalle) => ({
-      label: `${detalle.codigo} · ${detalle.nombre ?? ""}`.trim(),
-      value: detalle.codigo ?? "",
-    })),
-  );
 
   protected readonly filas = computed<PacienteFila[] | undefined>(() => {
     const pacientes = this.pacientes.value();
@@ -229,68 +153,12 @@ export class PacientesPage {
   });
 
   protected dialogVisible = false;
-  protected submitted = false;
-  protected guardando = false;
-  protected paciente: PacienteFormModel = pacienteVacio();
-  protected esNuevo = false;
-  protected idEditando: string | null = null;
-  protected idPersonaEditando: string | null = null;
-  protected codigoEditando: string | null = null;
+  protected esNuevo = true;
 
-  protected errores(): Partial<Record<keyof PacienteFormModel, string>> {
-    const errores: Partial<Record<keyof PacienteFormModel, string>> = {};
-    const nombres = this.paciente.nombres.trim();
-    const primerApellido = this.paciente.primerApellido.trim();
-    const segundoApellido = this.paciente.segundoApellido.trim();
-    const numeroDocumento = this.paciente.numeroDocumento.trim();
-    const telefono = this.paciente.telefono.trim();
-    const email = this.paciente.email.trim();
-    const domicilio = this.paciente.domicilio.trim();
-
-    if (!nombres) errores.nombres = "Los nombres son obligatorios.";
-    else if (nombres.length < 2)
-      errores.nombres = "Los nombres deben tener al menos 2 caracteres.";
-    else if (nombres.length > 100)
-      errores.nombres = "Los nombres no pueden exceder 100 caracteres.";
-
-    if (!primerApellido)
-      errores.primerApellido = "El primer apellido es obligatorio.";
-    else if (primerApellido.length < 2)
-      errores.primerApellido =
-        "El primer apellido debe tener al menos 2 caracteres.";
-    else if (primerApellido.length > 50)
-      errores.primerApellido = "El primer apellido no puede exceder 50 caracteres.";
-
-    if (segundoApellido && segundoApellido.length > 50)
-      errores.segundoApellido = "El segundo apellido no puede exceder 50 caracteres.";
-
-    if (this.paciente.generoId === null || this.paciente.generoId === undefined)
-      errores.generoId = "El género es obligatorio.";
-
-    if (numeroDocumento) {
-      if (!DOCUMENTO_PATTERN.test(numeroDocumento))
-        errores.numeroDocumento =
-          "El documento debe tener hasta 12 dígitos y puede incluir un guion con dos letras mayúsculas (Ej. 12345678-XY).";
-    }
-
-    if (telefono) {
-      if (!TELEFONO_PATTERN.test(telefono.replace(/\s+/g, "")))
-        errores.telefono =
-          "El teléfono debe tener 8 dígitos e iniciar con 5, 6 o 7 (Ej. 61234567).";
-    }
-
-    if (email) {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        errores.email = "Introduzca un correo electrónico válido.";
-      else if (email.length > 150)
-        errores.email = "El correo no puede exceder 150 caracteres.";
-    }
-
-    if (domicilio && domicilio.length > 500)
-      errores.domicilio = "El domicilio no puede exceder 500 caracteres.";
-
-    return errores;
-  }
+  /** Datos que se pasan al formulario compartido. */
+  protected personaFormulario = signal<Persona | null>(null);
+  protected idPersonaFormulario = signal<string | null>(null);
+  protected codigoFormulario = signal<string | null>(null);
 
   protected onGlobalFilter(table: Table, event: Event): void {
     table.filterGlobal((event.target as HTMLInputElement).value, "contains");
@@ -308,115 +176,46 @@ export class PacientesPage {
   }
 
   protected openNew(): void {
-    this.paciente = pacienteVacio();
-    this.idEditando = null;
-    this.idPersonaEditando = null;
-    this.codigoEditando = null;
     this.esNuevo = true;
-    this.submitted = false;
+    this.personaFormulario.set(null);
+    this.idPersonaFormulario.set(null);
+    this.codigoFormulario.set(null);
     this.dialogVisible = true;
   }
 
   protected editPaciente(fila: PacienteFila): void {
-    const persona = (this.personas.value() ?? []).find(
-      (item) => item.id === fila.idPersona,
-    );
-    this.idEditando = fila.id;
-    this.idPersonaEditando = fila.idPersona;
-    this.codigoEditando = fila.codigo;
-    this.paciente = persona
-      ? {
-          nombres: persona.nombres,
-          primerApellido: persona.primerApellido,
-          segundoApellido: persona.segundoApellido ?? "",
-          generoId: persona.generoId,
-          tipoDocumentoIdentidadId: persona.tipoDocumentoIdentidadId,
-          numeroDocumento: persona.numeroDocumento ?? "",
-          fechaNacimiento: persona.fechaNacimiento
-            ? this.parseFecha(persona.fechaNacimiento)
-            : null,
-          telefono: persona.telefono ?? "",
-          email: persona.email ?? "",
-          distincion: persona.distincion ?? null,
-          domicilio: persona.domicilio ?? "",
-        }
-      : pacienteVacio();
+    const persona =
+      this.personas.value()?.find((item) => item.id === fila.idPersona) ?? null;
     this.esNuevo = false;
-    this.submitted = false;
+    this.personaFormulario.set(persona);
+    this.idPersonaFormulario.set(fila.idPersona);
+    this.codigoFormulario.set(fila.codigo);
     this.dialogVisible = true;
   }
 
   protected hideDialog(): void {
     this.dialogVisible = false;
-    this.submitted = false;
   }
 
-  protected guardar(): void {
-    this.submitted = true;
-    if (Object.keys(this.errores()).length > 0) return;
-
-    const payload = {
-      nombres: this.paciente.nombres.trim(),
-      primerApellido: this.paciente.primerApellido.trim(),
-      segundoApellido: this.paciente.segundoApellido.trim() || null,
-      generoId: this.paciente.generoId as number,
-      tipoDocumentoIdentidadId: this.paciente.tipoDocumentoIdentidadId ?? null,
-      numeroDocumento: this.paciente.numeroDocumento.trim() || null,
-      fechaNacimiento: this.paciente.fechaNacimiento
-        ? this.paciente.fechaNacimiento.toISOString()
-        : null,
-      telefono: this.paciente.telefono.replace(/\s+/g, "").trim() || null,
-      email: this.paciente.email.trim() || null,
-      distincion: this.paciente.distincion ?? null,
-      domicilio: this.paciente.domicilio.trim() || null,
-    };
-
-    this.guardando = true;
-
-    const peticion: Observable<unknown> = this.esNuevo
-      ? this.pacientesService.registrarConPersona({ persona: payload })
-      : this.personasService.actualizar(
-          this.idPersonaEditando as string,
-          payload,
-        );
-
-    peticion.subscribe({
-      next: (resultado) => {
-        this.guardando = false;
-        this.dialogVisible = false;
-        this.submitted = false;
-        if (this.esNuevo) {
-          const creado = (resultado as { paciente: { codigo: string } })
-            .paciente;
-          this.messageService.add({
-            severity: "success",
-            summary: "Operación realizada correctamente",
-            detail: `Se registró el paciente con historia clínica ${creado.codigo}.`,
-            life: 3000,
-          });
-        } else {
-          this.messageService.add({
-            severity: "success",
-            summary: "Operación realizada correctamente",
-            detail: `Se actualizó el paciente ${this.codigoEditando}.`,
-            life: 3000,
-          });
-        }
-        this.pacientes.reload();
-        this.personas.reload();
-      },
-      error: (error: unknown) => {
-        this.guardando = false;
-        this.messageService.add({
-          severity: "error",
-          summary: this.esNuevo
-            ? "No fue posible registrar el paciente"
-            : "No fue posible actualizar el paciente",
-          detail: this.mensajeError(error),
-          life: 5000,
-        });
-      },
-    });
+  protected onGuardado(evento: PacienteGuardado): void {
+    this.dialogVisible = false;
+    if (evento.esNuevo) {
+      this.messageService.add({
+        severity: "success",
+        summary: "Operación realizada correctamente",
+        detail: `Se registró el paciente con historia clínica ${evento.paciente?.codigo}.`,
+        life: 3000,
+      });
+    } else {
+      this.messageService.add({
+        severity: "success",
+        summary: "Operación realizada correctamente",
+        detail: `Se actualizó el paciente ${this.codigoFormulario()}.`,
+        life: 3000,
+      });
+    }
+    this.pacientes.reload();
+    this.personas.reload();
   }
 
   protected eliminar(fila: PacienteFila): void {
@@ -447,29 +246,6 @@ export class PacientesPage {
         });
       },
     });
-  }
-
-  /**
-   * Descarga todas las páginas del listado (el backend limita cada página a
-   * 100 registros) para que la búsqueda y el paginador del cliente operen
-   * sobre el catálogo completo.
-   */
-  private listarTodo<T>(
-    listar: (query: { limite: number; pagina: number }) => Observable<PaginatedResult<T>>,
-  ): Observable<T[]> {
-    return listar({ limite: 100, pagina: 1 }).pipe(
-      switchMap((primera) => {
-        const totalPaginas = Math.max(1, primera.totalPaginas);
-        if (totalPaginas === 1) return of(primera.items);
-
-        const restantes = Array.from({ length: totalPaginas - 1 }, (_, i) =>
-          listar({ limite: 100, pagina: i + 2 }).pipe(map((p) => p.items)),
-        );
-        return forkJoin(restantes).pipe(
-          map((paginas) => [...primera.items, ...paginas.flat()]),
-        );
-      }),
-    );
   }
 
   private nombrePersona(persona: Persona): string {

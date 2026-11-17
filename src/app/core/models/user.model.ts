@@ -65,6 +65,8 @@ export interface UsuarioListado {
     distincion: string | null;
     domicilio: string | null;
   } | null;
+  /** Roles con asignación vigente (GET /usuario). */
+  roles: { id: string; rol: string }[];
 }
 
 export interface UsuarioListadoQuery {
@@ -104,6 +106,18 @@ export interface UsuarioDetalle {
     fechaCreacion: string;
     fechaModificacion: string | null;
   } | null;
+}
+
+/** Registro de personal de laboratorio (app_personal). */
+export interface Personal {
+  id: string;
+  registro: string;
+  idPersona: string;
+  /** Firma digital; el listado la serializa como bytes, no se usa aquí. */
+  firma: unknown;
+  esActivo: boolean;
+  fechaCreacion: string;
+  fechaModificacion: string | null;
 }
 
 /** Body de PATCH /usuario/:id (edición administrativa). */

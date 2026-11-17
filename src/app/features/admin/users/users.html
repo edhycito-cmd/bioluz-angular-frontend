@@ -33,7 +33,7 @@
   dataKey="id"
   [rowHover]="true"
   [rowsPerPageOptions]="[10, 20, 30]"
-  [globalFilterFields]="['nombres', 'primerApellido', 'email', 'documento', 'telefono', 'estado']"
+  [globalFilterFields]="['nombres', 'primerApellido', 'email', 'documento', 'telefono', 'rolesTexto', 'estado']"
   currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
   [showCurrentPageReport]="true"
   [tableStyle]="{ 'min-width': '60rem' }"
@@ -50,6 +50,7 @@
       <th pSortableColumn="email" style="min-width: 16rem">Correo electrónico <p-sortIcon field="email" /></th>
       <th pSortableColumn="documento" style="min-width: 10rem">Documento <p-sortIcon field="documento" /></th>
       <th pSortableColumn="telefono" style="min-width: 10rem">Teléfono <p-sortIcon field="telefono" /></th>
+      <th style="min-width: 14rem">Roles</th>
       <th pSortableColumn="estado" style="min-width: 10rem">Estado <p-sortIcon field="estado" /></th>
       <th style="min-width: 8rem"></th>
     </tr>
@@ -64,6 +65,17 @@
       <td data-label="Correo" style="min-width: 16rem">{{ usuario.email }}</td>
       <td data-label="Documento" style="min-width: 10rem">{{ usuario.documento || '—' }}</td>
       <td data-label="Teléfono" style="min-width: 10rem">{{ usuario.telefono || '—' }}</td>
+      <td data-label="Roles" style="min-width: 14rem">
+        @if (usuario.roles.length) {
+          <div class="flex flex-wrap gap-1">
+            @for (rol of usuario.roles; track rol) {
+              <p-tag [value]="rol" severity="info" />
+            }
+          </div>
+        } @else {
+          <span>—</span>
+        }
+      </td>
       <td data-label="Estado" style="min-width: 10rem">
         <p-tag
           [value]="usuario.estado"

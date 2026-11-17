@@ -1,0 +1,240 @@
+<div class="flex flex-col gap-4">
+  @if (modo() === "nuevo") {
+    <p-message severity="info" size="small" variant="simple">
+      El código de historia clínica (HC-XXXXXX) se genera automáticamente al guardar.
+    </p-message>
+  } @else {
+    <div class="text-sm">
+      <span class="text-muted-color">Historia clínica: </span>
+      <span class="font-medium">{{ codigoEditando() }}</span>
+    </div>
+  }
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="sm:col-span-2">
+      <label [for]="idCampo('nombres')" class="mb-1.5 block text-sm font-medium">
+        Nombres <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        [id]="idCampo('nombres')"
+        [(ngModel)]="paciente().nombres"
+        autocomplete="off"
+        placeholder="Ej. María Fernanda"
+        fluid
+      />
+      @if (submitted() && errores().nombres) {
+        <small class="text-red-500">{{ errores().nombres }}</small>
+      }
+    </div>
+
+    <div>
+      <label [for]="idCampo('primerApellido')" class="mb-1.5 block text-sm font-medium">
+        Primer apellido <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        pInputText
+        [id]="idCampo('primerApellido')"
+        [(ngModel)]="paciente().primerApellido"
+        autocomplete="off"
+        placeholder="Ej. Torres"
+        fluid
+      />
+      @if (submitted() && errores().primerApellido) {
+        <small class="text-red-500">{{ errores().primerApellido }}</small>
+      }
+    </div>
+
+    <div>
+      <label [for]="idCampo('segundoApellido')" class="mb-1.5 block text-sm font-medium">
+        Segundo apellido
+      </label>
+      <input
+        type="text"
+        pInputText
+        [id]="idCampo('segundoApellido')"
+        [(ngModel)]="paciente().segundoApellido"
+        autocomplete="off"
+        placeholder="Ej. Vega"
+        fluid
+      />
+      @if (submitted() && errores().segundoApellido) {
+        <small class="text-red-500">{{ errores().segundoApellido }}</small>
+      }
+    </div>
+
+    <div>
+      <label [for]="idCampo('generoId')" class="mb-1.5 block text-sm font-medium">
+        Género <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        [inputId]="idCampo('generoId')"
+        [options]="generoOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="paciente().generoId"
+        placeholder="Seleccione el género"
+        appendTo="body"
+        fluid
+      />
+      @if (submitted() && errores().generoId) {
+        <small class="text-red-500">{{ errores().generoId }}</small>
+      }
+    </div>
+
+    <div>
+      <label [for]="idCampo('distincion')" class="mb-1.5 block text-sm font-medium">
+        Tratamiento
+      </label>
+      <p-select
+        [inputId]="idCampo('distincion')"
+        [options]="distincionOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="paciente().distincion"
+        placeholder="Sin tratamiento"
+        [showClear]="true"
+        appendTo="body"
+        fluid
+      />
+    </div>
+
+    <div>
+      <label [for]="idCampo('tipoDocumentoIdentidadId')" class="mb-1.5 block text-sm font-medium">
+        Tipo de documento
+      </label>
+      <p-select
+        [inputId]="idCampo('tipoDocumentoIdentidadId')"
+        [options]="tipoDocumentoOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="paciente().tipoDocumentoIdentidadId"
+        placeholder="Seleccione el tipo"
+        [showClear]="true"
+        appendTo="body"
+        fluid
+      />
+    </div>
+
+    <div>
+      <label [for]="idCampo('numeroDocumento')" class="mb-1.5 block text-sm font-medium">
+        Número de documento
+      </label>
+      <input
+        type="text"
+        pInputText
+        [id]="idCampo('numeroDocumento')"
+        [(ngModel)]="paciente().numeroDocumento"
+        autocomplete="off"
+        maxlength="15"
+        placeholder="Ej. 12345678-XY"
+        fluid
+      />
+      @if (submitted() && errores().numeroDocumento) {
+        <small class="text-red-500">{{ errores().numeroDocumento }}</small>
+      }
+    </div>
+
+    <div>
+      <label [for]="idCampo('fechaNacimiento')" class="mb-1.5 block text-sm font-medium">
+        Fecha de nacimiento
+      </label>
+      <p-datepicker
+        [inputId]="idCampo('fechaNacimiento')"
+        [(ngModel)]="paciente().fechaNacimiento"
+        dateFormat="dd/mm/yy"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        [maxDate]="today"
+        appendTo="body"
+        fluid
+      />
+    </div>
+
+    <div>
+      <label [for]="idCampo('telefono')" class="mb-1.5 block text-sm font-medium">
+        Teléfono
+      </label>
+      <input
+        type="text"
+        pInputText
+        [id]="idCampo('telefono')"
+        [(ngModel)]="paciente().telefono"
+        autocomplete="off"
+        maxlength="8"
+        inputmode="numeric"
+        placeholder="Ej. 61234567"
+        fluid
+      />
+      @if (submitted() && errores().telefono) {
+        <small class="text-red-500">{{ errores().telefono }}</small>
+      }
+      @if (!submitted()) {
+        <small class="text-surface-500">
+          8 dígitos, inicia con 5, 6 o 7.
+        </small>
+      }
+    </div>
+
+    <div class="sm:col-span-2">
+      <label [for]="idCampo('email')" class="mb-1.5 block text-sm font-medium">
+        Correo electrónico
+      </label>
+      <input
+        type="email"
+        pInputText
+        [id]="idCampo('email')"
+        [(ngModel)]="paciente().email"
+        autocomplete="off"
+        placeholder="Ej. maria.torres@gmail.com"
+        fluid
+      />
+      @if (submitted() && errores().email) {
+        <small class="text-red-500">{{ errores().email }}</small>
+      }
+    </div>
+
+    <div class="sm:col-span-2">
+      <label [for]="idCampo('domicilio')" class="mb-1.5 block text-sm font-medium">
+        Domicilio
+      </label>
+      <input
+        type="text"
+        pInputText
+        [id]="idCampo('domicilio')"
+        [(ngModel)]="paciente().domicilio"
+        autocomplete="off"
+        placeholder="Dirección de residencia"
+        fluid
+      />
+      @if (submitted() && errores().domicilio) {
+        <small class="text-red-500">{{ errores().domicilio }}</small>
+      }
+    </div>
+  </div>
+
+  @if (formError()) {
+    <p-message severity="error" size="small" variant="simple">
+      {{ formError() }}
+    </p-message>
+  }
+
+  <div class="flex justify-end gap-2">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      text
+      severity="secondary"
+      (onClick)="cancelar()"
+      [disabled]="guardando()"
+    />
+    <p-button
+      [label]="modo() === 'nuevo' ? 'Guardar paciente' : 'Guardar cambios'"
+      icon="pi pi-check"
+      [loading]="guardando()"
+      (onClick)="guardar()"
+    />
+  </div>
+</div>

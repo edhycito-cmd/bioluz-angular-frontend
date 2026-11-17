@@ -36,6 +36,10 @@ interface UsuarioRow {
   telefono: string;
   estado: "ACTIVO" | "INACTIVO";
   esActivo: boolean;
+  /** Nombres de los roles vigentes (uno por tag). */
+  roles: string[];
+  /** Roles concatenados para búsqueda global y exportación CSV. */
+  rolesTexto: string;
 }
 
 interface OpcionGenero {
@@ -133,6 +137,7 @@ export class Users {
     { field: "email", header: "Correo electrónico" },
     { field: "documento", header: "Documento" },
     { field: "telefono", header: "Teléfono" },
+    { field: "rolesTexto", header: "Roles" },
     { field: "estado", header: "Estado" },
   ];
 
@@ -192,6 +197,8 @@ export class Users {
       telefono: item.persona?.telefono ?? "",
       estado: item.user.esActivo ? "ACTIVO" : "INACTIVO",
       esActivo: item.user.esActivo,
+      roles: (item.roles ?? []).map((rol) => rol.rol),
+      rolesTexto: (item.roles ?? []).map((rol) => rol.rol).join(", "),
     }));
   });
 
