@@ -10,10 +10,7 @@ import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { forkJoin, map, switchMap } from "rxjs";
-import {
-  ConfirmationService,
-  MessageService,
-} from "@openng/optimus-ui/api";
+import { ConfirmationService, MessageService } from "@openng/optimus-ui/api";
 import { ButtonModule } from "@openng/optimus-ui/button";
 import { ConfirmDialogModule } from "@openng/optimus-ui/confirmdialog";
 import { DatePickerModule } from "@openng/optimus-ui/datepicker";
@@ -141,14 +138,54 @@ interface EstiloArea {
 
 /** Paleta rotativa para distinguir las áreas (orden determinista). */
 const PALETA_AREAS: EstiloArea[] = [
-  { icono: "pi pi-heart",    chip: "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",       dot: "bg-rose-500",    texto: "text-rose-600 dark:text-rose-400" },
-  { icono: "pi pi-th-large", chip: "bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-400",       dot: "bg-teal-500",    texto: "text-teal-600 dark:text-teal-400" },
-  { icono: "pi pi-filter",   chip: "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",   dot: "bg-amber-500",   texto: "text-amber-600 dark:text-amber-400" },
-  { icono: "pi pi-star",     chip: "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400", dot: "bg-violet-500", texto: "text-violet-600 dark:text-violet-400" },
-  { icono: "pi pi-bookmark", chip: "bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",           dot: "bg-sky-500",     texto: "text-sky-600 dark:text-sky-400" },
-  { icono: "pi pi-clone",    chip: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400", dot: "bg-emerald-500", texto: "text-emerald-600 dark:text-emerald-400" },
-  { icono: "pi pi-tag",      chip: "bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400", dot: "bg-orange-500", texto: "text-orange-600 dark:text-orange-400" },
-  { icono: "pi pi-inbox",    chip: "bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400", dot: "bg-indigo-500", texto: "text-indigo-600 dark:text-indigo-400" },
+  {
+    icono: "pi pi-heart",
+    chip: "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
+    dot: "bg-rose-500",
+    texto: "text-rose-600 dark:text-rose-400",
+  },
+  {
+    icono: "pi pi-th-large",
+    chip: "bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-400",
+    dot: "bg-teal-500",
+    texto: "text-teal-600 dark:text-teal-400",
+  },
+  {
+    icono: "pi pi-filter",
+    chip: "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
+    dot: "bg-amber-500",
+    texto: "text-amber-600 dark:text-amber-400",
+  },
+  {
+    icono: "pi pi-star",
+    chip: "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
+    dot: "bg-violet-500",
+    texto: "text-violet-600 dark:text-violet-400",
+  },
+  {
+    icono: "pi pi-bookmark",
+    chip: "bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
+    dot: "bg-sky-500",
+    texto: "text-sky-600 dark:text-sky-400",
+  },
+  {
+    icono: "pi pi-clone",
+    chip: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
+    dot: "bg-emerald-500",
+    texto: "text-emerald-600 dark:text-emerald-400",
+  },
+  {
+    icono: "pi pi-tag",
+    chip: "bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400",
+    dot: "bg-orange-500",
+    texto: "text-orange-600 dark:text-orange-400",
+  },
+  {
+    icono: "pi pi-inbox",
+    chip: "bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400",
+    dot: "bg-indigo-500",
+    texto: "text-indigo-600 dark:text-indigo-400",
+  },
 ];
 
 /** Estado de selección de un nodo del treetable en modo checkbox. */
@@ -274,7 +311,8 @@ export class OrdenesLaboratorioPage {
     stream: () => this.detallesService.listarPorCodigoClasificador("GENERO"),
   });
   private readonly tiposMuestraRes = rxResource({
-    stream: () => this.detallesService.listarPorCodigoClasificador("TIPO_MUESTRA"),
+    stream: () =>
+      this.detallesService.listarPorCodigoClasificador("TIPO_MUESTRA"),
   });
   private readonly areasRes = rxResource({
     stream: () => listarTodo((q) => this.areasService.listar(q)),
@@ -301,7 +339,9 @@ export class OrdenesLaboratorioPage {
 
   /** Formulario de alta de paciente dentro del paso 1. */
   protected readonly formularioPacienteVisible = signal(false);
-  protected readonly modoFormularioPaciente = signal<"nuevo" | "editar">("nuevo");
+  protected readonly modoFormularioPaciente = signal<"nuevo" | "editar">(
+    "nuevo",
+  );
   protected readonly personaParaEditar = signal<Persona | null>(null);
 
   /** Búsqueda del listado de pacientes (paso 1). */
@@ -323,8 +363,6 @@ export class OrdenesLaboratorioPage {
   protected readonly idSucursal = signal<string | null>(null);
   protected readonly idInstitucion = signal<string | null>(null);
   protected readonly idMedico = signal<string | null>(null);
-  /** Profesional de laboratorio responsable de los informes (app_personal). */
-  // protected readonly idProfesional = signal<string | null>(null);
   protected readonly fechaSolicitud = signal<Date | null>(new Date());
 
   /** Registro en curso / resultado del registro (paso 3). */
@@ -346,15 +384,17 @@ export class OrdenesLaboratorioPage {
       const personas = this.personasRes.value();
       if (!pacientes || !personas) return;
 
-      const existe = pacientes.some(
-        (paciente) => paciente.id === this.pacienteDesdeQuery,
-      );
-      if (!existe) {
+      // Acepta tanto el id del paciente (app_pacientes) como el id de su
+      // persona (app_personas) para cubrir ambos orígenes del enlace.
+      const paciente =
+        pacientes.find((item) => item.id === this.pacienteDesdeQuery) ??
+        pacientes.find((item) => item.idPersona === this.pacienteDesdeQuery);
+      if (!paciente) {
         this.preseleccionAplicada = true;
         return;
       }
 
-      this.pacienteId.set(this.pacienteDesdeQuery);
+      this.pacienteId.set(paciente.id);
       this.preseleccionAplicada = true;
       this.paso.set(2);
     });
@@ -363,33 +403,35 @@ export class OrdenesLaboratorioPage {
   // ------------------------------------------------------------------
   // Paso 1 — pacientes
   // ------------------------------------------------------------------
-  protected readonly filasPacientes = computed<PacienteFila[] | undefined>(() => {
-    const pacientes = this.pacientesRes.value();
-    const personas = this.personasRes.value();
-    if (pacientes === undefined || personas === undefined) return undefined;
+  protected readonly filasPacientes = computed<PacienteFila[] | undefined>(
+    () => {
+      const pacientes = this.pacientesRes.value();
+      const personas = this.personasRes.value();
+      if (pacientes === undefined || personas === undefined) return undefined;
 
-    return pacientes.map((paciente) => {
-      const persona = personas.find((item) => item.id === paciente.idPersona);
-      const nombreCompleto = persona ? this.nombrePersona(persona) : "—";
+      return pacientes.map((paciente) => {
+        const persona = personas.find((item) => item.id === paciente.idPersona);
+        const nombreCompleto = persona ? this.nombrePersona(persona) : "—";
 
-      return {
-        id: paciente.id,
-        idPersona: paciente.idPersona,
-        codigo: paciente.codigo,
-        nombreCompleto,
-        iniciales: this.iniciales(nombreCompleto),
-        colorClass: this.colorAvatar(paciente.codigo),
-        documento: persona?.numeroDocumento ?? "—",
-        fechaNacimiento: persona?.fechaNacimiento ?? null,
-        fechaNacimientoTexto: persona?.fechaNacimiento
-          ? this.fechaTexto(persona.fechaNacimiento)
-          : "—",
-        edadSexo: this.edadSexo(persona ?? null),
-        telefono: persona?.telefono ?? "—",
-        email: persona?.email ?? null,
-      };
-    });
-  });
+        return {
+          id: paciente.id,
+          idPersona: paciente.idPersona,
+          codigo: paciente.codigo,
+          nombreCompleto,
+          iniciales: this.iniciales(nombreCompleto),
+          colorClass: this.colorAvatar(paciente.codigo),
+          documento: persona?.numeroDocumento ?? "—",
+          fechaNacimiento: persona?.fechaNacimiento ?? null,
+          fechaNacimientoTexto: persona?.fechaNacimiento
+            ? this.fechaTexto(persona.fechaNacimiento)
+            : "—",
+          edadSexo: this.edadSexo(persona ?? null),
+          telefono: persona?.telefono ?? "—",
+          email: persona?.email ?? null,
+        };
+      });
+    },
+  );
 
   /** Filas filtradas por el texto de búsqueda (nombre, documento, HC o teléfono). */
   protected readonly filasBuscadas = computed<PacienteFila[]>(() => {
@@ -405,11 +447,15 @@ export class OrdenesLaboratorioPage {
     );
   });
 
-  protected readonly pacienteSeleccionado = computed<PacienteFila | null>(() => {
-    const id = this.pacienteId();
-    if (!id) return null;
-    return (this.filasPacientes() ?? []).find((fila) => fila.id === id) ?? null;
-  });
+  protected readonly pacienteSeleccionado = computed<PacienteFila | null>(
+    () => {
+      const id = this.pacienteId();
+      if (!id) return null;
+      return (
+        (this.filasPacientes() ?? []).find((fila) => fila.id === id) ?? null
+      );
+    },
+  );
 
   /** Órdenes del paciente seleccionado, más recientes primero. */
   protected readonly ordenesDelPaciente = computed<OrdenLaboratorio[]>(() => {
@@ -528,70 +574,74 @@ export class OrdenesLaboratorioPage {
    * con sus exámenes como filas hoja (con checkbox), totales por área y
    * contador de selección.
    */
-  protected readonly nodosTreetable = computed<TreeNode<NodoArbolData>[]>(() => {
-    const seleccion = new Set(this.pruebasSeleccionadas());
-    const examenesPorArea = this.examenesPorArea();
-    const areas = (this.areasRes.value() ?? []).filter((area) => area.esActivo);
-    const expansion = this.expansionArbol();
-    const termino = this.busquedaPrueba().trim().toLowerCase();
+  protected readonly nodosTreetable = computed<TreeNode<NodoArbolData>[]>(
+    () => {
+      const seleccion = new Set(this.pruebasSeleccionadas());
+      const examenesPorArea = this.examenesPorArea();
+      const areas = (this.areasRes.value() ?? []).filter(
+        (area) => area.esActivo,
+      );
+      const expansion = this.expansionArbol();
+      const termino = this.busquedaPrueba().trim().toLowerCase();
 
-    const construir = (idArea: string | null): TreeNode<NodoArbolData>[] =>
-      areas
-        .filter((area) => (area.idArea ?? null) === idArea)
-        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
-        .map((area): TreeNode<NodoArbolData> | null => {
-          const subAreas = construir(area.id);
-          const directos = [...(examenesPorArea.get(area.id) ?? [])]
-            .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
-            .filter(
-              (examen) =>
-                !termino || examen.nombre.toLowerCase().includes(termino),
+      const construir = (idArea: string | null): TreeNode<NodoArbolData>[] =>
+        areas
+          .filter((area) => (area.idArea ?? null) === idArea)
+          .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+          .map((area): TreeNode<NodoArbolData> | null => {
+            const subAreas = construir(area.id);
+            const directos = [...(examenesPorArea.get(area.id) ?? [])]
+              .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+              .filter(
+                (examen) =>
+                  !termino || examen.nombre.toLowerCase().includes(termino),
+              );
+            if (directos.length === 0 && subAreas.length === 0) return null;
+
+            const seleccionadasDirectas = directos.filter((examen) =>
+              seleccion.has(examen.id),
+            ).length;
+            const seleccionadasSub = subAreas.reduce(
+              (n, hijo) => n + (hijo.data?.seleccionadas ?? 0),
+              0,
             );
-          if (directos.length === 0 && subAreas.length === 0) return null;
+            const total =
+              directos.length +
+              subAreas.reduce((n, hijo) => n + (hijo.data?.total ?? 0), 0);
 
-          const seleccionadasDirectas = directos.filter((examen) =>
-            seleccion.has(examen.id),
-          ).length;
-          const seleccionadasSub = subAreas.reduce(
-            (n, hijo) => n + (hijo.data?.seleccionadas ?? 0),
-            0,
-          );
-          const total =
-            directos.length +
-            subAreas.reduce((n, hijo) => n + (hijo.data?.total ?? 0), 0);
+            const filasExamenes: TreeNode<NodoArbolData>[] = directos.map(
+              (examen) => ({
+                data: {
+                  id: examen.id,
+                  nombre: examen.nombre,
+                  esExamen: true,
+                  areaId: examen.idAreaAnalisis,
+                  seleccionada: seleccion.has(examen.id),
+                },
+                leaf: true,
+                expanded: true,
+              }),
+            );
 
-          const filasExamenes: TreeNode<NodoArbolData>[] = directos.map(
-            (examen) => ({
+            return {
               data: {
-                id: examen.id,
-                nombre: examen.nombre,
-                esExamen: true,
-                areaId: examen.idAreaAnalisis,
-                seleccionada: seleccion.has(examen.id),
+                id: area.id,
+                nombre: area.nombre,
+                esExamen: false,
+                total,
+                seleccionadas: seleccionadasDirectas + seleccionadasSub,
               },
-              leaf: true,
-              expanded: true,
-            }),
-          );
+              children: [...subAreas, ...filasExamenes],
+              leaf: false,
+              // Con búsqueda activa se expande todo para ver los resultados.
+              expanded: termino ? true : (expansion[area.id] ?? true),
+            };
+          })
+          .filter((nodo): nodo is TreeNode<NodoArbolData> => nodo !== null);
 
-          return {
-            data: {
-              id: area.id,
-              nombre: area.nombre,
-              esExamen: false,
-              total,
-              seleccionadas: seleccionadasDirectas + seleccionadasSub,
-            },
-            children: [...subAreas, ...filasExamenes],
-            leaf: false,
-            // Con búsqueda activa se expande todo para ver los resultados.
-            expanded: termino ? true : (expansion[area.id] ?? true),
-          };
-        })
-        .filter((nodo): nodo is TreeNode<NodoArbolData> => nodo !== null);
-
-    return construir(null);
-  });
+      return construir(null);
+    },
+  );
 
   /**
    * Mapa de `selectionKeys` del treetable en modo `checkbox`: clave = id del
@@ -602,7 +652,9 @@ export class OrdenesLaboratorioPage {
     () => {
       const seleccion = new Set(this.pruebasSeleccionadas());
       const examenesPorArea = this.examenesPorArea();
-      const areas = (this.areasRes.value() ?? []).filter((area) => area.esActivo);
+      const areas = (this.areasRes.value() ?? []).filter(
+        (area) => area.esActivo,
+      );
 
       // Totales y seleccionadas por área, incluyendo sub-áreas.
       const resumen = new Map<string, { total: number; sel: number }>();
@@ -667,7 +719,9 @@ export class OrdenesLaboratorioPage {
   }
 
   protected readonly totalExamenes = computed(
-    () => (this.examenesRes.value() ?? []).filter((examen) => examen.esActivo).length,
+    () =>
+      (this.examenesRes.value() ?? []).filter((examen) => examen.esActivo)
+        .length,
   );
 
   protected readonly totalSeleccionadas = computed(
@@ -703,7 +757,9 @@ export class OrdenesLaboratorioPage {
   protected readonly grupos = computed<GrupoArea[]>(() => {
     const muestras = this.tiposMuestraRes.value() ?? [];
     const muestraPorDefecto =
-      muestras.find((detalle) => detalle.codigo === "SUE") ?? muestras[0] ?? null;
+      muestras.find((detalle) => detalle.codigo === "SUE") ??
+      muestras[0] ??
+      null;
     const config = this.muestraPorArea();
 
     const orden: string[] = [];
@@ -718,16 +774,13 @@ export class OrdenesLaboratorioPage {
     }
 
     return orden.map((areaId) => {
-      const muestraId =
-        config[areaId] ?? muestraPorDefecto?.id ?? "";
+      const muestraId = config[areaId] ?? muestraPorDefecto?.id ?? "";
       const muestra = muestras.find((detalle) => detalle.id === muestraId);
       return {
         areaId,
         areaNombre: this.nombreArea(areaId),
         muestraId,
-        muestraNombre: muestra
-          ? `${muestra.nombre ?? muestra.codigo}`
-          : "—",
+        muestraNombre: muestra ? `${muestra.nombre ?? muestra.codigo}` : "—",
         examenes: acumulado.get(areaId) ?? [],
       };
     });
@@ -791,7 +844,10 @@ export class OrdenesLaboratorioPage {
   }
 
   protected cambiarMuestra(areaId: string, muestraId: string): void {
-    this.muestraPorArea.update((actual) => ({ ...actual, [areaId]: muestraId }));
+    this.muestraPorArea.update((actual) => ({
+      ...actual,
+      [areaId]: muestraId,
+    }));
   }
 
   protected revisarOrden(): void {
@@ -833,16 +889,6 @@ export class OrdenesLaboratorioPage {
       })),
   );
 
-  // /** Profesionales del laboratorio (para el responsable de los informes). */
-  // protected readonly profesionalOptions = computed(() =>
-  //   (this.personalRes.value() ?? [])
-  //     .filter((profesional) => profesional.esActivo)
-  //     .map((profesional) => ({
-  //       label: this.profesionalLabel(profesional),
-  //       value: profesional.id,
-  //     })),
-  // );
-
   /** Folio sugerido según la sucursal elegida. */
   protected readonly folioSugerido = computed(() => {
     const ordenes = this.ordenesRes.value() ?? [];
@@ -864,7 +910,9 @@ export class OrdenesLaboratorioPage {
 
   protected readonly edadTextoPaciente = computed(() => {
     const edad = this.edadCalculada();
-    return edad ? `${edad.edadAnios}a ${edad.edadMeses}m ${edad.edadDias}d` : "—";
+    return edad
+      ? `${edad.edadAnios}a ${edad.edadMeses}m ${edad.edadDias}d`
+      : "—";
   });
 
   protected confirmar(): void {
@@ -888,19 +936,17 @@ export class OrdenesLaboratorioPage {
       this.errorWizard.set("Selecciona el médico solicitante de la orden.");
       return;
     }
-    // if (!this.idProfesional()) {
-    //   this.errorWizard.set(
-    //     "Selecciona el profesional responsable: es necesario para registrar los informes.",
-    //   );
-    //   return;
-    // }
     if (grupos.length === 0) {
       this.errorWizard.set("Agrega al menos una prueba a la orden.");
       return;
     }
 
     const fecha = this.fechaSolicitud() ?? new Date();
-    const edad = this.edadCalculada() ?? { edadAnios: 0, edadMeses: 0, edadDias: 0 };
+    const edad = this.edadCalculada() ?? {
+      edadAnios: 0,
+      edadMeses: 0,
+      edadDias: 0,
+    };
 
     const payload: CrearOrdenLaboratorioPayload = {
       idSucursal: this.idSucursal() as string,
@@ -921,27 +967,28 @@ export class OrdenesLaboratorioPage {
 
     // 1) Cabecera de la orden → 2) un informe por área → 3) resultados
     //    pendientes (uno por examen seleccionado).
+    // El informe exige un profesional responsable (app_personal); se asigna
+    // automáticamente el primer profesional activo del laboratorio.
+    const profesional = (this.personalRes.value() ?? []).find(
+      (item) => item.esActivo,
+    );
+    if (!profesional) {
+      this.registrando.set(false);
+      this.errorWizard.set(
+        "No hay profesionales de laboratorio activos para asignar a los informes.",
+      );
+      return;
+    }
+
     this.ordenesService.crear(payload).subscribe({
       next: (ordenCreada) => {
-        // const profesional = (this.personalRes.value() ?? []).find(
-        //   (item) => item.id === this.idProfesional(),
-        // );
-        // if (!profesional) {
-        //   this.registrando.set(false);
-        //   this.errorWizard.set(
-        //     "No se encontró el profesional responsable. La orden se registró; complétala desde el historial.",
-        //   );
-        //   this.ordenesRes.reload();
-        //   return;
-        // }
-
         forkJoin(
           grupos.map((grupo) =>
             this.informesService
               .crear({
                 idOrden: ordenCreada.id,
                 idAreaAnalisis: grupo.areaId,
-                idPaciente: '',
+                idPersona: profesional.id,
                 tipoMuestraId: grupo.muestraId,
                 fechaInforme: fecha.toISOString(),
                 formatoInforme: 1,
@@ -978,7 +1025,8 @@ export class OrdenesLaboratorioPage {
               this.errorRegistro(error, true, payload.nroFolio),
           });
       },
-      error: (error: unknown) => this.errorRegistro(error, false, payload.nroFolio),
+      error: (error: unknown) =>
+        this.errorRegistro(error, false, payload.nroFolio),
     });
   }
 
@@ -1062,7 +1110,11 @@ export class OrdenesLaboratorioPage {
     });
   }
 
-  private errorRegistro(error: unknown, ordenCreada: boolean, nroFolio: number): void {
+  private errorRegistro(
+    error: unknown,
+    ordenCreada: boolean,
+    nroFolio: number,
+  ): void {
     this.registrando.set(false);
     const base = ordenCreada
       ? "La orden N.° " +
@@ -1088,7 +1140,6 @@ export class OrdenesLaboratorioPage {
     this.idSucursal.set(null);
     this.idInstitucion.set(null);
     this.idMedico.set(null);
-    //this.idProfesional.set(null);
     this.fechaSolicitud.set(new Date());
   }
 
@@ -1219,7 +1270,9 @@ export class OrdenesLaboratorioPage {
     return !Number.isInteger(folio) || folio < 1;
   }
 
-  protected edadInvalida(campo: "edadAnios" | "edadMeses" | "edadDias"): boolean {
+  protected edadInvalida(
+    campo: "edadAnios" | "edadMeses" | "edadDias",
+  ): boolean {
     if (!this.submitted()) return false;
     const valor = Number(this.orden()[campo]);
     return !Number.isInteger(valor) || valor < 0;
@@ -1244,7 +1297,9 @@ export class OrdenesLaboratorioPage {
 
     const folio = Number(orden.nroFolio);
     if (!Number.isInteger(folio) || folio < 1) {
-      this.formError.set("El número de folio debe ser un número entero mayor que cero.");
+      this.formError.set(
+        "El número de folio debe ser un número entero mayor que cero.",
+      );
       return;
     }
 
@@ -1254,7 +1309,9 @@ export class OrdenesLaboratorioPage {
         return !Number.isInteger(numero) || numero < 0;
       })
     ) {
-      this.formError.set("Las edades deben ser números enteros mayores o iguales a cero.");
+      this.formError.set(
+        "Las edades deben ser números enteros mayores o iguales a cero.",
+      );
       return;
     }
 
@@ -1400,14 +1457,13 @@ export class OrdenesLaboratorioPage {
   }
 
   protected medicoLabel(id: string): string {
-    const medico = this.medicosRes.value()?.items.find((item) => item.id === id);
+    const medico = this.medicosRes
+      .value()
+      ?.items.find((item) => item.id === id);
     if (!medico) return id;
 
     const persona = this.personaDe(medico.idPersona);
-    return [
-      medico.especialidad,
-      persona ? this.nombrePersona(persona) : null,
-    ]
+    return [medico.especialidad, persona ? this.nombrePersona(persona) : null]
       .filter(Boolean)
       .join(" · ");
   }
@@ -1501,10 +1557,7 @@ export class OrdenesLaboratorioPage {
       : null;
     const edad =
       fechaNacimiento && !Number.isNaN(fechaNacimiento.getTime())
-        ? this.calcularEdad(
-            fechaNacimiento,
-            orden.fechaSolicitud ?? new Date(),
-          )
+        ? this.calcularEdad(fechaNacimiento, orden.fechaSolicitud ?? new Date())
         : null;
 
     this.orden.update((actual) => ({

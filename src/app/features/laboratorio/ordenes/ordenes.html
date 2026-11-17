@@ -1,242 +1,191 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: 'min(450px, calc(100vw - 2rem))' }" />
 
-<app-page-header
-  title="Órdenes de laboratorio"
+<app-page-header title="Órdenes de laboratorio"
   subtitle="Selecciona al paciente, arma la orden desde el catálogo jerárquico y confirma el registro."
-  icon="pi pi-file-edit"
->
-  <p-selectbutton
-    [options]="vistas"
-    optionLabel="label"
-    optionValue="value"
-    [ngModel]="vista()"
-    (ngModelChange)="vista.set($event)"
-    [allowEmpty]="false"
-  />
+  icon="pi pi-file-edit">
+  <p-selectbutton [options]="vistas" optionLabel="label" optionValue="value" [ngModel]="vista()"
+    (ngModelChange)="vista.set($event)" [allowEmpty]="false" />
 </app-page-header>
 
 <!-- ================================================================== -->
 <!-- Asistente de nueva orden (3 pasos)                                 -->
 <!-- ================================================================== -->
 @if (vista() === 'nueva') {
-  @if (ordenRegistrada(); as registro) {
-    <!-- ---------------------- Pantalla de éxito ---------------------- -->
-    <div class="mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-xl border border-surface bg-surface-0 px-8 py-12 text-center dark:bg-surface-900">
-      <span class="flex size-20 items-center justify-center rounded-full border-4 border-teal-600 text-4xl text-teal-600">
-        <i class="pi pi-check"></i>
-      </span>
-      <div>
-        <p class="text-xs font-semibold tracking-[0.18em] text-muted-color uppercase">
-          Orden registrada
-        </p>
-        <h2 class="mt-1 text-3xl font-bold text-surface-900 dark:text-surface-0">
-          ¡Orden registrada!
-        </h2>
-      </div>
+@if (ordenRegistrada(); as registro) {
+<!-- ---------------------- Pantalla de éxito ---------------------- -->
+<div
+  class="mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-xl border border-surface bg-surface-0 px-8 py-12 text-center dark:bg-surface-900">
+  <span class="flex size-20 items-center justify-center rounded-full border-4 border-teal-600 text-4xl text-teal-600">
+    <i class="pi pi-check"></i>
+  </span>
+  <div>
+    <p class="text-xs font-semibold tracking-[0.18em] text-muted-color uppercase">
+      Orden registrada
+    </p>
+    <h2 class="mt-1 text-3xl font-bold text-surface-900 dark:text-surface-0">
+      ¡Orden registrada!
+    </h2>
+  </div>
 
-      <div class="flex items-center gap-2 rounded-lg border border-dashed border-surface-300 px-5 py-3 dark:border-surface-700">
-        <span class="text-2xl font-bold tracking-wide text-surface-900 dark:text-surface-0">
-          {{ registro.codigo }}
-        </span>
-        <p-button
-          icon="pi pi-copy"
-          ariaLabel="Copiar código"
-          [text]="true"
-          [rounded]="true"
-          (onClick)="copiarCodigo()"
-        />
-      </div>
+  <div
+    class="flex items-center gap-2 rounded-lg border border-dashed border-surface-300 px-5 py-3 dark:border-surface-700">
+    <span class="text-2xl font-bold tracking-wide text-surface-900 dark:text-surface-0">
+      {{ registro.codigo }}
+    </span>
+    <p-button icon="pi pi-copy" ariaLabel="Copiar código" [text]="true" [rounded]="true" (onClick)="copiarCodigo()" />
+  </div>
 
-      <div class="flex flex-wrap items-center justify-center gap-2">
-        <p-tag [value]="registro.pacienteNombre" icon="pi pi-user" severity="secondary" />
-        <p-tag [value]="registro.pruebas + ' pruebas'" severity="info" />
-        <p-tag [value]="registro.muestras.length + ' muestras'" severity="secondary" />
-        <p-tag value="PENDIENTE" severity="warn" />
-        <p-tag [value]="registro.fecha" severity="secondary" />
-      </div>
-      <div class="flex flex-wrap items-center justify-center gap-2">
-        @for (muestra of registro.muestras; track muestra) {
-          <p-tag [value]="muestra" severity="secondary" />
+  <div class="flex flex-wrap items-center justify-center gap-2">
+    <p-tag [value]="registro.pacienteNombre" icon="pi pi-user" severity="secondary" />
+    <p-tag [value]="registro.pruebas + ' pruebas'" severity="info" />
+    <p-tag [value]="registro.muestras.length + ' muestras'" severity="secondary" />
+    <p-tag value="PENDIENTE" severity="warn" />
+    <p-tag [value]="registro.fecha" severity="secondary" />
+  </div>
+  <div class="flex flex-wrap items-center justify-center gap-2">
+    @for (muestra of registro.muestras; track muestra) {
+    <p-tag [value]="muestra" severity="secondary" />
+    }
+  </div>
+
+  <p-message severity="info" [variant]="'simple'" size="small" class="max-w-xl">
+    Imprime los rótulos y dirige al paciente a la sala de toma. El técnico registrará
+    los resultados en la etapa de análisis; la orden ya aparece en el historial.
+  </p-message>
+
+  <div class="flex flex-wrap justify-center gap-2 pt-2">
+    <p-button label="Imprimir rótulos ({{ registro.muestras.length }})" icon="pi pi-print" [outlined]="true"
+      (onClick)="imprimirRotulos()" />
+    <p-button label="Ver historial" icon="pi pi-eye" severity="secondary" [outlined]="true"
+      (onClick)="verOrdenRegistrada()" />
+    <p-button label="Nueva orden" icon="pi pi-plus" severity="secondary" [outlined]="true" (onClick)="otraOrden()" />
+  </div>
+</div>
+} @else {
+<!-- ---------------------- Indicador de pasos ---------------------- -->
+<div class="flex items-center justify-center gap-0 py-2">
+  @for (etapa of [{ numero: 1, etiqueta: 'Paciente' }, { numero: 2, etiqueta: 'Pruebas' }, { numero: 3, etiqueta:
+  'Confirmar' }]; track etapa.numero) {
+  <div class="flex items-center">
+    <div class="flex w-28 flex-col items-center gap-1 sm:w-36">
+      <span
+        class="flex size-10 items-center justify-center rounded-full border-2 font-semibold {{ paso() > etapa.numero ? 'border-teal-600 bg-teal-600 text-white' : paso() === etapa.numero ? 'border-teal-600 bg-surface-0 text-teal-600 dark:bg-surface-900' : 'border-surface-300 bg-surface-0 text-muted-color dark:border-surface-700 dark:bg-surface-900' }}">
+        @if (paso() > etapa.numero) {
+        <i class="pi pi-check text-sm"></i>
+        } @else {
+        {{ etapa.numero }}
         }
+      </span>
+      <span
+        class="text-sm font-medium {{ paso() >= etapa.numero ? 'text-surface-900 dark:text-surface-0' : 'text-muted-color' }}">
+        {{ etapa.etiqueta }}
+      </span>
+    </div>
+    @if (etapa.numero < 3) { <div
+      class="mb-6 h-0.5 w-16 sm:w-28 {{ paso() > etapa.numero ? 'bg-teal-600' : 'bg-surface-300 dark:bg-surface-700' }}">
+  </div>
+  }
+</div>
+}
+</div>
+
+@if (errorWizard()) {
+<p-message severity="error" size="small" variant="simple" class="block">
+  {{ errorWizard() }}
+</p-message>
+}
+
+<!-- =========================== PASO 1 =========================== -->
+@if (paso() === 1) {
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_26rem]">
+  <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+    <div class="flex flex-col gap-3 border-b border-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-search mt-1 text-lg text-teal-600"></i>
+        <div>
+          <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Buscar paciente</h3>
+          <p class="text-xs text-muted-color">Nombre, documento, HC o teléfono</p>
+        </div>
       </div>
+      <p-button label="Nuevo paciente" icon="pi pi-plus" [outlined]="true" (onClick)="abrirFormularioNuevo()" />
+    </div>
 
-      <p-message severity="info" [variant]="'simple'" size="small" class="max-w-xl">
-        Imprime los rótulos y dirige al paciente a la sala de toma. El técnico registrará
-        los resultados en la etapa de análisis; la orden ya aparece en el historial.
-      </p-message>
-
-      <div class="flex flex-wrap justify-center gap-2 pt-2">
-        <p-button
-          label="Imprimir rótulos ({{ registro.muestras.length }})"
-          icon="pi pi-print"
-          [outlined]="true"
-          (onClick)="imprimirRotulos()"
-        />
-        <p-button
-          label="Ver historial"
-          icon="pi pi-eye"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="verOrdenRegistrada()"
-        />
-        <p-button
-          label="Nueva orden"
-          icon="pi pi-plus"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="otraOrden()"
-        />
+    <div class="border-b border-surface p-4">
+      <div class="relative">
+        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-color"></i>
+        <input type="text" pInputText class="w-full pl-9" aria-label="Buscar paciente"
+          placeholder="Ej.: Maria Torres · 45781203 · HC-010231" [ngModel]="busquedaPaciente()"
+          (ngModelChange)="busquedaPaciente.set($event)" />
       </div>
     </div>
-  } @else {
-    <!-- ---------------------- Indicador de pasos ---------------------- -->
-    <div class="flex items-center justify-center gap-0 py-2">
-      @for (etapa of [{ numero: 1, etiqueta: 'Paciente' }, { numero: 2, etiqueta: 'Pruebas' }, { numero: 3, etiqueta: 'Confirmar' }]; track etapa.numero) {
-        <div class="flex items-center">
-          <div class="flex w-28 flex-col items-center gap-1 sm:w-36">
+
+    <p-table styleClass="mobile-card-table" [value]="filasBuscadas()" [rows]="8"
+      [paginator]="filasBuscadas().length > 8" [scrollable]="true" dataKey="id" [rowHover]="true"
+      [loading]="cargandoPacientes()" [rowsPerPageOptions]="[8, 16, 32]"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pacientes" [showCurrentPageReport]="true"
+      [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th style="width: 3rem"></th>
+          <th pSortableColumn="nombreCompleto" style="min-width: 16rem">
+            Paciente <p-sortIcon field="nombreCompleto" />
+          </th>
+          <th pSortableColumn="codigo" style="min-width: 8rem">
+            Código <p-sortIcon field="codigo" />
+          </th>
+          <th pSortableColumn="edadSexo" style="min-width: 7rem">
+            Edad / Sexo <p-sortIcon field="edadSexo" />
+          </th>
+          <th pSortableColumn="telefono" style="min-width: 9rem">
+            Teléfono <p-sortIcon field="telefono" />
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-fila>
+        <tr class="cursor-pointer {{ pacienteId() === fila.id ? 'bg-teal-50 dark:bg-teal-900/30' : '' }}"
+          (click)="seleccionarPaciente(fila)">
+          <td>
             <span
-              class="flex size-10 items-center justify-center rounded-full border-2 font-semibold {{ paso() > etapa.numero ? 'border-teal-600 bg-teal-600 text-white' : paso() === etapa.numero ? 'border-teal-600 bg-surface-0 text-teal-600 dark:bg-surface-900' : 'border-surface-300 bg-surface-0 text-muted-color dark:border-surface-700 dark:bg-surface-900' }}"
-            >
-              @if (paso() > etapa.numero) {
-                <i class="pi pi-check text-sm"></i>
-              } @else {
-                {{ etapa.numero }}
+              class="flex size-5 items-center justify-center rounded-full border-2 {{ pacienteId() === fila.id ? 'border-teal-600 bg-teal-600 text-white' : 'border-surface-300 dark:border-surface-600' }}">
+              @if (pacienteId() === fila.id) {
+              <i class="pi pi-check text-[0.6rem]"></i>
               }
             </span>
-            <span class="text-sm font-medium {{ paso() >= etapa.numero ? 'text-surface-900 dark:text-surface-0' : 'text-muted-color' }}">
-              {{ etapa.etiqueta }}
+          </td>
+          <td data-label="Paciente">
+            <div class="flex items-center gap-3">
+              <span
+                class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}"
+                aria-hidden="true">
+                {{ fila.iniciales }}
+              </span>
+              <span class="font-medium text-surface-900 dark:text-surface-0">
+                {{ fila.nombreCompleto }}
+              </span>
+            </div>
+          </td>
+          <td data-label="Código">{{ fila.codigo }}</td>
+          <td data-label="Edad / Sexo">
+            <span
+              class="rounded-full border border-surface-200 bg-surface-100 px-2.5 py-1 text-xs font-medium text-surface-700 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200">
+              {{ fila.edadSexo }}
             </span>
-          </div>
-          @if (etapa.numero < 3) {
-            <div class="mb-6 h-0.5 w-16 sm:w-28 {{ paso() > etapa.numero ? 'bg-teal-600' : 'bg-surface-300 dark:bg-surface-700' }}"></div>
-          }
-        </div>
-      }
-    </div>
+          </td>
+          <td data-label="Teléfono">{{ fila.telefono }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5">
+            <app-empty-state icon="pi pi-user" title="Sin resultados"
+              description="No hay pacientes que coincidan con la búsqueda. Registra uno nuevo con el botón «Nuevo paciente»." />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
 
-    @if (errorWizard()) {
-      <p-message severity="error" size="small" variant="simple" class="block">
-        {{ errorWizard() }}
-      </p-message>
-    }
-
-    <!-- =========================== PASO 1 =========================== -->
-    @if (paso() === 1) {
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_26rem]">
-        <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-          <div class="flex flex-col gap-3 border-b border-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-start gap-3">
-              <i class="pi pi-search mt-1 text-lg text-teal-600"></i>
-              <div>
-                <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Buscar paciente</h3>
-                <p class="text-xs text-muted-color">Nombre, documento, HC o teléfono</p>
-              </div>
-            </div>
-            <p-button
-              label="Nuevo paciente"
-              icon="pi pi-plus"
-              [outlined]="true"
-              (onClick)="abrirFormularioNuevo()"
-            />
-          </div>
-
-          <div class="border-b border-surface p-4">
-            <div class="relative">
-              <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-color"></i>
-              <input
-                type="text"
-                pInputText
-                class="w-full pl-9"
-                aria-label="Buscar paciente"
-                placeholder="Ej.: Maria Torres · 45781203 · HC-010231"
-                [ngModel]="busquedaPaciente()"
-                (ngModelChange)="busquedaPaciente.set($event)"
-              />
-            </div>
-          </div>
-
-          <p-table
-            styleClass="mobile-card-table"
-            [value]="filasBuscadas()"
-            [rows]="8"
-            [paginator]="filasBuscadas().length > 8"
-            [scrollable]="true"
-            dataKey="id"
-            [rowHover]="true"
-            [loading]="cargandoPacientes()"
-            [rowsPerPageOptions]="[8, 16, 32]"
-            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pacientes"
-            [showCurrentPageReport]="true"
-            [tableStyle]="{ 'min-width': '40rem' }"
-          >
-            <ng-template #header>
-              <tr>
-                <th style="width: 3rem"></th>
-                <th pSortableColumn="nombreCompleto" style="min-width: 16rem">
-                  Paciente <p-sortIcon field="nombreCompleto" />
-                </th>
-                <th pSortableColumn="codigo" style="min-width: 8rem">
-                  Código <p-sortIcon field="codigo" />
-                </th>
-                <th pSortableColumn="edadSexo" style="min-width: 7rem">
-                  Edad / Sexo <p-sortIcon field="edadSexo" />
-                </th>
-                <th pSortableColumn="telefono" style="min-width: 9rem">
-                  Teléfono <p-sortIcon field="telefono" />
-                </th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-fila>
-              <tr
-                class="cursor-pointer {{ pacienteId() === fila.id ? 'bg-teal-50 dark:bg-teal-900/30' : '' }}"
-                (click)="seleccionarPaciente(fila)"
-              >
-                <td>
-                  <span
-                    class="flex size-5 items-center justify-center rounded-full border-2 {{ pacienteId() === fila.id ? 'border-teal-600 bg-teal-600 text-white' : 'border-surface-300 dark:border-surface-600' }}"
-                  >
-                    @if (pacienteId() === fila.id) {
-                      <i class="pi pi-check text-[0.6rem]"></i>
-                    }
-                  </span>
-                </td>
-                <td data-label="Paciente">
-                  <div class="flex items-center gap-3">
-                    <span
-                      class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}"
-                      aria-hidden="true"
-                    >
-                      {{ fila.iniciales }}
-                    </span>
-                    <span class="font-medium text-surface-900 dark:text-surface-0">
-                      {{ fila.nombreCompleto }}
-                    </span>
-                  </div>
-                </td>
-                <td data-label="Código">{{ fila.codigo }}</td>
-                <td data-label="Edad / Sexo">
-                  <span class="rounded-full border border-surface-200 bg-surface-100 px-2.5 py-1 text-xs font-medium text-surface-700 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200">
-                    {{ fila.edadSexo }}
-                  </span>
-                </td>
-                <td data-label="Teléfono">{{ fila.telefono }}</td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr>
-                <td colspan="5">
-                  <app-empty-state
-                    icon="pi pi-user"
-                    title="Sin resultados"
-                    description="No hay pacientes que coincidan con la búsqueda. Registra uno nuevo con el botón «Nuevo paciente»."
-                  />
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-
-          <!-- @if (pacientesRecientes().length > 0) {
+    <!-- @if (pacientesRecientes().length > 0) {
             <div class="border-t border-surface p-4">
               <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">Recientess</p>
               <div class="flex flex-wrap gap-2">
@@ -255,788 +204,602 @@
               </div>
             </div>
           } -->
+  </div>
+
+  <aside class="flex flex-col gap-4">
+    @if (formularioPacienteVisible()) {
+    <div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+      <div class="border-b border-surface p-4">
+        <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">
+          {{ modoFormularioPaciente() === 'nuevo' ? 'Nuevo paciente' : 'Editar datos' }}
+        </h3>
+        <p class="text-xs text-muted-color">
+          {{ modoFormularioPaciente() === 'nuevo' ? 'Completa los datos obligatorios (*)' : 'Actualiza la información
+          del paciente' }}
+        </p>
+      </div>
+      <div class="p-4">
+        <app-paciente-formulario [modo]="modoFormularioPaciente()" [personaInicial]="personaParaEditar()"
+          [idPersonaEditando]="pacienteSeleccionado()?.idPersona ?? null"
+          [codigoEditando]="pacienteSeleccionado()?.codigo ?? null" idPrefijo="wizard"
+          (guardado)="onFormularioGuardado($event)" (cancelado)="cancelarFormulario()" />
+      </div>
+    </div>
+    } @else if (pacienteSeleccionado(); as fila) {
+    <div class="overflow-hidden rounded-xl border border-teal-600/40 bg-surface-0 dark:bg-surface-900">
+      <div class="flex items-start justify-between gap-3 border-b border-surface p-4">
+        <div class="flex items-start gap-3">
+          <i class="pi pi-user mt-1 text-lg text-teal-600"></i>
+          <div>
+            <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Ficha del paciente</h3>
+            <p class="text-xs text-muted-color">Verifica la información antes de continuar</p>
+          </div>
+        </div>
+        <p-tag value="Seleccionado" severity="success" icon="pi pi-check" />
+      </div>
+
+      <div class="flex flex-col gap-4 p-4">
+        <div class="flex items-center gap-3">
+          <span
+            class="flex size-12 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white {{ fila.colorClass }}">
+            {{ fila.iniciales }}
+          </span>
+          <div>
+            <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
+            <p-tag value="Listo para crear orden" severity="success" icon="pi pi-check" />
+          </div>
         </div>
 
-        <aside class="flex flex-col gap-4">
-          @if (formularioPacienteVisible()) {
-            <div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-              <div class="border-b border-surface p-4">
-                <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">
-                  {{ modoFormularioPaciente() === 'nuevo' ? 'Nuevo paciente' : 'Editar datos' }}
-                </h3>
-                <p class="text-xs text-muted-color">
-                  {{ modoFormularioPaciente() === 'nuevo' ? 'Completa los datos obligatorios (*)' : 'Actualiza la información del paciente' }}
-                </p>
-              </div>
-              <div class="p-4">
-                <app-paciente-formulario
-                  [modo]="modoFormularioPaciente()"
-                  [personaInicial]="personaParaEditar()"
-                  [idPersonaEditando]="pacienteSeleccionado()?.idPersona ?? null"
-                  [codigoEditando]="pacienteSeleccionado()?.codigo ?? null"
-                  idPrefijo="wizard"
-                  (guardado)="onFormularioGuardado($event)"
-                  (cancelado)="cancelarFormulario()"
-                />
-              </div>
+        <div class="flex flex-wrap gap-2">
+          <p-tag [value]="fila.documento" icon="pi pi-id-card" severity="secondary" />
+          <p-tag [value]="fila.codigo" severity="secondary" />
+          <p-tag [value]="fila.edadSexo" severity="secondary" />
+        </div>
+
+        <div
+          class="flex flex-col gap-2 rounded-lg border border-surface bg-surface-50 p-3 text-sm dark:bg-surface-800/50">
+          <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
+            <i class="pi pi-phone text-teal-600"></i>{{ fila.telefono }}
+          </span>
+          <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
+            <i class="pi pi-envelope text-teal-600"></i>{{ fila.email ?? "Sin correo registrado" }}
+          </span>
+          <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
+            <i class="pi pi-calendar text-teal-600"></i>Nacimiento: {{ fila.fechaNacimientoTexto }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-lg border border-surface p-3 text-center">
+            <p class="text-xl font-bold text-surface-900 dark:text-surface-0">{{ ordenesDelPaciente().length }}</p>
+            <p class="text-xs text-muted-color">Órdenes</p>
+          </div>
+          <div class="rounded-lg border border-surface p-3 text-center">
+            <p class="text-xl font-bold text-surface-900 dark:text-surface-0">
+              {{ ordenesDelPaciente().length > 0 ? fechaTexto(ordenesDelPaciente()[0].fechaSolicitud) : "—" }}
+            </p>
+            <p class="text-xs text-muted-color">Última visita</p>
+          </div>
+        </div>
+
+        @if (ordenesDelPaciente().length > 0) {
+        <div>
+          <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">Historial reciente</p>
+          <div class="flex flex-col divide-y divide-surface rounded-lg border border-surface">
+            @for (orden of ordenesDelPaciente().slice(0, 3); track orden.id) {
+            <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+              <span class="font-semibold text-surface-900 dark:text-surface-0">{{ ordenFolio(orden) }}</span>
+              <span class="flex items-center gap-2">
+                <p-tag [value]="orden.estado" [severity]="estadoSeverity(orden.estado)" />
+                <span class="text-xs text-muted-color">{{ fechaTexto(orden.fechaSolicitud) }}</span>
+              </span>
             </div>
-          } @else if (pacienteSeleccionado(); as fila) {
-            <div class="overflow-hidden rounded-xl border border-teal-600/40 bg-surface-0 dark:bg-surface-900">
-              <div class="flex items-start justify-between gap-3 border-b border-surface p-4">
-                <div class="flex items-start gap-3">
-                  <i class="pi pi-user mt-1 text-lg text-teal-600"></i>
-                  <div>
-                    <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Ficha del paciente</h3>
-                    <p class="text-xs text-muted-color">Verifica la información antes de continuar</p>
-                  </div>
-                </div>
-                <p-tag value="Seleccionado" severity="success" icon="pi pi-check" />
-              </div>
+            }
+          </div>
+        </div>
+        }
 
-              <div class="flex flex-col gap-4 p-4">
-                <div class="flex items-center gap-3">
-                  <span class="flex size-12 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white {{ fila.colorClass }}">
-                    {{ fila.iniciales }}
-                  </span>
-                  <div>
-                    <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
-                    <p-tag value="Listo para crear orden" severity="success" icon="pi pi-check" />
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                  <p-tag [value]="fila.documento" icon="pi pi-id-card" severity="secondary" />
-                  <p-tag [value]="fila.codigo" severity="secondary" />
-                  <p-tag [value]="fila.edadSexo" severity="secondary" />
-                </div>
-
-                <div class="flex flex-col gap-2 rounded-lg border border-surface bg-surface-50 p-3 text-sm dark:bg-surface-800/50">
-                  <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
-                    <i class="pi pi-phone text-teal-600"></i>{{ fila.telefono }}
-                  </span>
-                  <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
-                    <i class="pi pi-envelope text-teal-600"></i>{{ fila.email ?? "Sin correo registrado" }}
-                  </span>
-                  <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
-                    <i class="pi pi-calendar text-teal-600"></i>Nacimiento: {{ fila.fechaNacimientoTexto }}
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="rounded-lg border border-surface p-3 text-center">
-                    <p class="text-xl font-bold text-surface-900 dark:text-surface-0">{{ ordenesDelPaciente().length }}</p>
-                    <p class="text-xs text-muted-color">Órdenes</p>
-                  </div>
-                  <div class="rounded-lg border border-surface p-3 text-center">
-                    <p class="text-xl font-bold text-surface-900 dark:text-surface-0">
-                      {{ ordenesDelPaciente().length > 0 ? fechaTexto(ordenesDelPaciente()[0].fechaSolicitud) : "—" }}
-                    </p>
-                    <p class="text-xs text-muted-color">Última visita</p>
-                  </div>
-                </div>
-
-                @if (ordenesDelPaciente().length > 0) {
-                  <div>
-                    <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">Historial reciente</p>
-                    <div class="flex flex-col divide-y divide-surface rounded-lg border border-surface">
-                      @for (orden of ordenesDelPaciente().slice(0, 3); track orden.id) {
-                        <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
-                          <span class="font-semibold text-surface-900 dark:text-surface-0">{{ ordenFolio(orden) }}</span>
-                          <span class="flex items-center gap-2">
-                            <p-tag [value]="orden.estado" [severity]="estadoSeverity(orden.estado)" />
-                            <span class="text-xs text-muted-color">{{ fechaTexto(orden.fechaSolicitud) }}</span>
-                          </span>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                }
-
-                <div class="flex flex-col gap-2">
-                  <!-- <p-button
+        <div class="flex flex-col gap-2">
+          <!-- <p-button
                     label="Continuar a pruebas"
                     icon="pi pi-arrow-right"
                     iconPos="right"
                     /* (onClick)="continuarAPruebas()" */
                   /> -->
-                  <p-button
-                    label="Editar datos"
-                    icon="pi pi-pencil"
-                    severity="secondary"
-                    [outlined]="true"
-                    *appHasPermission="'update'"
-                    (onClick)="abrirFormularioEdicion()"
-                  />
-                </div>
-              </div>
-            </div>
-          } 
-          @else {
-            <div class="flex h-full min-h-72 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-surface-300 bg-surface-50 p-6 text-center dark:border-surface-700 dark:bg-surface-800/40">
-              <i class="pi pi-id-card text-3xl text-muted-color"></i>
-              <div>
-                <p class="font-medium text-surface-900 dark:text-surface-0">Ficha del paciente</p>
-                <p class="mt-1 text-xs text-muted-color">
-                  Selecciona un paciente de la tabla o registra uno nuevo para ver su ficha aquí.
-                </p>
-              </div>            
-            </div>
-          }
-        </aside>
-      </div>
-    }
-
-    <!-- =========================== PASO 2 =========================== -->
-    @if (paso() === 2) {
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
-        <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-          <div class="flex items-center justify-between gap-2 border-b border-surface p-4">
-            <h3 class="font-semibold text-surface-900 dark:text-surface-0">Categorías</h3>
-            <span class="rounded-full bg-teal-600 px-2.5 py-0.5 text-xs font-semibold text-white">
-              {{ totalSeleccionadas() }}/{{ totalExamenes() }}
-            </span>
-          </div>
-
-          <div class="p-2">
-            <div class="relative mb-2">
-              <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-color"></i>
-              <input
-                type="text"
-                pInputText
-                class="w-full pl-9"
-                aria-label="Buscar prueba"
-                placeholder="Buscar prueba por nombre..."
-                [ngModel]="busquedaPrueba()"
-                (ngModelChange)="busquedaPrueba.set($event)"
-              />
-            </div>
-
-            <p-treetable
-              [value]="nodosTreetable()"
-              [loading]="cargandoCatalogo()"
-              [scrollable]="true"
-              scrollHeight="24rem"
-              selectionMode="checkbox"
-              dataKey="id"
-              [selectionKeys]="clavesSeleccion()"
-              (selectionKeysChange)="alCambiarClaves($event)"
-              (onNodeExpand)="recordarExpansion($event.node, true)"
-              (onNodeCollapse)="recordarExpansion($event.node, false)"
-              styleClass="border-0"
-            >
-              <ng-template #header>
-                <tr>
-                  <th class="text-left">Área</th>
-                  <th class="w-24 text-center">Pruebas</th>
-                </tr>
-              </ng-template>
-
-              <ng-template #body let-rowNode let-rowData="rowData">
-                @if (rowData.esExamen) {
-                  <!-- Fila de prueba (hoja): checkbox del treetable -->
-                  <tr
-                    class="{{ rowData.seleccionada ? 'bg-rose-50 dark:bg-rose-900/20' : 'hover:bg-surface-100 dark:hover:bg-surface-800' }}"
-                  >
-                    <td>
-                      <div class="flex items-center gap-2">
-                        <p-treeTableToggler [rowNode]="rowNode" />
-                        <p-treeTableCheckbox [value]="rowNode" />
-                        <span
-                          class="truncate text-sm {{ rowData.seleccionada ? 'font-medium text-surface-900 dark:text-surface-0' : 'text-surface-700 dark:text-surface-200' }}"
-                        >
-                          {{ rowData.nombre }}
-                        </span>
-                      </div>
-                    </td>
-                    <td></td>
-                  </tr>
-                } @else {
-                  <!-- Fila de área: checkbox marca/desmarca toda la rama -->
-                  <tr class="hover:bg-surface-100 dark:hover:bg-surface-800">
-                    <td>
-                      <div class="flex items-center gap-2">
-                        <p-treeTableToggler [rowNode]="rowNode" />
-                        <p-treeTableCheckbox [value]="rowNode" />
-                        <span
-                          class="flex size-7 shrink-0 items-center justify-center rounded-lg {{ estiloArea(rowData.id).chip }}"
-                        >
-                          <i class="{{ estiloArea(rowData.id).icono }} text-xs"></i>
-                        </span>
-                        <span class="truncate text-sm font-medium text-surface-800 dark:text-surface-100">
-                          {{ rowData.nombre }}
-                        </span>
-                      </div>
-                    </td>
-                    <td class="text-right">
-                      @if (rowData.seleccionadas > 0) {
-                        <span class="inline-flex rounded-full bg-rose-500 px-2 py-0.5 text-[0.7rem] font-semibold text-white">
-                          {{ rowData.seleccionadas }}/{{ rowData.total }}
-                        </span>
-                      } @else {
-                        <span class="inline-flex min-w-7 justify-center rounded-full bg-surface-100 px-2 py-0.5 text-xs text-surface-600 dark:bg-surface-800 dark:text-surface-300">
-                          {{ rowData.total }}
-                        </span>
-                      }
-                    </td>
-                  </tr>
-                }
-              </ng-template>
-
-              <ng-template #emptymessage>
-                <tr>
-                  <td colspan="2">
-                    <div class="p-4 text-center">
-                      <p class="text-sm text-muted-color">
-                        {{ cargandoCatalogo() ? "Cargando catálogo..." : "No hay áreas de análisis registradas. Configura áreas y exámenes en la sección Catálogos." }}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-treetable>
-          </div>
+          <p-button label="Editar datos" icon="pi pi-pencil" severity="secondary" [outlined]="true"
+            *appHasPermission="'update'" (onClick)="abrirFormularioEdicion()" />
         </div>
-
-        <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-          <div class="flex items-center justify-between gap-3 border-b border-surface p-4">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-clipboard text-lg text-teal-600"></i>
-              <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Orden en curso</h3>
-              <p-tag value="BORRADOR" severity="secondary" />
-            </div>
-            <p-button
-              icon="pi pi-trash"
-              ariaLabel="Vaciar orden"
-              severity="danger"
-              [text]="true"
-              [rounded]="true"
-              [disabled]="totalSeleccionadas() === 0"
-              (onClick)="limpiarPruebas()"
-            />
-          </div>
-
-          <div class="border-b border-surface bg-surface-50 p-4 dark:bg-surface-800/50">
-            @if (pacienteSeleccionado(); as fila) {
-              <div class="flex items-center gap-3">
-                <span class="flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
-                  {{ fila.iniciales }}
-                </span>
-                <div>
-                  <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
-                  <p class="text-xs text-muted-color">{{ fila.codigo }} · {{ fila.edadSexo }}</p>
-                </div>
-              </div>
-            }
-          </div>
-
-          <div class="flex min-h-0 flex-1 flex-col gap-4 p-4">
-            @if (pruebasElegidas().length > 0) {
-              <div>
-                <p class="mb-2 text-sm font-semibold text-surface-900 dark:text-surface-0">
-                  Pruebas seleccionadas ({{ pruebasElegidas().length }})
-                </p>
-                <div class="flex max-h-80 flex-col gap-2 overflow-y-auto">
-                  @for (examen of pruebasElegidas(); track examen.id) {
-                    <div class="flex items-center gap-3 rounded-lg border border-surface bg-surface-0 px-3 py-2.5 dark:bg-surface-900">
-                      <span class="size-2 shrink-0 rounded-full {{ estiloArea(examen.idAreaAnalisis).dot }}"></span>
-                      <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-semibold text-surface-900 dark:text-surface-0">
-                          {{ examen.nombre }}
-                        </p>
-                        <p class="truncate text-[0.7rem] font-medium {{ estiloArea(examen.idAreaAnalisis).texto }}">
-                          {{ nombreArea(examen.idAreaAnalisis) }}
-                        </p>
-                      </div>
-                      <p-button
-                        icon="pi pi-times"
-                        ariaLabel="Quitar prueba"
-                        severity="danger"
-                        [text]="true"
-                        [rounded]="true"
-                        (onClick)="togglePrueba(examen)"
-                      />
-                    </div>
-                  }
-                </div>
-              </div>
-            } @else {
-              <div class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-surface-300 p-6 text-center dark:border-surface-700">
-                <i class="pi pi-check-square text-2xl text-muted-color"></i>
-                <p class="text-sm text-muted-color">
-                  Marca con los checkbox del árbol las pruebas de la orden.
-                </p>
-              </div>
-            }
-
-            @if (grupos().length > 0) {
-              <div>
-                <p class="mb-2 flex items-center justify-between text-sm font-semibold text-surface-900 dark:text-surface-0">
-                  Muestras a recolectar
-                  <span class="text-xs font-medium text-muted-color uppercase">
-                    {{ grupos().length }} envase{{ grupos().length === 1 ? "" : "s" }}
-                  </span>
-                </p>
-                <div class="flex flex-col gap-2">
-                  @for (grupo of grupos(); track grupo.areaId) {
-                    <div class="flex items-center justify-between gap-3 rounded-lg border border-surface bg-surface-0 px-3 py-2 dark:bg-surface-900">
-                      <span class="min-w-0 truncate text-sm text-surface-800 dark:text-surface-100">
-                        <i class="pi pi-tag mr-1 text-teal-600"></i>{{ grupo.areaNombre }}
-                      </span>
-                      <p-select
-                        [ngModel]="grupo.muestraId"
-                        (ngModelChange)="cambiarMuestra(grupo.areaId, $event)"
-                        [options]="opcionesTipoMuestra()"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Tipo de muestra"
-                        [filter]="false"
-                        appendTo="body"
-                        styleClass="w-56"
-                      />
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-
-          <div class="flex items-center justify-between border-t border-surface px-4 py-3">
-            <span class="text-sm text-muted-color">Orden para {{ pacienteSeleccionado()?.nombreCompleto ?? "—" }}</span>
-            <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">
-              {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }}
-            </span>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- =========================== PASO 3 =========================== -->
-    @if (paso() === 3) {
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-          <div class="border-b border-surface p-4">
-            <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">
-              Toma de muestra y datos clínicos
-            </h3>
-            <p class="text-xs text-muted-color">Sucursal, institución, fecha y médico solicitante</p>
-          </div>
-
-          <div class="flex flex-col gap-4 p-4">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label for="wzSucursal" class="mb-1.5 block text-sm font-medium">
-                  Sucursal <span class="text-red-500">*</span>
-                </label>
-                <p-select
-                  inputId="wzSucursal"
-                  [options]="sucursalOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="idSucursal()"
-                  (ngModelChange)="idSucursal.set($event)"
-                  placeholder="Seleccione una sucursal"
-                  [filter]="true"
-                  appendTo="body"
-                  fluid
-                />
-              </div>
-
-              <div>
-                <label for="wzInstitucion" class="mb-1.5 block text-sm font-medium">
-                  Institución <span class="text-red-500">*</span>
-                </label>
-                <p-select
-                  inputId="wzInstitucion"
-                  [options]="institucionOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="idInstitucion()"
-                  (ngModelChange)="idInstitucion.set($event)"
-                  placeholder="Seleccione una institución"
-                  [filter]="true"
-                  appendTo="body"
-                  fluid
-                />
-              </div>
-
-              <div>
-                <label for="wzFecha" class="mb-1.5 block text-sm font-medium">
-                  Fecha de toma <span class="text-red-500">*</span>
-                </label>
-                <p-datepicker
-                  inputId="wzFecha"
-                  [ngModel]="fechaSolicitud()"
-                  (ngModelChange)="fechaSolicitud.set($event)"
-                  dateFormat="dd/mm/yy"
-                  [showIcon]="true"
-                  [showTime]="true"
-                  [showButtonBar]="true"
-                  appendTo="body"
-                  fluid
-                />
-                <small class="mt-1 block text-muted-color">
-                  Folio sugerido: #{{ folioSugerido() }}
-                </small>
-              </div>
-
-              <div>
-                <label for="wzMedico" class="mb-1.5 block text-sm font-medium">
-                  Médico solicitantes <span class="text-red-500">*</span>
-                </label>
-                <p-select
-                  inputId="wzMedico"
-                  [options]="medicoOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="idMedico()"
-                  (ngModelChange)="idMedico.set($event)"
-                  placeholder="Dr. / Dra. — especialidad"
-                  [filter]="true"
-                  appendTo="body"
-                  fluid
-                />
-              </div>
-
-              <!-- <div class="sm:col-span-2">
-                <label for="wzProfesional" class="mb-1.5 block text-sm font-medium">
-                  Profesional responsable <span class="text-red-500">*</span>
-                </label>
-                <p-select
-                  inputId="wzProfesional"
-                  [options]="profesionalOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="idProfesional()"
-                  (ngModelChange)="idProfesional.set($event)"
-                  placeholder="Nombre · registro profesional"
-                  [filter]="true"
-                  appendTo="body"
-                  fluid
-                />
-                <small class="mt-1 block text-muted-color">
-                  Bioquímico que firmará los informes de cada área.
-                </small>
-              </div> -->
-            </div>
-
-            <!-- <div class="rounded-lg border border-surface bg-surface-50 p-3 text-sm dark:bg-surface-800/50">
-              <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">
-                Datos del paciente
-              </p>
-              <div class="flex flex-wrap gap-x-6 gap-y-1 text-surface-700 dark:text-surface-200">
-                <span><span class="text-muted-color">Paciente: </span>{{ pacienteSeleccionado()?.nombreCompleto }}</span>
-                <span><span class="text-muted-color">HC: </span>{{ pacienteSeleccionado()?.codigo }}</span>
-                <span><span class="text-muted-color">Edad: </span>{{ edadTextoPaciente() }}</span>
-              </div>
-            </div> -->
-
-            @if (grupos().length > 0) {
-              <div>
-                <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">
-                  Muestras a recolectar
-                </p>
-                <div class="flex flex-wrap gap-2">
-                  @for (grupo of grupos(); track grupo.areaId) {
-                    <p-tag
-                      [value]="grupo.muestraNombre + ' · ' + grupo.areaNombre"
-                      icon="pi pi-tag"
-                      severity="secondary"
-                    />
-                  }
-                </div>
-                <small class="mt-1 block text-muted-color">
-                  Cambia el tipo de muestra en el paso 2, tarjeta «Orden en curso».
-                </small>
-              </div>
-            }
-          </div>
-        </div>
-
-        <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-          <div class="flex items-center justify-between gap-3 border-b border-surface p-4">
-            <div class="flex items-center gap-3">
-              <i class="pi pi-eye text-lg text-teal-600"></i>
-              <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">
-                Resumen de la orden
-              </h3>
-            </div>
-            <p-tag [value]="totalSeleccionadas() + ' pruebas'" severity="info" />
-          </div>
-
-          <div class="flex flex-col gap-4 overflow-y-auto p-4">
-            @if (pacienteSeleccionado(); as fila) {
-              <div class="flex items-center justify-between gap-3 rounded-lg border border-surface bg-surface-50 p-3 dark:bg-surface-800/50">
-                <div class="flex items-center gap-3">
-                  <span class="flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
-                    {{ fila.iniciales }}
-                  </span>
-                  <div>
-                    <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
-                    <p class="text-xs text-muted-color">
-                      {{ fila.codigo }} · {{ fila.documento }} · {{ fila.edadSexo }}
-                    </p>
-                  </div>
-                </div>
-                <p-tag [value]="sucursalLabel(idSucursal() ?? '')" severity="secondary" />
-              </div>
-            }
-
-            @for (grupo of grupos(); track grupo.areaId) {
-              <div>
-                <div class="mb-1 flex items-center justify-between">
-                  <span class="text-sm font-semibold text-teal-700 dark:text-teal-400">
-                    {{ grupo.areaNombre }}
-                  </span>
-                  <span class="text-xs text-muted-color">{{ grupo.examenes.length }}</span>
-                </div>
-                <div class="flex flex-col divide-y divide-surface rounded-lg border border-surface">
-                  @for (examen of grupo.examenes; track examen.id) {
-                    <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
-                      <span class="min-w-0 truncate text-surface-800 dark:text-surface-100">
-                        {{ examen.nombre }}
-                      </span>
-                      <span class="text-xs text-muted-color">{{ grupo.muestraNombre }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-
-            <div class="mt-auto border-t border-surface pt-3">
-              <div class="flex items-center justify-between">
-                <span class="font-semibold text-surface-900 dark:text-surface-0">Total</span>
-                <span class="text-lg font-bold text-teal-700 dark:text-teal-400">
-                  {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- ---------------------- Barra inferior del asistente ---------------------- -->
-    <div class="sticky bottom-4 z-10 mt-2 flex flex-col gap-3 rounded-xl border border-surface bg-surface-0 p-3 shadow-lg sm:flex-row sm:items-center sm:justify-between dark:bg-surface-900">
-      <div class="flex min-w-0 items-center gap-3">
-        @if (pacienteSeleccionado(); as fila) {
-          <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
-            {{ fila.iniciales }}
-          </span>
-          <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-surface-900 dark:text-surface-0">
-              {{ fila.nombreCompleto }}
-            </p>
-            <p class="text-xs text-muted-color">
-              @if (paso() === 1) {
-                Paciente seleccionado
-              } @else if (paso() === 2) {
-                {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }}
-              } @else {
-                {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }} · {{ grupos().length }} muestra{{ grupos().length === 1 ? "" : "s" }}
-              }
-            </p>
-          </div>
-        } @else {
-          <i class="pi pi-info-circle text-lg text-muted-color"></i>
-          <p class="text-sm text-muted-color">Selecciona un paciente para iniciar la orden</p>
-        }
-      </div>
-
-      <div class="flex items-center justify-end gap-2">
-        @if (paso() === 1) {
-          <p-button
-            label="Continuar a pruebas"
-            icon="pi pi-arrow-right"
-            iconPos="right"
-            [disabled]="!pacienteSeleccionado()"
-            (onClick)="continuarAPruebas()"
-          />
-        } @else if (paso() === 2) {
-          <p-button
-            label="Atrás"
-            icon="pi pi-arrow-left"
-            severity="secondary"
-            [outlined]="true"
-            (onClick)="atras()"
-          />
-          <p-button
-            label="Revisar orden"
-            icon="pi pi-arrow-right"
-            iconPos="right"
-            [disabled]="totalSeleccionadas() === 0"
-            (onClick)="revisarOrden()"
-          />
-        } @else {
-          <p-button
-            label="Atrás"
-            icon="pi pi-arrow-left"
-            severity="secondary"
-            [outlined]="true"
-            (onClick)="atras()"
-          />
-          <p-button
-            label="Confirmar y registrar"
-            icon="pi pi-check"
-            [loading]="registrando()"
-            (onClick)="confirmar()"
-          />
-        }
       </div>
     </div>
-  }
+    }
+    @else {
+    <div
+      class="flex h-full min-h-72 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-surface-300 bg-surface-50 p-6 text-center dark:border-surface-700 dark:bg-surface-800/40">
+      <i class="pi pi-id-card text-3xl text-muted-color"></i>
+      <div>
+        <p class="font-medium text-surface-900 dark:text-surface-0">Ficha del paciente</p>
+        <p class="mt-1 text-xs text-muted-color">
+          Selecciona un paciente de la tabla o registra uno nuevo para ver su ficha aquí.
+        </p>
+      </div>
+    </div>
+    }
+  </aside>
+</div>
+}
+
+<!-- =========================== PASO 2 =========================== -->
+@if (paso() === 2) {
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
+  <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+    <div class="flex items-center justify-between gap-2 border-b border-surface p-4">
+      <h3 class="font-semibold text-surface-900 dark:text-surface-0">Categorías</h3>
+      <span class="rounded-full bg-teal-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+        {{ totalSeleccionadas() }}/{{ totalExamenes() }}
+      </span>
+    </div>
+
+    <div class="p-2">
+      <div class="relative mb-2">
+        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-color"></i>
+        <input type="text" pInputText class="w-full pl-9" aria-label="Buscar prueba"
+          placeholder="Buscar prueba por nombre..." [ngModel]="busquedaPrueba()"
+          (ngModelChange)="busquedaPrueba.set($event)" />
+      </div>
+
+      <p-treetable [value]="nodosTreetable()" [loading]="cargandoCatalogo()" [scrollable]="true" scrollHeight="24rem"
+        selectionMode="checkbox" dataKey="id" [selectionKeys]="clavesSeleccion()"
+        (selectionKeysChange)="alCambiarClaves($event)" (onNodeExpand)="recordarExpansion($event.node, true)"
+        (onNodeCollapse)="recordarExpansion($event.node, false)" styleClass="border-0">
+        <ng-template #header>
+          <tr>
+            <th class="text-left">Área</th>
+            <th class="w-24 text-center">Pruebas</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-rowNode let-rowData="rowData">
+          @if (rowData.esExamen) {
+          <!-- Fila de prueba (hoja): checkbox del treetable -->
+          <tr
+            class="{{ rowData.seleccionada ? 'bg-rose-50 dark:bg-rose-900/20' : 'hover:bg-surface-100 dark:hover:bg-surface-800' }}">
+            <td>
+              <div class="flex items-center gap-2">
+                <p-treeTableToggler [rowNode]="rowNode" />
+                <p-treeTableCheckbox [value]="rowNode" />
+                <span
+                  class="truncate text-sm {{ rowData.seleccionada ? 'font-medium text-surface-900 dark:text-surface-0' : 'text-surface-700 dark:text-surface-200' }}">
+                  {{ rowData.nombre }}
+                </span>
+              </div>
+            </td>
+            <td></td>
+          </tr>
+          } @else {
+          <!-- Fila de área: checkbox marca/desmarca toda la rama -->
+          <tr class="hover:bg-surface-100 dark:hover:bg-surface-800">
+            <td>
+              <div class="flex items-center gap-2">
+                <p-treeTableToggler [rowNode]="rowNode" />
+                <p-treeTableCheckbox [value]="rowNode" />
+                <span
+                  class="flex size-7 shrink-0 items-center justify-center rounded-lg {{ estiloArea(rowData.id).chip }}">
+                  <i class="{{ estiloArea(rowData.id).icono }} text-xs"></i>
+                </span>
+                <span class="truncate text-sm font-medium text-surface-800 dark:text-surface-100">
+                  {{ rowData.nombre }}
+                </span>
+              </div>
+            </td>
+            <td class="text-right">
+              @if (rowData.seleccionadas > 0) {
+              <span class="inline-flex rounded-full bg-rose-500 px-2 py-0.5 text-[0.7rem] font-semibold text-white">
+                {{ rowData.seleccionadas }}/{{ rowData.total }}
+              </span>
+              } @else {
+              <span
+                class="inline-flex min-w-7 justify-center rounded-full bg-surface-100 px-2 py-0.5 text-xs text-surface-600 dark:bg-surface-800 dark:text-surface-300">
+                {{ rowData.total }}
+              </span>
+              }
+            </td>
+          </tr>
+          }
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="2">
+              <div class="p-4 text-center">
+                <p class="text-sm text-muted-color">
+                  {{ cargandoCatalogo() ? "Cargando catálogo..." : "No hay áreas de análisis registradas. Configura
+                  áreas y exámenes en la sección Catálogos." }}
+                </p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-treetable>
+    </div>
+  </div>
+
+  <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+    <div class="flex items-center justify-between gap-3 border-b border-surface p-4">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-clipboard text-lg text-teal-600"></i>
+        <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Orden en curso</h3>
+        <p-tag value="BORRADOR" severity="secondary" />
+      </div>
+      <p-button icon="pi pi-trash" ariaLabel="Vaciar orden" severity="danger" [text]="true" [rounded]="true"
+        [disabled]="totalSeleccionadas() === 0" (onClick)="limpiarPruebas()" />
+    </div>
+
+    <div class="border-b border-surface bg-surface-50 p-4 dark:bg-surface-800/50">
+      @if (pacienteSeleccionado(); as fila) {
+      <div class="flex items-center gap-3">
+        <span
+          class="flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
+          {{ fila.iniciales }}
+        </span>
+        <div>
+          <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
+          <p class="text-xs text-muted-color">{{ fila.codigo }} · {{ fila.edadSexo }}</p>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="flex min-h-0 flex-1 flex-col gap-4 p-4">
+      @if (pruebasElegidas().length > 0) {
+      <div>
+        <p class="mb-2 text-sm font-semibold text-surface-900 dark:text-surface-0">
+          Pruebas seleccionadas ({{ pruebasElegidas().length }})
+        </p>
+        <div class="flex max-h-80 flex-col gap-2 overflow-y-auto">
+          @for (examen of pruebasElegidas(); track examen.id) {
+          <div
+            class="flex items-center gap-3 rounded-lg border border-surface bg-surface-0 px-3 py-2.5 dark:bg-surface-900">
+            <span class="size-2 shrink-0 rounded-full {{ estiloArea(examen.idAreaAnalisis).dot }}"></span>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-surface-900 dark:text-surface-0">
+                {{ examen.nombre }}
+              </p>
+              <p class="truncate text-[0.7rem] font-medium {{ estiloArea(examen.idAreaAnalisis).texto }}">
+                {{ nombreArea(examen.idAreaAnalisis) }}
+              </p>
+            </div>
+            <p-button icon="pi pi-times" ariaLabel="Quitar prueba" severity="danger" [text]="true" [rounded]="true"
+              (onClick)="togglePrueba(examen)" />
+          </div>
+          }
+        </div>
+      </div>
+      } @else {
+      <div
+        class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-surface-300 p-6 text-center dark:border-surface-700">
+        <i class="pi pi-check-square text-2xl text-muted-color"></i>
+        <p class="text-sm text-muted-color">
+          Marca con los checkbox del árbol las pruebas de la orden.
+        </p>
+      </div>
+      }
+
+      @if (grupos().length > 0) {
+      <div>
+        <p class="mb-2 flex items-center justify-between text-sm font-semibold text-surface-900 dark:text-surface-0">
+          Muestras a recolectar
+          <span class="text-xs font-medium text-muted-color uppercase">
+            {{ grupos().length }} envase{{ grupos().length === 1 ? "" : "s" }}
+          </span>
+        </p>
+        <div class="flex flex-col gap-2">
+          @for (grupo of grupos(); track grupo.areaId) {
+          <div
+            class="flex items-center justify-between gap-3 rounded-lg border border-surface bg-surface-0 px-3 py-2 dark:bg-surface-900">
+            <span class="min-w-0 truncate text-sm text-surface-800 dark:text-surface-100">
+              <i class="pi pi-tag mr-1 text-teal-600"></i>{{ grupo.areaNombre }}
+            </span>
+            <p-select [ngModel]="grupo.muestraId" (ngModelChange)="cambiarMuestra(grupo.areaId, $event)"
+              [options]="opcionesTipoMuestra()" optionLabel="label" optionValue="value" placeholder="Tipo de muestra"
+              [filter]="false" appendTo="body" styleClass="w-56" />
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="flex items-center justify-between border-t border-surface px-4 py-3">
+      <span class="text-sm text-muted-color">Orden para {{ pacienteSeleccionado()?.nombreCompleto ?? "—" }}</span>
+      <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">
+        {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }}
+      </span>
+    </div>
+  </div>
+</div>
+}
+
+<!-- =========================== PASO 3 =========================== -->
+@if (paso() === 3) {
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+  <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+    <div class="border-b border-surface p-4">
+      <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">
+        Toma de muestra y datos clínicos
+      </h3>
+      <p class="text-xs text-muted-color">Sucursal, institución, fecha y médico solicitante</p>
+    </div>
+
+    <div class="flex flex-col gap-4 p-4">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="wzSucursal" class="mb-1.5 block text-sm font-medium">
+            Sucursal <span class="text-red-500">*</span>
+          </label>
+          <p-select inputId="wzSucursal" [options]="sucursalOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="idSucursal()" (ngModelChange)="idSucursal.set($event)" placeholder="Seleccione una sucursal"
+            [filter]="true" appendTo="body" fluid />
+        </div>
+
+        <div>
+          <label for="wzInstitucion" class="mb-1.5 block text-sm font-medium">
+            Institución <span class="text-red-500">*</span>
+          </label>
+          <p-select inputId="wzInstitucion" [options]="institucionOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="idInstitucion()" (ngModelChange)="idInstitucion.set($event)"
+            placeholder="Seleccione una institución" [filter]="true" appendTo="body" fluid />
+        </div>
+
+        <div>
+          <label for="wzFecha" class="mb-1.5 block text-sm font-medium">
+            Fecha de toma <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker inputId="wzFecha" [ngModel]="fechaSolicitud()" (ngModelChange)="fechaSolicitud.set($event)"
+            dateFormat="dd/mm/yy" [showIcon]="true" [showTime]="true" [showButtonBar]="true" appendTo="body" fluid />
+          <small class="mt-1 block text-muted-color">
+            Folio sugerido: #{{ folioSugerido() }}
+          </small>
+        </div>
+
+        <div>
+          <label for="wzMedico" class="mb-1.5 block text-sm font-medium">
+            Médico solicitante <span class="text-red-500">*</span>
+          </label>
+          <p-select inputId="wzMedico" [options]="medicoOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="idMedico()" (ngModelChange)="idMedico.set($event)" placeholder="Dr. / Dra. — especialidad"
+            [filter]="true" appendTo="body" fluid />
+        </div>
+      </div>
+
+
+
+      @if (grupos().length > 0) {
+      <div>
+        <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">
+          Muestras a recolectar
+        </p>
+        <div class="flex flex-wrap gap-2">
+          @for (grupo of grupos(); track grupo.areaId) {
+          <p-tag [value]="grupo.muestraNombre + ' · ' + grupo.areaNombre" icon="pi pi-tag" severity="secondary" />
+          }
+        </div>
+        <small class="mt-1 block text-muted-color">
+          Cambia el tipo de muestra en el paso 2, tarjeta «Orden en curso».
+        </small>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+    <div class="flex items-center justify-between gap-3 border-b border-surface p-4">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-eye text-lg text-teal-600"></i>
+        <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">
+          Resumen de la orden
+        </h3>
+      </div>
+      <p-tag [value]="totalSeleccionadas() + ' pruebas'" severity="info" />
+    </div>
+
+    <div class="flex flex-col gap-4 overflow-y-auto p-4">
+      @if (pacienteSeleccionado(); as fila) {
+      <div
+        class="flex items-center justify-between gap-3 rounded-lg border border-surface bg-surface-50 p-3 dark:bg-surface-800/50">
+        <div class="flex items-center gap-3">
+          <span
+            class="flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
+            {{ fila.iniciales }}
+          </span>
+          <div>
+            <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
+            <p class="text-xs text-muted-color">
+              {{ fila.codigo }} · {{ fila.documento }} · {{ fila.edadSexo }}
+            </p>
+          </div>
+        </div>
+        <p-tag [value]="sucursalLabel(idSucursal() ?? '')" severity="secondary" />
+      </div>
+      }
+
+      @for (grupo of grupos(); track grupo.areaId) {
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <span class="text-sm font-semibold text-teal-700 dark:text-teal-400">
+            {{ grupo.areaNombre }}
+          </span>
+          <span class="text-xs text-muted-color">{{ grupo.examenes.length }}</span>
+        </div>
+        <div class="flex flex-col divide-y divide-surface rounded-lg border border-surface">
+          @for (examen of grupo.examenes; track examen.id) {
+          <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+            <span class="min-w-0 truncate text-surface-800 dark:text-surface-100">
+              {{ examen.nombre }}
+            </span>
+            <span class="text-xs text-muted-color">{{ grupo.muestraNombre }}</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <div class="mt-auto border-t border-surface pt-3">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold text-surface-900 dark:text-surface-0">Total</span>
+          <span class="text-lg font-bold text-teal-700 dark:text-teal-400">
+            {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ---------------------- Barra inferior del asistente ---------------------- -->
+<div
+  class="sticky bottom-4 z-10 mt-2 flex flex-col gap-3 rounded-xl border border-surface bg-surface-0 p-3 shadow-lg sm:flex-row sm:items-center sm:justify-between dark:bg-surface-900">
+  <div class="flex min-w-0 items-center gap-3">
+    @if (pacienteSeleccionado(); as fila) {
+    <span
+      class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
+      {{ fila.iniciales }}
+    </span>
+    <div class="min-w-0">
+      <p class="truncate text-sm font-semibold text-surface-900 dark:text-surface-0">
+        {{ fila.nombreCompleto }}
+      </p>
+      <p class="text-xs text-muted-color">
+        @if (paso() === 1) {
+        Paciente seleccionado
+        } @else if (paso() === 2) {
+        {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }}
+        } @else {
+        {{ totalSeleccionadas() }} prueba{{ totalSeleccionadas() === 1 ? "" : "s" }} · {{ grupos().length }} muestra{{
+        grupos().length === 1 ? "" : "s" }}
+        }
+      </p>
+    </div>
+    } @else {
+    <i class="pi pi-info-circle text-lg text-muted-color"></i>
+    <p class="text-sm text-muted-color">Selecciona un paciente para iniciar la orden</p>
+    }
+  </div>
+
+  <div class="flex items-center justify-end gap-2">
+    @if (paso() === 1) {
+    <p-button label="Continuar a pruebas" icon="pi pi-arrow-right" iconPos="right" [disabled]="!pacienteSeleccionado()"
+      (onClick)="continuarAPruebas()" />
+    } @else if (paso() === 2) {
+    <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (onClick)="atras()" />
+    <p-button label="Revisar orden" icon="pi pi-arrow-right" iconPos="right" [disabled]="totalSeleccionadas() === 0"
+      (onClick)="revisarOrden()" />
+    } @else {
+    <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (onClick)="atras()" />
+    <p-button label="Confirmar y registrar" icon="pi pi-check" [loading]="registrando()" (onClick)="confirmar()" />
+    }
+  </div>
+</div>
+}
 }
 
 <!-- ================================================================== -->
 <!-- Historial de órdenes                                               -->
 <!-- ================================================================== -->
 @if (vista() === 'historial') {
-  @if (errorCarga()) {
-    <p-message severity="error" size="small" variant="simple" class="mb-3 block">
-      No fue posible cargar las órdenes. Intente recargar la página.
-    </p-message>
-  }
-
-  <div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
-    <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-      <p-iconfield class="w-full sm:w-96">
-        <p-inputicon styleClass="pi pi-search" />
-        <input
-          pInputText
-          type="text"
-          class="w-full"
-          aria-label="Buscar órdenes"
-          [ngModel]="filtro()"
-          (ngModelChange)="filtro.set($event)"
-          placeholder="Buscar folio, paciente, médico..."
-        />
-      </p-iconfield>
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-muted-color">{{ filasFiltradas().length }} órdenes</span>
-        <p-button
-          icon="pi pi-refresh"
-          severity="secondary"
-          [outlined]="true"
-          ariaLabel="Recargar órdenes"
-          pTooltip="Recargar"
-          tooltipPosition="bottom"
-          (onClick)="recargar()"
-        />
-        <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportar()" />
-      </div>
-    </div>
-
-    <p-table
-      styleClass="mobile-card-table"
-      [value]="filasFiltradas()"
-      [rows]="10"
-      [paginator]="true"
-      [scrollable]="true"
-      dataKey="id"
-      [rowHover]="true"
-      [loading]="cargando()"
-      [rowsPerPageOptions]="[10, 20, 50]"
-      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
-      [showCurrentPageReport]="true"
-      [tableStyle]="{ 'min-width': '62rem' }"
-    >
-      <ng-template #header>
-        <tr>
-          <th pSortableColumn="nroFolio" style="min-width: 6rem">
-            Folio <p-sortIcon field="nroFolio" />
-          </th>
-          <th pSortableColumn="fechaSolicitud" style="min-width: 8rem">
-            Fecha <p-sortIcon field="fechaSolicitud" />
-          </th>
-          <th style="min-width: 11rem">Paciente</th>
-          <th style="min-width: 11rem">Médico</th>
-          <th style="min-width: 8rem">Sucursal</th>
-          <th style="min-width: 9rem">Institución</th>
-          <th style="min-width: 5rem">Edad</th>
-          <th style="min-width: 6rem">Género</th>
-          <th pSortableColumn="estado" style="min-width: 8rem">
-            Estado <p-sortIcon field="estado" />
-          </th>
-          <th style="min-width: 7rem">Acciones</th>
-        </tr>
-      </ng-template>
-
-      <ng-template #body let-orden>
-        <tr>
-          <td data-label="Folio">
-            <span class="font-semibold">#{{ orden.nroFolio }}</span>
-          </td>
-          <td data-label="Fecha">{{ fechaTexto(orden.fechaSolicitud) }}</td>
-          <td data-label="Paciente">
-            <div class="font-medium">{{ pacienteLabel(orden.idPaciente) }}</div>
-          </td>
-          <td data-label="Médico">
-            <div>{{ medicoLabel(orden.idMedico) }}</div>
-          </td>
-          <td data-label="Sucursal">{{ sucursalLabel(orden.idSucursal) }}</td>
-          <td data-label="Institución">
-            {{ institucionLabel(orden.idInstitucion) }}
-          </td>
-          <td data-label="Edad">{{ edadOrdenTexto(orden) }}</td>
-          <td data-label="Género">{{ generoLabel(orden.generoId) }}</td>
-          <td data-label="Estado">
-            <p-tag
-              [value]="orden.estado"
-              [severity]="estadoSeverity(orden.estado)"
-            />
-          </td>
-          <td data-label="Acciones">
-            <div class="flex gap-2">
-              <p-button
-                icon="pi pi-pencil"
-                ariaLabel="Editar"
-                [rounded]="true"
-                [text]="true"
-                pTooltip="Editar"
-                tooltipPosition="top"
-                *appHasPermission="'update'"
-                (onClick)="openEdit(orden)"
-              />
-              <p-button
-                icon="pi pi-trash"
-                ariaLabel="Eliminar"
-                severity="danger"
-                [rounded]="true"
-                [text]="true"
-                pTooltip="Eliminar"
-                tooltipPosition="top"
-                *appHasPermission="'delete'"
-                (onClick)="eliminar(orden)"
-              />
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template #emptymessage>
-        <tr>
-          <td colspan="10">
-            <app-empty-state
-              icon="pi pi-file-edit"
-              title="No hay órdenes registradas"
-              description="Registra la primera orden desde la vista «Nueva orden»."
-            />
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
+@if (errorCarga()) {
+<p-message severity="error" size="small" variant="simple" class="mb-3 block">
+  No fue posible cargar las órdenes. Intente recargar la página.
+</p-message>
 }
 
-<p-dialog
-  [visible]="dialogVisible()"
-  (visibleChange)="dialogVisible.set($event)"
-  (onHide)="hideDialog()"
-  [style]="{ width: 'min(980px, calc(100vw - 2rem))' }"
-  [header]="tituloDialogo()"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
->
+<div class="overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
+  <div class="flex flex-col gap-3 border-b border-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <p-iconfield class="w-full sm:w-96">
+      <p-inputicon styleClass="pi pi-search" />
+      <input pInputText type="text" class="w-full" aria-label="Buscar órdenes" [ngModel]="filtro()"
+        (ngModelChange)="filtro.set($event)" placeholder="Buscar folio, paciente, médico..." />
+    </p-iconfield>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-muted-color">{{ filasFiltradas().length }} órdenes</span>
+      <p-button icon="pi pi-refresh" severity="secondary" [outlined]="true" ariaLabel="Recargar órdenes"
+        pTooltip="Recargar" tooltipPosition="bottom" (onClick)="recargar()" />
+      <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportar()" />
+    </div>
+  </div>
+
+  <p-table styleClass="mobile-card-table" [value]="filasFiltradas()" [rows]="10" [paginator]="true" [scrollable]="true"
+    dataKey="id" [rowHover]="true" [loading]="cargando()" [rowsPerPageOptions]="[10, 20, 50]"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes" [showCurrentPageReport]="true"
+    [tableStyle]="{ 'min-width': '62rem' }">
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="nroFolio" style="min-width: 6rem">
+          Folio <p-sortIcon field="nroFolio" />
+        </th>
+        <th pSortableColumn="fechaSolicitud" style="min-width: 8rem">
+          Fecha <p-sortIcon field="fechaSolicitud" />
+        </th>
+        <th style="min-width: 11rem">Paciente</th>
+        <th style="min-width: 11rem">Médico</th>
+        <th style="min-width: 8rem">Sucursal</th>
+        <th style="min-width: 9rem">Institución</th>
+        <th style="min-width: 5rem">Edad</th>
+        <th style="min-width: 6rem">Género</th>
+        <th pSortableColumn="estado" style="min-width: 8rem">
+          Estado <p-sortIcon field="estado" />
+        </th>
+        <th style="min-width: 7rem">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-orden>
+      <tr>
+        <td data-label="Folio">
+          <span class="font-semibold">#{{ orden.nroFolio }}</span>
+        </td>
+        <td data-label="Fecha">{{ fechaTexto(orden.fechaSolicitud) }}</td>
+        <td data-label="Paciente">
+          <div class="font-medium">{{ pacienteLabel(orden.idPaciente) }}</div>
+        </td>
+        <td data-label="Médico">
+          <div>{{ medicoLabel(orden.idMedico) }}</div>
+        </td>
+        <td data-label="Sucursal">{{ sucursalLabel(orden.idSucursal) }}</td>
+        <td data-label="Institución">
+          {{ institucionLabel(orden.idInstitucion) }}
+        </td>
+        <td data-label="Edad">{{ edadOrdenTexto(orden) }}</td>
+        <td data-label="Género">{{ generoLabel(orden.generoId) }}</td>
+        <td data-label="Estado">
+          <p-tag [value]="orden.estado" [severity]="estadoSeverity(orden.estado)" />
+        </td>
+        <td data-label="Acciones">
+          <div class="flex gap-2">
+            <p-button icon="pi pi-pencil" ariaLabel="Editar" [rounded]="true" [text]="true" pTooltip="Editar"
+              tooltipPosition="top" *appHasPermission="'update'" (onClick)="openEdit(orden)" />
+            <p-button icon="pi pi-trash" ariaLabel="Eliminar" severity="danger" [rounded]="true" [text]="true"
+              pTooltip="Eliminar" tooltipPosition="top" *appHasPermission="'delete'" (onClick)="eliminar(orden)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="10">
+          <app-empty-state icon="pi pi-file-edit" title="No hay órdenes registradas"
+            description="Registra la primera orden desde la vista «Nueva orden»." />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+}
+
+<p-dialog [visible]="dialogVisible()" (visibleChange)="dialogVisible.set($event)" (onHide)="hideDialog()"
+  [style]="{ width: 'min(980px, calc(100vw - 2rem))' }" [header]="tituloDialogo()" [modal]="true" [draggable]="false"
+  [resizable]="false">
   <div class="flex flex-col gap-6">
     <p-message severity="info" size="small" variant="simple">
       Al elegir el paciente se completan automáticamente el género y la edad. Si modifica la fecha de
@@ -1049,24 +812,16 @@
           <label for="nroFolio" class="mb-1.5 block text-sm font-medium">
             N.° de folio <span class="text-red-500">*</span>
           </label>
-          <p-inputnumber
-            inputId="nroFolio"
-            [ngModel]="orden().nroFolio"
-            (ngModelChange)="setCampo('nroFolio', $event)"
-            [min]="1"
-            [useGrouping]="false"
-            [showButtons]="false"
-            placeholder="Ej. 1"
-            fluid
-          />
+          <p-inputnumber inputId="nroFolio" [ngModel]="orden().nroFolio" (ngModelChange)="setCampo('nroFolio', $event)"
+            [min]="1" [useGrouping]="false" [showButtons]="false" placeholder="Ej. 1" fluid />
           @if (folioInvalido()) {
-            <small class="mt-1 block text-red-500">
-              El folio debe ser un número entero mayor que cero.
-            </small>
+          <small class="mt-1 block text-red-500">
+            El folio debe ser un número entero mayor que cero.
+          </small>
           } @else {
-            <small class="mt-1 block text-muted-color">
-              Se propone el siguiente folio libre de la sucursal.
-            </small>
+          <small class="mt-1 block text-muted-color">
+            Se propone el siguiente folio libre de la sucursal.
+          </small>
           }
         </div>
 
@@ -1074,19 +829,13 @@
           <label for="fechaSolicitud" class="mb-1.5 block text-sm font-medium">
             Fecha de solicitud <span class="text-red-500">*</span>
           </label>
-          <p-datepicker
-            inputId="fechaSolicitud"
-            [ngModel]="orden().fechaSolicitud"
-            (ngModelChange)="onFechaSolicitudChange($event)"
-            dateFormat="dd/mm/yy"
-            [showIcon]="true"
-            [showButtonBar]="true"
-            fluid
-          />
+          <p-datepicker inputId="fechaSolicitud" [ngModel]="orden().fechaSolicitud"
+            (ngModelChange)="onFechaSolicitudChange($event)" dateFormat="dd/mm/yy" [showIcon]="true"
+            [showButtonBar]="true" fluid />
           @if (invalido('fechaSolicitud')) {
-            <small class="mt-1 block text-red-500">
-              La fecha de solicitud es obligatoria.
-            </small>
+          <small class="mt-1 block text-red-500">
+            La fecha de solicitud es obligatoria.
+          </small>
           }
         </div>
 
@@ -1094,22 +843,13 @@
           <label for="idSucursal" class="mb-1.5 block text-sm font-medium">
             Sucursal <span class="text-red-500">*</span>
           </label>
-          <p-select
-            inputId="idSucursal"
-            [options]="sucursalOptions()"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="orden().idSucursal"
-            (ngModelChange)="onSucursalChange($event)"
-            placeholder="Seleccione una sucursal"
-            [filter]="true"
-            [appendTo]="'body'"
-            fluid
-          />
+          <p-select inputId="idSucursal" [options]="sucursalOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="orden().idSucursal" (ngModelChange)="onSucursalChange($event)"
+            placeholder="Seleccione una sucursal" [filter]="true" [appendTo]="'body'" fluid />
           @if (invalido('idSucursal')) {
-            <small class="mt-1 block text-red-500">
-              La sucursal es obligatoria.
-            </small>
+          <small class="mt-1 block text-red-500">
+            La sucursal es obligatoria.
+          </small>
           }
         </div>
 
@@ -1117,22 +857,13 @@
           <label for="idInstitucion" class="mb-1.5 block text-sm font-medium">
             Institución <span class="text-red-500">*</span>
           </label>
-          <p-select
-            inputId="idInstitucion"
-            [options]="institucionOptions()"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="orden().idInstitucion"
-            (ngModelChange)="setCampo('idInstitucion', $event)"
-            placeholder="Seleccione una institución"
-            [filter]="true"
-            [appendTo]="'body'"
-            fluid
-          />
+          <p-select inputId="idInstitucion" [options]="institucionOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="orden().idInstitucion" (ngModelChange)="setCampo('idInstitucion', $event)"
+            placeholder="Seleccione una institución" [filter]="true" [appendTo]="'body'" fluid />
           @if (invalido('idInstitucion')) {
-            <small class="mt-1 block text-red-500">
-              La institución es obligatoria.
-            </small>
+          <small class="mt-1 block text-red-500">
+            La institución es obligatoria.
+          </small>
           }
         </div>
       </div>
@@ -1144,22 +875,13 @@
           <label for="idPaciente" class="mb-1.5 block text-sm font-medium">
             Paciente <span class="text-red-500">*</span>
           </label>
-          <p-select
-            inputId="idPaciente"
-            [options]="pacienteOptions()"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="orden().idPaciente"
-            (ngModelChange)="onPacienteChange($event)"
-            placeholder="Seleccione un paciente"
-            [filter]="true"
-            [appendTo]="'body'"
-            fluid
-          />
+          <p-select inputId="idPaciente" [options]="pacienteOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="orden().idPaciente" (ngModelChange)="onPacienteChange($event)"
+            placeholder="Seleccione un paciente" [filter]="true" [appendTo]="'body'" fluid />
           @if (invalido('idPaciente')) {
-            <small class="mt-1 block text-red-500">
-              El paciente es obligatorio.
-            </small>
+          <small class="mt-1 block text-red-500">
+            El paciente es obligatorio.
+          </small>
           }
         </div>
 
@@ -1167,22 +889,13 @@
           <label for="idMedico" class="mb-1.5 block text-sm font-medium">
             Médico solicitante <span class="text-red-500">*</span>
           </label>
-          <p-select
-            inputId="idMedico"
-            [options]="medicoOptions()"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="orden().idMedico"
-            (ngModelChange)="setCampo('idMedico', $event)"
-            placeholder="Seleccione un médico"
-            [filter]="true"
-            [appendTo]="'body'"
-            fluid
-          />
+          <p-select inputId="idMedico" [options]="medicoOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="orden().idMedico" (ngModelChange)="setCampo('idMedico', $event)"
+            placeholder="Seleccione un médico" [filter]="true" [appendTo]="'body'" fluid />
           @if (invalido('idMedico')) {
-            <small class="mt-1 block text-red-500">
-              El médico solicitante es obligatorio.
-            </small>
+          <small class="mt-1 block text-red-500">
+            El médico solicitante es obligatorio.
+          </small>
           }
         </div>
 
@@ -1190,25 +903,17 @@
           <label for="generoId" class="mb-1.5 block text-sm font-medium">
             Género <span class="text-red-500">*</span>
           </label>
-          <p-select
-            inputId="generoId"
-            [options]="generoOptions()"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="orden().generoId"
-            (ngModelChange)="setCampo('generoId', $event)"
-            placeholder="Seleccione un género"
-            [appendTo]="'body'"
-            fluid
-          />
+          <p-select inputId="generoId" [options]="generoOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="orden().generoId" (ngModelChange)="setCampo('generoId', $event)"
+            placeholder="Seleccione un género" [appendTo]="'body'" fluid />
           @if (invalido('generoId')) {
-            <small class="mt-1 block text-red-500">
-              El género es obligatorio.
-            </small>
+          <small class="mt-1 block text-red-500">
+            El género es obligatorio.
+          </small>
           } @else {
-            <small class="mt-1 block text-muted-color">
-              Se completa a partir de los datos de la persona del paciente.
-            </small>
+          <small class="mt-1 block text-muted-color">
+            Se completa a partir de los datos de la persona del paciente.
+          </small>
           }
         </div>
 
@@ -1216,102 +921,65 @@
           <label for="estado" class="mb-1.5 block text-sm font-medium">
             Estado <span class="text-red-500">*</span>
           </label>
-          <p-select
-            inputId="estado"
-            [options]="estadoOptions"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="orden().estado"
-            (ngModelChange)="setCampo('estado', $event)"
-            placeholder="Seleccione un estado"
-            [appendTo]="'body'"
-            fluid
-          />
+          <p-select inputId="estado" [options]="estadoOptions" optionLabel="label" optionValue="value"
+            [ngModel]="orden().estado" (ngModelChange)="setCampo('estado', $event)" placeholder="Seleccione un estado"
+            [appendTo]="'body'" fluid />
           @if (invalido('estado')) {
-            <small class="mt-1 block text-red-500">
-              El estado es obligatorio.
-            </small>
+          <small class="mt-1 block text-red-500">
+            El estado es obligatorio.
+          </small>
           }
         </div>
       </div>
     </app-form-section>
 
-    <app-form-section title="Edad al momento de la solicitud" icon="pi pi-calendar" description="Se calcula con la fecha de nacimiento; puede ajustarla.">
+    <app-form-section title="Edad al momento de la solicitud" icon="pi pi-calendar"
+      description="Se calcula con la fecha de nacimiento; puede ajustarla.">
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label for="edadAnios" class="mb-1.5 block text-sm font-medium">Años</label>
-          <p-inputnumber
-            inputId="edadAnios"
-            [ngModel]="orden().edadAnios"
-            (ngModelChange)="setCampo('edadAnios', $event)"
-            [min]="0"
-            [useGrouping]="false"
-            [showButtons]="false"
-            fluid
-          />
+          <p-inputnumber inputId="edadAnios" [ngModel]="orden().edadAnios"
+            (ngModelChange)="setCampo('edadAnios', $event)" [min]="0" [useGrouping]="false" [showButtons]="false"
+            fluid />
           @if (edadInvalida("edadAnios")) {
-            <small class="mt-1 block text-red-500">
-              Introduzca un número entero mayor o igual a cero.
-            </small>
+          <small class="mt-1 block text-red-500">
+            Introduzca un número entero mayor o igual a cero.
+          </small>
           }
         </div>
 
         <div class="col-span-12 md:col-span-4">
           <label for="edadMeses" class="mb-1.5 block text-sm font-medium">Meses</label>
-          <p-inputnumber
-            inputId="edadMeses"
-            [ngModel]="orden().edadMeses"
-            (ngModelChange)="setCampo('edadMeses', $event)"
-            [min]="0"
-            [useGrouping]="false"
-            [showButtons]="false"
-            fluid
-          />
+          <p-inputnumber inputId="edadMeses" [ngModel]="orden().edadMeses"
+            (ngModelChange)="setCampo('edadMeses', $event)" [min]="0" [useGrouping]="false" [showButtons]="false"
+            fluid />
           @if (edadInvalida("edadMeses")) {
-            <small class="mt-1 block text-red-500">
-              Introduzca un número entero mayor o igual a cero.
-            </small>
+          <small class="mt-1 block text-red-500">
+            Introduzca un número entero mayor o igual a cero.
+          </small>
           }
         </div>
 
         <div class="col-span-12 md:col-span-4">
           <label for="edadDias" class="mb-1.5 block text-sm font-medium">Días</label>
-          <p-inputnumber
-            inputId="edadDias"
-            [ngModel]="orden().edadDias"
-            (ngModelChange)="setCampo('edadDias', $event)"
-            [min]="0"
-            [useGrouping]="false"
-            [showButtons]="false"
-            fluid
-          />
+          <p-inputnumber inputId="edadDias" [ngModel]="orden().edadDias" (ngModelChange)="setCampo('edadDias', $event)"
+            [min]="0" [useGrouping]="false" [showButtons]="false" fluid />
           @if (edadInvalida("edadDias")) {
-            <small class="mt-1 block text-red-500">
-              Introduzca un número entero mayor o igual a cero.
-            </small>
+          <small class="mt-1 block text-red-500">
+            Introduzca un número entero mayor o igual a cero.
+          </small>
           }
         </div>
       </div>
     </app-form-section>
 
     @if (formError()) {
-      <p-message severity="error" size="small" variant="simple">{{ formError() }}</p-message>
+    <p-message severity="error" size="small" variant="simple">{{ formError() }}</p-message>
     }
   </div>
 
   <ng-template #footer>
-    <p-button
-      label="Cancelar"
-      icon="pi pi-times"
-      text
-      severity="secondary"
-      (onClick)="hideDialog()"
-    />
-    <p-button
-      label="Guardar orden"
-      icon="pi pi-check"
-      [loading]="guardando()"
-      (onClick)="guardar()"
-    />
+    <p-button label="Cancelar" icon="pi pi-times" text severity="secondary" (onClick)="hideDialog()" />
+    <p-button label="Guardar orden" icon="pi pi-check" [loading]="guardando()" (onClick)="guardar()" />
   </ng-template>
 </p-dialog>
