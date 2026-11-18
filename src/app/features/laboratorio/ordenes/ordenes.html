@@ -5,7 +5,7 @@
   subtitle="Selecciona al paciente, arma la orden desde el catálogo jerárquico y confirma el registro."
   icon="pi pi-file-edit">
   <p-selectbutton [options]="vistas" optionLabel="label" optionValue="value" [ngModel]="vista()"
-    (ngModelChange)="vista.set($event)" [allowEmpty]="false" />
+    (ngModelChange)="cambiarVista($event)" [allowEmpty]="false" />
 </app-page-header>
 
 <!-- ================================================================== -->
@@ -15,7 +15,7 @@
 @if (ordenRegistrada(); as registro) {
 <!-- ---------------------- Pantalla de éxito ---------------------- -->
 <div
-  class="mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-xl border border-surface bg-surface-0 px-8 py-12 text-center dark:bg-surface-900">
+  class="mx-auto flex max-w-3xl flex-col items-center gap-6 rounded-xl border border-surface bg-surface-0 px-6 py-10 text-center dark:bg-surface-900 sm:px-8">
   <span class="flex size-20 items-center justify-center rounded-full border-4 border-teal-600 text-4xl text-teal-600">
     <i class="pi pi-check"></i>
   </span>
@@ -28,38 +28,68 @@
     </h2>
   </div>
 
+  <!-- Datos protagonistas: paciente y código de orden -->
   <div
-    class="flex items-center gap-2 rounded-lg border border-dashed border-surface-300 px-5 py-3 dark:border-surface-700">
-    <span class="text-2xl font-bold tracking-wide text-surface-900 dark:text-surface-0">
-      {{ registro.codigo }}
-    </span>
-    <p-button icon="pi pi-copy" ariaLabel="Copiar código" [text]="true" [rounded]="true" (onClick)="copiarCodigo()" />
+    class="w-full max-w-lg divide-y divide-surface rounded-xl border border-surface bg-surface-50 text-left dark:bg-surface-800/50">
+    <div class="flex flex-col gap-1 px-6 py-4">
+      <span class="flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-color uppercase">
+        <i class="pi pi-user text-teal-600"></i>Paciente
+      </span>
+      <p class="text-2xl font-bold break-words text-surface-900 dark:text-surface-0">
+        {{ registro.pacienteNombre }}
+      </p>
+    </div>
+    <div class="flex items-center justify-between gap-3 px-6 py-4">
+      <div class="flex flex-col gap-1">
+        <span class="flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-color uppercase">
+          <i class="pi pi-hashtag text-teal-600"></i>Código de orden
+        </span>
+        <span class="text-2xl font-bold tracking-wide text-teal-700 dark:text-teal-400">
+          {{ registro.codigo }}
+        </span>
+      </div>
+      <p-button icon="pi pi-copy" ariaLabel="Copiar código" [text]="true" [rounded]="true" (onClick)="copiarCodigo()" />
+    </div>
   </div>
 
-  <div class="flex flex-wrap items-center justify-center gap-2">
-    <p-tag [value]="registro.pacienteNombre" icon="pi pi-user" severity="secondary" />
-    <p-tag [value]="registro.pruebas + ' pruebas'" severity="info" />
-    <p-tag [value]="registro.muestras.length + ' muestras'" severity="secondary" />
-    <p-tag value="PENDIENTE" severity="warn" />
-    <p-tag [value]="registro.fecha" severity="secondary" />
-  </div>
-  <div class="flex flex-wrap items-center justify-center gap-2">
-    @for (muestra of registro.muestras; track muestra) {
-    <p-tag [value]="muestra" severity="secondary" />
-    }
-  </div>
-
-  <p-message severity="info" [variant]="'simple'" size="small" class="max-w-xl">
-    Imprime los rótulos y dirige al paciente a la sala de toma. El técnico registrará
-    los resultados en la etapa de análisis; la orden ya aparece en el historial.
-  </p-message>
-
-  <div class="flex flex-wrap justify-center gap-2 pt-2">
-    <p-button label="Imprimir rótulos ({{ registro.muestras.length }})" icon="pi pi-print" [outlined]="true"
-      (onClick)="imprimirRotulos()" />
-    <p-button label="Ver historial" icon="pi pi-eye" severity="secondary" [outlined]="true"
-      (onClick)="verOrdenRegistrada()" />
-    <p-button label="Nueva orden" icon="pi pi-plus" severity="secondary" [outlined]="true" (onClick)="otraOrden()" />
+  <!-- Detalle de la orden -->
+  <div class="w-full max-w-lg divide-y divide-surface rounded-xl border border-surface text-left">
+    <div class="flex items-center justify-between gap-3 px-6 py-3">
+      <span class="flex items-center gap-2 text-sm text-muted-color">
+        <i class="pi pi-barcode text-teal-600"></i>Código del paciente
+      </span>
+      <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ registro.pacienteCodigo }}</span>
+    </div>
+    <div class="flex items-center justify-between gap-3 px-6 py-3">
+      <span class="flex items-center gap-2 text-sm text-muted-color">
+        <i class="pi pi-calendar text-teal-600"></i>Fecha de solicitud
+      </span>
+      <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ registro.fecha }}</span>
+    </div>
+    <div class="flex items-center justify-between gap-3 px-6 py-3">
+      <span class="flex items-center gap-2 text-sm text-muted-color">
+        <i class="pi pi-check-square text-teal-600"></i>Pruebas
+      </span>
+      <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">
+        {{ registro.pruebas }} {{ registro.pruebas === 1 ? "prueba" : "pruebas" }}
+      </span>
+    </div>
+    <div class="flex items-start justify-between gap-3 px-6 py-3">
+      <span class="flex items-center gap-2 pt-0.5 text-sm text-muted-color">
+        <i class="pi pi-tag text-teal-600"></i>Muestras
+      </span>
+      <span class="flex max-w-[60%] flex-wrap justify-end gap-1.5">
+        @for (muestra of registro.muestras; track muestra) {
+        <p-tag [value]="muestra" severity="secondary" />
+        }
+      </span>
+    </div>
+    <div class="flex items-center justify-between gap-3 px-6 py-3">
+      <span class="flex items-center gap-2 text-sm text-muted-color">
+        <i class="pi pi-hourglass text-teal-600"></i>Estado
+      </span>
+      <p-tag value="PENDIENTE" severity="warn" />
+    </div>
   </div>
 </div>
 } @else {
@@ -211,7 +241,6 @@
           <i class="pi pi-user mt-1 text-lg text-teal-600"></i>
           <div>
             <h3 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Ficha del paciente</h3>
-            <p class="text-xs text-muted-color">Verifica la información antes de continuar</p>
           </div>
         </div>
         <p-tag value="Seleccionado" severity="success" icon="pi pi-check" />
@@ -229,10 +258,29 @@
           </div>
         </div>
 
+        <div
+          class="flex flex-col gap-2 rounded-lg border border-teal-600/40 bg-teal-50 p-3 text-sm font-medium dark:border-teal-500/40 dark:bg-teal-900/20">
+          <span class="flex items-center gap-2 text-surface-900 dark:text-surface-0">
+            <i class="pi pi-barcode text-teal-600"></i><strong>Código del paciente:</strong> {{ fila.codigo }}
+          </span>
+          <span class="flex items-center gap-2 text-surface-900 dark:text-surface-0">
+            <i class="pi pi-id-card text-teal-600"></i><strong>Número de documento:</strong> {{ fila.documento }}
+          </span>
+          <span class="flex items-center gap-2 text-surface-900 dark:text-surface-0">
+            <i class="pi pi-hourglass text-teal-600"></i><strong>Edad:</strong>
+            @if (edadDetallada(); as edadDetalle) {
+            {{ edadDetalle }}
+            } @else {
+            —
+            }
+          </span>
+        </div>
+
         <div class="flex flex-wrap gap-2">
-          <p-tag [value]="fila.documento" icon="pi pi-id-card" severity="secondary" />
-          <p-tag [value]="fila.codigo" severity="secondary" />
-          <p-tag [value]="fila.edadSexo" severity="secondary" />
+          <p-tag [value]="fila.genero" severity="secondary" icon="pi pi-user" />
+          @if (etapaVidaTexto(); as etapa) {
+          <p-tag [value]="etapa" severity="info" icon="pi pi-heart" />
+          }
         </div>
 
         <div
@@ -263,19 +311,6 @@
           } @else {
           <p-tag value="Sin usuario vinculado · No puede acceder al sistema" severity="secondary" icon="pi pi-ban" />
           }
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="rounded-lg border border-surface p-3 text-center">
-            <p class="text-xl font-bold text-surface-900 dark:text-surface-0">{{ ordenesDelPaciente().length }}</p>
-            <p class="text-xs text-muted-color">Órdenes</p>
-          </div>
-          <div class="rounded-lg border border-surface p-3 text-center">
-            <p class="text-xl font-bold text-surface-900 dark:text-surface-0">
-              {{ ordenesDelPaciente().length > 0 ? fechaTexto(ordenesDelPaciente()[0].fechaSolicitud) : "—" }}
-            </p>
-            <p class="text-xs text-muted-color">Última visita</p>
-          </div>
         </div>
 
         @if (ordenesDelPaciente().length > 0) {

@@ -991,6 +991,30 @@ export class OrdenesLaboratorioPage {
       : "—";
   });
 
+  /** Edad desglosada en años, meses y días (para la ficha del paciente). */
+  protected readonly edadDetallada = computed<string | null>(() => {
+    const edad = this.edadCalculada();
+    if (!edad) return null;
+    const partes = [
+      `${edad.edadAnios} ${edad.edadAnios === 1 ? "año" : "años"}`,
+      `${edad.edadMeses} ${edad.edadMeses === 1 ? "mes" : "meses"}`,
+      `${edad.edadDias} ${edad.edadDias === 1 ? "día" : "días"}`,
+    ];
+    return partes.join(", ");
+  });
+
+  /** Etiqueta de etapa de vida: niño (≤ 12 años) o persona adulta. */
+  protected readonly etapaVidaTexto = computed<string | null>(() => {
+    const edad = this.edadCalculada();
+    const fila = this.pacienteSeleccionado();
+    if (!edad || !fila) return null;
+    if (edad.edadAnios > 12) return "Es persona adulta";
+    const esNina = /fem/i.test(fila.genero);
+    return esNina
+      ? "Es niña (menor o igual a 12 años)"
+      : "Es niño (menor o igual a 12 años)";
+  });
+
   protected confirmar(): void {
     const fila = this.pacienteSeleccionado();
     const persona = fila ? this.personaDe(fila.idPersona) : null;
@@ -1106,13 +1130,12 @@ export class OrdenesLaboratorioPage {
     });
   }
 
-  protected verOrdenRegistrada(): void {
-    this.reiniciarWizard();
-    this.vista.set("historial");
-  }
-
-  protected otraOrden(): void {
-    this.reiniciarWizard();
+  protected cambiarVista(destino: "nueva" | "historial"): void {
+    this.vista.set(destino);
+    // Al abandonar la pantalla de éxito, el asistente se reinicia para una nueva orden.
+    if (this.ordenRegistrada()) {
+      this.reiniciarWizard();
+    }
   }
 
   protected imprimirRotulos(): void {
