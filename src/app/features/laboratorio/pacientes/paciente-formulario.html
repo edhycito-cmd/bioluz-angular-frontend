@@ -1,9 +1,5 @@
 <div class="flex flex-col gap-4">
-  @if (modo() === "nuevo") {
-    <p-message severity="info" size="small" variant="simple">
-      El código de historia clínica (HC-XXXXXX) se genera automáticamente al guardar.
-    </p-message>
-  } @else {
+  @if (modo() !== "nuevo") {    
     <div class="text-sm">
       <span class="text-muted-color">Historia clínica: </span>
       <span class="font-medium">{{ codigoEditando() }}</span>

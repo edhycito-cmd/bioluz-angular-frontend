@@ -120,9 +120,19 @@ interface PacienteFila {
   documento: string;
   fechaNacimiento: string | null;
   fechaNacimientoTexto: string;
+  /** Fecha de nacimiento completa (dd/mm/aaaa) para la ficha. */
+  fechaNacimientoCompleta: string;
   edadSexo: string;
+  /** Nombre del género desde el catálogo GENERO. */
+  genero: string;
   telefono: string;
   email: string | null;
+  domicilio: string | null;
+  /**
+   * null = sin usuario vinculado; true/false = usuario activo con el rol
+   * PACIENTE asignado y vigente (enriquecimiento de GET /personas).
+   */
+  usuarioActivo: boolean | null;
 }
 
 /** Acento visual (ícono, color) asignado a cada área del paso 2. */
@@ -343,6 +353,8 @@ export class OrdenesLaboratorioPage {
     "nuevo",
   );
   protected readonly personaParaEditar = signal<Persona | null>(null);
+  /** idPersona de la persona que edita el formulario embebido (puede no estar seleccionada). */
+  protected readonly idPersonaFormulario = signal<string | null>(null);
 
   /** Búsqueda del listado de pacientes (paso 1). */
   protected readonly busquedaPaciente = signal("");
@@ -394,8 +406,15 @@ export class OrdenesLaboratorioPage {
         return;
       }
 
-      this.pacienteId.set(paciente.id);
+      // Solo se preselecciona si el paciente tiene género y fecha de
+      // nacimiento registrados (requisito para crear la orden).
+      const fila = (this.filasPacientes() ?? []).find(
+        (item) => item.id === paciente.id,
+      );
       this.preseleccionAplicada = true;
+      if (!fila || !this.datosBasicosCompletos(fila)) return;
+
+      this.pacienteId.set(paciente.id);
       this.paso.set(2);
     });
   }
@@ -425,9 +444,15 @@ export class OrdenesLaboratorioPage {
           fechaNacimientoTexto: persona?.fechaNacimiento
             ? this.fechaTexto(persona.fechaNacimiento)
             : "—",
+          fechaNacimientoCompleta: persona?.fechaNacimiento
+            ? this.fechaCompleta(persona.fechaNacimiento)
+            : "—",
           edadSexo: this.edadSexo(persona ?? null),
+          genero: this.generoNombre(persona?.generoId ?? null),
           telefono: persona?.telefono ?? "—",
           email: persona?.email ?? null,
+          domicilio: persona?.domicilio ?? null,
+          usuarioActivo: persona?.usuarioActivo ?? null,
         };
       });
     },
@@ -457,8 +482,17 @@ export class OrdenesLaboratorioPage {
     },
   );
 
-  /** Órdenes del paciente seleccionado, más recientes primero. */
-  protected readonly ordenesDelPaciente = computed<OrdenLaboratorio[]>(() => {
+  /** Código HC del paciente que edita el formulario embebido (aunque no esté seleccionado). */
+  protected readonly codigoPacienteFormulario = computed<string | null>(() => {
+    const idPersona = this.idPersonaFormulario();
+    if (!idPersona) return null;
+    return (
+      (this.filasPacientes() ?? []).find((fila) => fila.idPersona === idPersona)
+        ?.codigo ?? null
+    );
+  });
+
+  /** Órdenes del paciente seleccionado, más recientes primero. */  protected readonly ordenesDelPaciente = computed<OrdenLaboratorio[]>(() => {
     const id = this.pacienteId();
     if (!id) return [];
     return (this.ordenesRes.value() ?? [])
@@ -493,7 +527,37 @@ export class OrdenesLaboratorioPage {
     () => this.pacientesRes.isLoading() || this.personasRes.isLoading(),
   );
 
+  /**
+   * Un paciente solo puede participar en una orden si tiene género y fecha
+   * de nacimiento registrados (la orden guarda la edad calculada).
+   */
+  protected datosBasicosCompletos(fila: PacienteFila): boolean {
+    const persona = this.personaDe(fila.idPersona);
+    return (
+      persona !== undefined &&
+      persona.generoId != null &&
+      !!persona.fechaNacimiento
+    );
+  }
+
   protected seleccionarPaciente(fila: PacienteFila): void {
+    if (!this.datosBasicosCompletos(fila)) {
+      this.messageService.add({
+        severity: "warn",
+        summary: "Paciente incompleto",
+        detail:
+          "No se puede crear una orden sin género y fecha de nacimiento. Completa los datos en el formulario.",
+        life: 5000,
+      });
+      // No se selecciona: se abre el formulario de edición para completar
+      // los datos del paciente.
+      this.modoFormularioPaciente.set("editar");
+      this.personaParaEditar.set(this.personaDe(fila.idPersona) ?? null);
+      this.idPersonaFormulario.set(fila.idPersona);
+      this.pacienteId.set(null);
+      this.formularioPacienteVisible.set(true);
+      return;
+    }
     this.pacienteId.set(fila.id);
     this.formularioPacienteVisible.set(false);
   }
@@ -501,6 +565,10 @@ export class OrdenesLaboratorioPage {
   protected abrirFormularioNuevo(): void {
     this.modoFormularioPaciente.set("nuevo");
     this.personaParaEditar.set(null);
+    this.idPersonaFormulario.set(null);
+    // Limpia la selección: es confuso mostrar un paciente seleccionado
+    // mientras se registra uno nuevo.
+    this.pacienteId.set(null);
     this.formularioPacienteVisible.set(true);
   }
 
@@ -510,13 +578,20 @@ export class OrdenesLaboratorioPage {
     const persona = this.personaDe(fila.idPersona) ?? null;
     this.modoFormularioPaciente.set("editar");
     this.personaParaEditar.set(persona);
+    this.idPersonaFormulario.set(fila.idPersona);
     this.formularioPacienteVisible.set(true);
   }
 
   protected onFormularioGuardado(evento: PacienteGuardado): void {
     this.formularioPacienteVisible.set(false);
+    this.idPersonaFormulario.set(null);
     this.pacientesRes.reload();
     this.personasRes.reload();
+
+    // Solo se auto-selecciona si la persona quedó con género y fecha de
+    // nacimiento registrados.
+    const personaCompleta =
+      evento.persona.generoId != null && !!evento.persona.fechaNacimiento;
 
     if (evento.esNuevo && evento.paciente) {
       this.messageService.add({
@@ -525,7 +600,7 @@ export class OrdenesLaboratorioPage {
         detail: `Se registró el paciente con historia clínica ${evento.paciente.codigo}.`,
         life: 3000,
       });
-      this.pacienteId.set(evento.paciente.id);
+      this.pacienteId.set(personaCompleta ? evento.paciente.id : null);
     } else {
       this.messageService.add({
         severity: "success",
@@ -533,7 +608,7 @@ export class OrdenesLaboratorioPage {
         detail: "Se actualizaron los datos del paciente.",
         life: 3000,
       });
-      if (evento.persona) {
+      if (evento.persona && personaCompleta) {
         const paciente = (this.pacientesRes.value() ?? []).find(
           (item) => item.idPersona === evento.persona.id,
         );
@@ -544,6 +619,7 @@ export class OrdenesLaboratorioPage {
 
   protected cancelarFormulario(): void {
     this.formularioPacienteVisible.set(false);
+    this.idPersonaFormulario.set(null);
   }
 
   protected continuarAPruebas(): void {
@@ -1132,6 +1208,7 @@ export class OrdenesLaboratorioPage {
     this.paso.set(1);
     this.pacienteId.set(null);
     this.formularioPacienteVisible.set(false);
+    this.idPersonaFormulario.set(null);
     this.busquedaPaciente.set("");
     this.busquedaPrueba.set("");
     this.pruebasSeleccionadas.set([]);
@@ -1571,6 +1648,27 @@ export class OrdenesLaboratorioPage {
     return (this.personasRes.value() ?? []).find(
       (persona) => persona.id === idPersona,
     );
+  }
+
+  /** Nombre del género a partir del catálogo GENERO. */
+  private generoNombre(generoId: number | null): string {
+    if (generoId === null || generoId === undefined) return "—";
+    const genero = (this.generosRes.value() ?? []).find(
+      (detalle) => detalle.orden === generoId,
+    );
+    return genero?.nombre ?? genero?.codigo ?? "—";
+  }
+
+  /** Fecha completa (dd/mm/aaaa) para la ficha del paciente. */
+  private fechaCompleta(valor: string): string {
+    const fecha = this.parseFecha(valor);
+    return Number.isNaN(fecha.getTime())
+      ? "—"
+      : fecha.toLocaleDateString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
   }
 
   private siguienteFolio(idSucursal: string | null): number {

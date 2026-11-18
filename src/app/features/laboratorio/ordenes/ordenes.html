@@ -98,7 +98,7 @@
 
 <!-- =========================== PASO 1 =========================== -->
 @if (paso() === 1) {
-<div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_26rem]">
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_35rem]">
   <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
     <div class="flex flex-col gap-3 border-b border-surface p-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-start gap-3">
@@ -184,26 +184,6 @@
         </tr>
       </ng-template>
     </p-table>
-
-    <!-- @if (pacientesRecientes().length > 0) {
-            <div class="border-t border-surface p-4">
-              <p class="mb-2 text-xs font-semibold tracking-wider text-muted-color uppercase">Recientess</p>
-              <div class="flex flex-wrap gap-2">
-                @for (reciente of pacientesRecientes(); track reciente.id) {
-                  <button
-                    type="button"
-                    class="flex items-center gap-2 rounded-full border border-surface-200 bg-surface-100 px-3 py-1.5 text-sm font-medium text-surface-800 transition hover:border-teal-500 hover:text-teal-700 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-100 dark:hover:text-teal-400"
-                    (click)="seleccionarPaciente(reciente)"
-                  >
-                    <span class="flex size-6 items-center justify-center rounded-full text-[0.65rem] font-semibold text-white {{ reciente.colorClass }}">
-                      {{ reciente.iniciales }}
-                    </span>
-                    {{ reciente.nombreCompleto }}
-                  </button>
-                }
-              </div>
-            </div>
-          } -->
   </div>
 
   <aside class="flex flex-col gap-4">
@@ -220,8 +200,7 @@
       </div>
       <div class="p-4">
         <app-paciente-formulario [modo]="modoFormularioPaciente()" [personaInicial]="personaParaEditar()"
-          [idPersonaEditando]="pacienteSeleccionado()?.idPersona ?? null"
-          [codigoEditando]="pacienteSeleccionado()?.codigo ?? null" idPrefijo="wizard"
+          [idPersonaEditando]="idPersonaFormulario()" [codigoEditando]="codigoPacienteFormulario()" idPrefijo="wizard"
           (guardado)="onFormularioGuardado($event)" (cancelado)="cancelarFormulario()" />
       </div>
     </div>
@@ -265,8 +244,25 @@
             <i class="pi pi-envelope text-teal-600"></i>{{ fila.email ?? "Sin correo registrado" }}
           </span>
           <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
-            <i class="pi pi-calendar text-teal-600"></i>Nacimiento: {{ fila.fechaNacimientoTexto }}
+            <i class="pi pi-map-marker text-teal-600"></i>{{ fila.domicilio ?? "Sin dirección registrada" }}
           </span>
+          <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
+            <i class="pi pi-user text-teal-600"></i>Género: {{ fila.genero }}
+          </span>
+          <span class="flex items-center gap-2 text-surface-700 dark:text-surface-200">
+            <i class="pi pi-calendar text-teal-600"></i>Nacimiento: {{ fila.fechaNacimientoCompleta }}
+          </span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          @if (fila.usuarioActivo === true) {
+          <p-tag value="Rol PACIENTE vigente · Puede acceder al sistema" severity="success" icon="pi pi-check-circle" />
+          } @else if (fila.usuarioActivo === false) {
+          <p-tag value="Usuario inactivo · No puede acceder al sistema" severity="warn"
+            icon="pi pi-exclamation-triangle" />
+          } @else {
+          <p-tag value="Sin usuario vinculado · No puede acceder al sistema" severity="secondary" icon="pi pi-ban" />
+          }
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -330,7 +326,7 @@
 
 <!-- =========================== PASO 2 =========================== -->
 @if (paso() === 2) {
-<div class="grid grid-cols-1 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
   <div class="flex flex-col overflow-hidden rounded-xl border border-surface bg-surface-0 dark:bg-surface-900">
     <div class="flex items-center justify-between gap-2 border-b border-surface p-4">
       <h3 class="font-semibold text-surface-900 dark:text-surface-0">Categorías</h3>
@@ -603,24 +599,6 @@
     </div>
 
     <div class="flex flex-col gap-4 overflow-y-auto p-4">
-      @if (pacienteSeleccionado(); as fila) {
-      <div
-        class="flex items-center justify-between gap-3 rounded-lg border border-surface bg-surface-50 p-3 dark:bg-surface-800/50">
-        <div class="flex items-center gap-3">
-          <span
-            class="flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white {{ fila.colorClass }}">
-            {{ fila.iniciales }}
-          </span>
-          <div>
-            <p class="font-semibold text-surface-900 dark:text-surface-0">{{ fila.nombreCompleto }}</p>
-            <p class="text-xs text-muted-color">
-              {{ fila.codigo }} · {{ fila.documento }} · {{ fila.edadSexo }}
-            </p>
-          </div>
-        </div>
-        <p-tag [value]="sucursalLabel(idSucursal() ?? '')" severity="secondary" />
-      </div>
-      }
 
       @for (grupo of grupos(); track grupo.areaId) {
       <div>
